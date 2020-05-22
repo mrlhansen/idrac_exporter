@@ -4,6 +4,8 @@ This is a (very) simple iDRAC exporter for [Prometheus](https://prometheus.io). 
 http://localhost:9348/metrics?target=123.45.6.78
 ```
 
+Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the target will be flagged as invalid, and any subsequent call to that target will simply be ignored and a status code 500 is returned.
+
 ## Requirements
 The exporter requires Python 3.6 or newer and it depends on the following non-standard modules.
 * [requests](https://requests.readthedocs.io)
@@ -23,7 +25,10 @@ hosts:
   default:
     username: user
     password: pass
-
+metrics:
+  - system
+  - sensor
+  - sel
 ```
 
 ## List of Metrics

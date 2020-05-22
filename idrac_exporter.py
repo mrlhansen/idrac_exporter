@@ -74,7 +74,7 @@ class RedfishAPI:
             value = int(time.time()-time.mktime(value))
             self.metrics_add('sel_entry', args, value)
 
-    def collect_basics(self):
+    def collect_system(self):
         data = self.get('Systems/System.Embedded.1')
         error = data.get('error')
         data = data.get('json')
@@ -108,22 +108,21 @@ class RedfishAPI:
         data = data.get('json')
         if error:
             return
-
         data = data.get('Members')
         for entry in data:
             args = { 'name' : entry['ElementName'], 'id' : entry['DeviceID'] }
             args['enabled'] = 1 if entry['EnabledState'] == 'Enabled' else 0
             if entry['SensorType'] == 'Temperature':
-                self.metrics_add('sensors_temperature', args, float(entry['CurrentReading'])/10.0)
+                value = float(entry['CurrentReading'])/10.0
+                name = 'sensors_temperature'
             elif entry['SensorType'] == 'Tachometer':
-                self.metrics_add('sensors_tachometer', args, int(entry['CurrentReading']))
-
-    def collect_metrics(self):
-        self.metrics_clear()
-        self.collect_basics()
-        self.collect_sensors()
-        self.collect_sel()
-        return self.metrics_get()
+                value = int(entry['CurrentReading'])
+                name = 'sensors_tachometer'
+            else:
+                continue
+            if value < 0:
+                value = 0
+            self.metrics_add(name, args, value)
 
 
 ################################################################################
@@ -137,10 +136,12 @@ def encode_token(username, password):
     return token
 
 def collect_metrics(host):
+    metrics = config['metrics']
+    hosts = config['hosts']
+    retval = ""
     if not hosts.get(host):
         hosts[host] = hosts['default'].copy()
     info = hosts.get(host)
-    metrics = ""
     if 'host' not in info:
         host = RedfishAPI(host)
         valid = True
@@ -150,10 +151,17 @@ def collect_metrics(host):
         info['valid'] = valid
     if info.get('valid'):
         host = info['host']
-        metrics = host.collect_metrics()
+        host.metrics_clear()
+        if 'system' in metrics:
+            host.collect_system()
+        if 'sensor' in metrics:
+            host.collect_sensors()
+        if 'sel' in metrics:
+            host.collect_sel()
+        retval = host.metrics_get()
     else:
         raise RuntimeError('Invalid host')
-    return metrics
+    return retval
 
 
 ################################################################################
@@ -194,44 +202,51 @@ parser.add_argument('--config', help='path to idrac exporter configuration file'
 args = parser.parse_args()
 
 if args.config:
-    config = args.config
+    configfile = args.config
 else:
-    config = '/etc/prometheus/idrac.yml'
+    configfile = '/etc/prometheus/idrac.yml'
 
 try:
-    file = open(config, 'r')
+    file = open(configfile, 'r')
 except:
-    print(f'Unable to open configuration file: {config}')
+    print(f'{configfile}: unable to open configuration file')
     exit(1)
 
 try:
     config = yaml.full_load(file)
     file.close()
 except:
-    print('Unable to parse configuration file')
+    print(f'{configfile}: unable to parse configuration file')
     exit(1)
 
-if config.get('address'):
-    address = config['address']
-else:
-    address = '0.0.0.0'
+if not config.get('address'):
+    config['address'] = '0.0.0.0'
 
-if config.get('port'):
-    port = int(config['port'])
-else:
-    port = 9348
+if not config.get('port'):
+    config['port'] = 9348
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-hosts = config['hosts']
+if not config.get('hosts'):
+    print(f'{configfile}: missing section: hosts')
+    exit(1)
 
-for key,value in hosts.items():
+if not config.get('metrics'):
+    print(f'{configfile}: missing section: metrics')
+    exit(1)
+
+for key,value in config['hosts'].items():
     if 'username' not in value or 'password' not in value:
-        print(f'Username or password missing for host: {key}')
+        print(f'{configfile}: username or password missing for host: {key}')
         exit(1)
     value['token'] = encode_token(value['username'], value['password'])
 
+for key in config['metrics']:
+    if key not in ('system', 'sensor', 'sel'):
+        print(f'{configfile}: unknown metrics component: {key}')
+        exit(1)
+
 try:
-    server = HTTPServer((address, port), ServiceHandler)
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    server = HTTPServer((config['address'], config['port']), ServiceHandler)
     server.serve_forever()
 except Exception as e:
     print(f'Unable to start HTTP server: {e}')
