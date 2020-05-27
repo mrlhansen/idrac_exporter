@@ -96,7 +96,7 @@ func redfishSystem(host *HostConfig) {
 	var text string
 	var value float64
 	var args map[string]string
-    var entry map[string]interface{}
+	var entry map[string]interface{}
 
 	data, ok := redfishGet(host, "Systems/System.Embedded.1")
 	if !ok {

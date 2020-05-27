@@ -46,11 +46,11 @@ func validateMetrics(name string) bool {
 }
 
 func readConfigFile(fileName string) {
-    yamlFile, err := ioutil.ReadFile(fileName)
-    if err != nil {
-        log.Printf("Error reading configuration file: %s\n", err)
-        os.Exit(1)
-    }
+	yamlFile, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Printf("Error reading configuration file: %s\n", err)
+		os.Exit(1)
+	}
 
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {

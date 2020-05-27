@@ -62,7 +62,7 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	var configFile string
-    flag.StringVar(&configFile, "config", "/etc/prometheus/idrac.yml", "path to idrac exporter configuration file")
+	flag.StringVar(&configFile, "config", "/etc/prometheus/idrac.yml", "path to idrac exporter configuration file")
 	flag.Parse()
 	readConfigFile(configFile)
 

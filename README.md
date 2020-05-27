@@ -6,15 +6,14 @@ http://localhost:9348/metrics?target=123.45.6.78
 
 Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the target will be flagged as invalid, and any subsequent call to that target will simply be ignored and a status code 500 is returned.
 
-## Requirements
-The exporter requires Python 3.6 or newer and it depends on the following non-standard modules.
-* [requests](https://requests.readthedocs.io)
-* [yaml](https://pyyaml.org)
-* [dateutil](https://pypi.org/project/python-dateutil)
-
+## Download
+The exporter is written in [Go](https://golang.org) and it can be downloaded and compiled using:
+```bash
+go get github.com/mrlhansen/idrac_exporter
+```
 
 ## Configuration
-In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `--config` option.
+In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
 ```yaml
 address: 127.0.0.1
 port: 9348
@@ -27,7 +26,7 @@ hosts:
     password: pass
 metrics:
   - system
-  - sensor
+  - sensors
   - sel
 ```
 
