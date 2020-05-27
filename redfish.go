@@ -118,7 +118,7 @@ func redfishSystem(host *HostConfig) {
 	} else {
 		value = 0
 	}
-	metricsAppend(host, "status_ok", args, value)
+	metricsAppend(host, "health_ok", args, value)
 
 	if data["IndicatorLed"] == "Off" {
 		value = 0
@@ -136,11 +136,11 @@ func redfishSystem(host *HostConfig) {
 	text = entry["Model"].(string)
 	value = entry["Count"].(float64)
 	args = map[string]string{"model": text}
-	metricsAppend(host, "memory_size", args, value)
+	metricsAppend(host, "cpu_count", args, value)
 
 	text = data["BiosVersion"].(string)
 	args = map[string]string{"version": text}
-	metricsAppend(host, "memory_size", args, -1)
+	metricsAppend(host, "bios_version", args, -1)
 }
 
 func redfishSEL(host *HostConfig) {
