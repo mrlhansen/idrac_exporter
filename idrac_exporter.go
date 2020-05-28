@@ -45,7 +45,6 @@ func collectMetrics(target string) (string, bool) {
 func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	args := r.URL.Query()
 	target, ok := args["target"]
-
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		return

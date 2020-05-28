@@ -20,6 +20,7 @@ var client = &http.Client{
 }
 
 type jsonmap = map[string]interface{}
+type stringmap = map[string]string
 
 func redfishGet(host *HostConfig, path string) (jsonmap, bool) {
 	var result jsonmap
@@ -50,7 +51,8 @@ func redfishSensors(host *HostConfig) {
 	var enabled string
 	var name string
 	var value float64
-	var args map[string]string
+	var args stringmap
+	var entry jsonmap
 
 	data, ok := redfishGet(host, "Dell/Systems/System.Embedded.1/DellNumericSensorCollection")
 	if !ok {
@@ -59,25 +61,25 @@ func redfishSensors(host *HostConfig) {
 
 	members := data["Members"].([]interface{})
 	for _, v := range members {
-		v := v.(jsonmap)
+		entry = v.(jsonmap)
 
-		if v["EnabledState"] == "Enabled" {
+		if entry["EnabledState"] == "Enabled" {
 			enabled = "1"
 		} else {
 			enabled = "0"
 		}
 
-		args = map[string]string{
-			"name": v["ElementName"].(string),
-			"id": v["DeviceID"].(string),
+		args = stringmap{
+			"name": entry["ElementName"].(string),
+			"id": entry["DeviceID"].(string),
 			"enabled": enabled,
 		}
 
-		if v["SensorType"] == "Temperature" {
-			value = v["CurrentReading"].(float64)/10.0
+		if entry["SensorType"] == "Temperature" {
+			value = entry["CurrentReading"].(float64)/10.0
 			name = "sensors_temperature"
-		} else if v["SensorType"] == "Tachometer" {
-			value = v["CurrentReading"].(float64)
+		} else if entry["SensorType"] == "Tachometer" {
+			value = entry["CurrentReading"].(float64)
 			name = "sensors_tachometer"
 		} else {
 			continue
@@ -95,8 +97,8 @@ func redfishSensors(host *HostConfig) {
 func redfishSystem(host *HostConfig) {
 	var text string
 	var value float64
-	var args map[string]string
-	var entry map[string]interface{}
+	var args stringmap
+	var entry jsonmap
 
 	data, ok := redfishGet(host, "Systems/System.Embedded.1")
 	if !ok {
@@ -110,9 +112,9 @@ func redfishSystem(host *HostConfig) {
 	}
 	metricsAppend(host, "power_on", nil, value)
 
-	entry = data["Status"].(map[string]interface{})
+	entry = data["Status"].(jsonmap)
 	text = entry["Health"].(string)
-	args = map[string]string{"status": text}
+	args = stringmap{"status": text}
 	if text == "OK" {
 		value = 1
 	} else {
@@ -127,24 +129,24 @@ func redfishSystem(host *HostConfig) {
 	}
 	metricsAppend(host, "indicator_led_on", nil, value)
 
-	entry = data["MemorySummary"].(map[string]interface{})
+	entry = data["MemorySummary"].(jsonmap)
 	value = entry["TotalSystemMemoryGiB"].(float64)
 	value = math.Floor(value*1099511627776.0/1000000000.0)
 	metricsAppend(host, "memory_size", nil, value)
 
-	entry = data["ProcessorSummary"].(map[string]interface{})
+	entry = data["ProcessorSummary"].(jsonmap)
 	text = entry["Model"].(string)
 	value = entry["Count"].(float64)
-	args = map[string]string{"model": text}
+	args = stringmap{"model": text}
 	metricsAppend(host, "cpu_count", args, value)
 
 	text = data["BiosVersion"].(string)
-	args = map[string]string{"version": text}
+	args = stringmap{"version": text}
 	metricsAppend(host, "bios_version", args, -1)
 }
 
 func redfishSEL(host *HostConfig) {
-	var args map[string]string
+	var args stringmap
 	var text string
 	var value float64
 
@@ -157,11 +159,11 @@ func redfishSEL(host *HostConfig) {
 	for _, v := range members {
 		entry := v.(jsonmap)
 
-		args = map[string]string{
-			"id" : entry["Id"].(string),
-			"message" : entry["Message"].(string),
-			"component" : entry["SensorType"].(string),
-			"severity" : entry["Severity"].(string),
+		args = stringmap{
+			"id": entry["Id"].(string),
+			"message": entry["Message"].(string),
+			"component": entry["SensorType"].(string),
+			"severity": entry["Severity"].(string),
 		}
 
 		text = entry["Created"].(string)

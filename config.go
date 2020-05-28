@@ -45,6 +45,11 @@ func validateMetrics(name string) bool {
 	return false
 }
 
+func parseError(s0, s1 string) {
+	log.Printf("Error parsing configuration file: %s: %s", s0, s1)
+	os.Exit(1)
+}
+
 func readConfigFile(fileName string) {
 	yamlFile, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -67,28 +72,25 @@ func readConfigFile(fileName string) {
 	}
 
 	if len(config.Metrics) == 0 {
-		log.Printf("Error parsing configuration file: missing section: metrics")
-		os.Exit(1)
+		parseError("missing section", "metrics")
 	}
 
 	if len(config.Hosts) == 0 {
-		log.Printf("Error parsing configuration file: missing section: hosts")
-		os.Exit(1)
+		parseError("missing section", "hosts")
 	}
 
 	for _, v := range config.Metrics {
 		if !validateMetrics(v) {
-			log.Printf("Error parsing configuration file: invalid metrics name: %s", v)
-			os.Exit(1)
+			parseError("invalid metrics name", v)
 		}
 	}
 
 	for k, v := range config.Hosts {
 		if len(v.Username) == 0 {
-			log.Printf("Error parsing configuration file: missing username for host: %s", k)
+			parseError("missing username for host", k)
 		}
 		if len(v.Password) == 0 {
-			log.Printf("Error parsing configuration file: missing password for host: %s", k)
+			parseError("missing password for host", k)
 		}
 
 		data := []byte(v.Username + ":" + v.Password)
