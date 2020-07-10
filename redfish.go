@@ -158,11 +158,12 @@ func redfishSEL(host *HostConfig) {
 	members := data["Members"].([]interface{})
 	for _, v := range members {
 		entry := v.(jsonmap)
+		component, _ := entry["SensorType"].(string) // sometimes reported as null
 
 		args = stringmap{
 			"id": entry["Id"].(string),
 			"message": entry["Message"].(string),
-			"component": entry["SensorType"].(string),
+			"component": component,
 			"severity": entry["Severity"].(string),
 		}
 
