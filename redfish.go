@@ -122,7 +122,7 @@ func redfishSystem(host *HostConfig) {
 	}
 	metricsAppend(host, "health_ok", args, value)
 
-	if data["IndicatorLed"] == "Off" {
+	if data["IndicatorLED"] == "Off" {
 		value = 0
 	} else {
 		value = 1
@@ -130,8 +130,12 @@ func redfishSystem(host *HostConfig) {
 	metricsAppend(host, "indicator_led_on", nil, value)
 
 	entry = data["MemorySummary"].(jsonmap)
-	value = entry["TotalSystemMemoryGiB"].(float64)
-	value = math.Floor(value*1099511627776.0/1000000000.0)
+	value = entry["TotalSystemMemoryGiB"].(float64) // depending on the bios version, this is reported in either GB or GiB
+	if value == math.Trunc(value) {
+		value = value * 1024
+	} else {
+		value = math.Floor(value*1099511627776.0/1000000000.0)
+	}
 	metricsAppend(host, "memory_size", nil, value)
 
 	entry = data["ProcessorSummary"].(jsonmap)
