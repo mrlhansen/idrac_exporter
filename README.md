@@ -1,6 +1,6 @@
 # iDRAC Exporter
 This is a (very) simple iDRAC exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL addresse.
-```sh
+```
 http://localhost:9348/metrics?target=123.45.6.78
 ```
 

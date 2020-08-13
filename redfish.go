@@ -16,7 +16,7 @@ var transport = &http.Transport{
 
 var client = &http.Client{
 	Transport: transport,
-	Timeout: time.Second,
+	Timeout: 2*time.Second,
 }
 
 type jsonmap = map[string]interface{}
