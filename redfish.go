@@ -47,7 +47,7 @@ func redfishGet(host *HostConfig, path string) (jsonmap, bool) {
 	return result, true
 }
 
-func redfishSensors(host *HostConfig) {
+func redfishSensors(host *HostConfig) bool {
 	var enabled string
 	var name string
 	var value float64
@@ -56,7 +56,7 @@ func redfishSensors(host *HostConfig) {
 
 	data, ok := redfishGet(host, "Dell/Systems/System.Embedded.1/DellNumericSensorCollection")
 	if !ok {
-		return
+		return false
 	}
 
 	members := data["Members"].([]interface{})
@@ -92,9 +92,10 @@ func redfishSensors(host *HostConfig) {
 		metricsAppend(host, name, args, value)
 	}
 
+	return true
 }
 
-func redfishSystem(host *HostConfig) {
+func redfishSystem(host *HostConfig) bool {
 	var text string
 	var value float64
 	var args stringmap
@@ -102,7 +103,7 @@ func redfishSystem(host *HostConfig) {
 
 	data, ok := redfishGet(host, "Systems/System.Embedded.1")
 	if !ok {
-		return
+		return false
 	}
 
 	if data["PowerState"] == "On" {
@@ -147,16 +148,18 @@ func redfishSystem(host *HostConfig) {
 	text = data["BiosVersion"].(string)
 	args = stringmap{"version": text}
 	metricsAppend(host, "bios_version", args, -1)
+
+	return true
 }
 
-func redfishSEL(host *HostConfig) {
+func redfishSEL(host *HostConfig) bool {
 	var args stringmap
 	var text string
 	var value float64
 
 	data, ok := redfishGet(host, "Managers/iDRAC.Embedded.1/Logs/Sel")
 	if !ok {
-		return
+		return false
 	}
 
 	members := data["Members"].([]interface{})
@@ -175,10 +178,12 @@ func redfishSEL(host *HostConfig) {
 		tm, err := time.Parse(time.RFC3339, text)
 		if err != nil {
 			log.Print(err)
-			return
+			return false
 		}
 
 		value = float64(time.Now().Unix() - tm.Unix())
 		metricsAppend(host, "sel_entry", args, value)
 	}
+
+	return true
 }

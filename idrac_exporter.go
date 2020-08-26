@@ -30,13 +30,24 @@ func collectMetrics(target string) (string, bool) {
 	metricsClear(host)
 
 	if collectSystem {
-		redfishSystem(host)
+		ok = redfishSystem(host)
+		if !ok {
+			return "", false
+		}
 	}
+
 	if collectSensors {
-		redfishSensors(host)
+		ok = redfishSensors(host)
+		if !ok {
+			return "", false
+		}
 	}
+
 	if collectSEL {
-		redfishSEL(host)
+		ok = redfishSEL(host)
+		if !ok {
+			return "", false
+		}
 	}
 
 	return metricsGet(host), true
