@@ -181,7 +181,7 @@ func redfishSEL(host *HostConfig) bool {
 			return false
 		}
 
-		value = float64(time.Now().Unix() - tm.Unix())
+		value = float64(tm.Unix())
 		metricsAppend(host, "sel_entry", args, value)
 	}
 

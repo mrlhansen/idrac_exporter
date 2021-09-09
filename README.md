@@ -52,7 +52,7 @@ idrac_sensors_tachometer{name="FAN1A",id="0x17__Fan.Embedded.1A",enabled="1"} 72
 ```
 
 ### System Event Log
-The system event log is also exported. This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. For this reason the metric value is the age of the entry in seconds. Of course, this assumes that the time is set correctly on the iDRAC controller.
+The system event log is also exported. This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the unix timestamp for when the entry was created (as reported by iDRAC).
 ```
-idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 2787494
+idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 1631175352
 ```
