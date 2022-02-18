@@ -76,4 +76,4 @@ scrape_configs:
 ```
 
 where `192.168.2.1` and `192.168.2.2` are the iDRACs to query, and `exporter:9000` is the
-node and host running `idrac_exporter`.
+node and port where `idrac_exporter` is running.
