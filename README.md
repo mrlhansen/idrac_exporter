@@ -56,3 +56,24 @@ The system event log is also exported. This is not exactly an ordinary metric, b
 ```
 idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 1631175352
 ```
+
+## Prometheus Configuration
+For the situation where you have a single `idrac_exporter` and multiple iDRACs to query,
+the following `prometheus.yml` snippet can be used.
+
+```
+scrape_configs:
+  - job_name: "idrac"
+    static_configs:
+      - targets: ["192.168.2.1", "192.168.2.2"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: exporter:9000
+```
+
+where `192.168.2.1` and `192.168.2.2` are the iDRACs to query, and `exporter:9000` is the
+node and host running `idrac_exporter`.
