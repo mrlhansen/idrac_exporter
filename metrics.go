@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"math"
 	"fmt"
 )
@@ -16,7 +17,7 @@ func metricsAppend(host *HostConfig, name string, args map[string]string, value 
 	if length > 0 {
 		name += "{"
 		for k, v := range args {
-			name += k + "=\"" + v + "\""
+			name += k + "=\"" + strings.TrimSpace(v) + "\""
 			length--
 			if length > 0 {
 				name += ","

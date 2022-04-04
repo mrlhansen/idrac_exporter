@@ -16,6 +16,7 @@ type HostConfig struct {
 	Metrics string
 	Active bool
 	Valid bool
+	SystemCollection string
 }
 
 type RootConfig struct {

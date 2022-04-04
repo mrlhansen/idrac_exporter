@@ -19,13 +19,14 @@ var client = &http.Client{
 	Timeout: 5*time.Second,
 }
 
-type jsonmap = map[string]interface{}
+type dict = map[string]interface{}
+type list = []interface{}
 type stringmap = map[string]string
 
-func redfishGet(host *HostConfig, path string) (jsonmap, bool) {
-	var result jsonmap
+func redfishGet(host *HostConfig, path string) (dict, bool) {
+	var result dict
 
-	url := "https://" + host.Hostname + "/redfish/v1/" + path
+	url := "https://" + host.Hostname + path
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "Basic " + host.Token)
 	req.Header.Add("Accept", "application/json")
@@ -47,21 +48,42 @@ func redfishGet(host *HostConfig, path string) (jsonmap, bool) {
 	return result, true
 }
 
+func redfishFindSystemCollection(host *HostConfig) bool {
+	data, ok := redfishGet(host, "/redfish/v1/")
+	if !ok {
+		return false
+	}
+
+	collection := data["Systems"].(dict)
+	url := collection["@odata.id"].(string)
+
+	data, ok = redfishGet(host, url)
+	if !ok {
+		return false
+	}
+
+	members := data["Members"].(list)
+	entry := members[0].(dict)
+	host.SystemCollection = entry["@odata.id"].(string)
+
+	return true
+}
+
 func redfishSensors(host *HostConfig) bool {
 	var enabled string
 	var name string
 	var value float64
 	var args stringmap
-	var entry jsonmap
+	var entry dict
 
-	data, ok := redfishGet(host, "Dell/Systems/System.Embedded.1/DellNumericSensorCollection")
+	data, ok := redfishGet(host, "/redfish/v1/Dell/Systems/System.Embedded.1/DellNumericSensorCollection")
 	if !ok {
 		return false
 	}
 
-	members := data["Members"].([]interface{})
+	members := data["Members"].(list)
 	for _, v := range members {
-		entry = v.(jsonmap)
+		entry = v.(dict)
 
 		if entry["EnabledState"] == "Enabled" {
 			enabled = "1"
@@ -99,9 +121,9 @@ func redfishSystem(host *HostConfig) bool {
 	var text string
 	var value float64
 	var args stringmap
-	var entry jsonmap
+	var entry dict
 
-	data, ok := redfishGet(host, "Systems/System.Embedded.1")
+	data, ok := redfishGet(host, host.SystemCollection)
 	if !ok {
 		return false
 	}
@@ -113,7 +135,7 @@ func redfishSystem(host *HostConfig) bool {
 	}
 	metricsAppend(host, "power_on", nil, value)
 
-	entry = data["Status"].(jsonmap)
+	entry = data["Status"].(dict)
 	text = entry["Health"].(string)
 	args = stringmap{"status": text}
 	if text == "OK" {
@@ -130,7 +152,7 @@ func redfishSystem(host *HostConfig) bool {
 	}
 	metricsAppend(host, "indicator_led_on", nil, value)
 
-	entry = data["MemorySummary"].(jsonmap)
+	entry = data["MemorySummary"].(dict)
 	value = entry["TotalSystemMemoryGiB"].(float64) // depending on the bios version, this is reported in either GB or GiB
 	if value == math.Trunc(value) {
 		value = value * 1024
@@ -139,7 +161,7 @@ func redfishSystem(host *HostConfig) bool {
 	}
 	metricsAppend(host, "memory_size", nil, value)
 
-	entry = data["ProcessorSummary"].(jsonmap)
+	entry = data["ProcessorSummary"].(dict)
 	text = entry["Model"].(string)
 	value = entry["Count"].(float64)
 	args = stringmap{"model": text}
@@ -157,14 +179,14 @@ func redfishSEL(host *HostConfig) bool {
 	var text string
 	var value float64
 
-	data, ok := redfishGet(host, "Managers/iDRAC.Embedded.1/Logs/Sel")
+	data, ok := redfishGet(host, "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel")
 	if !ok {
 		return false
 	}
 
-	members := data["Members"].([]interface{})
+	members := data["Members"].(list)
 	for _, v := range members {
-		entry := v.(jsonmap)
+		entry := v.(dict)
 		component, _ := entry["SensorType"].(string) // sometimes reported as null
 
 		args = stringmap{
