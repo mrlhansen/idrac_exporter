@@ -18,7 +18,7 @@ func collectMetrics(target string) (string, bool) {
 	}
 
 	if !host.Active {
-		ok = redfishFindSystemCollection(host)
+		ok = redfishFindAllEndpoints(host)
 		host.Active = true
 		host.Valid = ok
 	}

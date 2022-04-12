@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 	"math"
+	"strings"
 	"io/ioutil"
 	"net/http"
 	"crypto/tls"
@@ -16,7 +17,7 @@ var transport = &http.Transport{
 
 var client = &http.Client{
 	Transport: transport,
-	Timeout: 5*time.Second,
+	Timeout: 10*time.Second,
 }
 
 type dict = map[string]interface{}
@@ -48,70 +49,123 @@ func redfishGet(host *HostConfig, path string) (dict, bool) {
 	return result, true
 }
 
-func redfishFindSystemCollection(host *HostConfig) bool {
-	data, ok := redfishGet(host, "/redfish/v1/")
+func redfishFindAllEndpoints(host *HostConfig) bool {
+	root, ok := redfishGet(host, "/redfish/v1/")
 	if !ok {
 		return false
 	}
 
-	collection := data["Systems"].(dict)
+	// Systems
+	collection := root["Systems"].(dict)
 	url := collection["@odata.id"].(string)
 
-	data, ok = redfishGet(host, url)
+	data, ok := redfishGet(host, url)
 	if !ok {
 		return false
 	}
 
 	members := data["Members"].(list)
 	entry := members[0].(dict)
-	host.SystemCollection = entry["@odata.id"].(string)
+	host.SystemEndpoint = entry["@odata.id"].(string)
+
+	// Thermal
+	collection = root["Chassis"].(dict)
+	url = collection["@odata.id"].(string)
+
+	data, ok = redfishGet(host, url)
+	if !ok {
+		return false
+	}
+
+	members = data["Members"].(list)
+	entry = members[0].(dict)
+	url = entry["@odata.id"].(string)
+
+	data, ok = redfishGet(host, url)
+	if !ok {
+		return false
+	}
+
+	collection = data["Thermal"].(dict)
+	host.ThermalEndpoint = collection["@odata.id"].(string)
 
 	return true
 }
 
 func redfishSensors(host *HostConfig) bool {
-	var enabled string
 	var name string
 	var value float64
 	var args stringmap
 	var entry dict
+	var status dict
+	var units string
 
-	data, ok := redfishGet(host, "/redfish/v1/Dell/Systems/System.Embedded.1/DellNumericSensorCollection")
+	data, ok := redfishGet(host, host.ThermalEndpoint)
 	if !ok {
 		return false
 	}
 
-	members := data["Members"].(list)
-	for _, v := range members {
+	temp := data["Temperatures"].(list)
+	for _, v := range temp {
 		entry = v.(dict)
+		status = entry["Status"].(dict)
 
-		if entry["EnabledState"] == "Enabled" {
-			enabled = "1"
-		} else {
-			enabled = "0"
-		}
-
-		args = stringmap{
-			"name": entry["ElementName"].(string),
-			"id": entry["DeviceID"].(string),
-			"enabled": enabled,
-		}
-
-		if entry["SensorType"] == "Temperature" {
-			value = entry["CurrentReading"].(float64)/10.0
-			name = "sensors_temperature"
-		} else if entry["SensorType"] == "Tachometer" {
-			value = entry["CurrentReading"].(float64)
-			name = "sensors_tachometer"
-		} else {
+		if status["State"] != "Enabled" {
 			continue
 		}
 
-		if value < 0 {
-			value = 0
+		args = stringmap{
+			"name": entry["Name"].(string),
+			"units": "celsius",
 		}
 
-		metricsAppend(host, name, args, value)
+		value = entry["ReadingCelsius"].(float64)
+		if value < 0 {
+			continue
+		}
+
+		metricsAppend(host, "sensors_temperature", args, value)
+	}
+
+	fans := data["Fans"].(list)
+	for _, v := range fans {
+		entry = v.(dict)
+		status = entry["Status"].(dict)
+
+		if status["State"] != "Enabled" {
+			continue
+		}
+
+		name, ok = entry["Name"].(string)
+		if !ok {
+			name, ok = entry["FanName"].(string)
+			if !ok {
+				continue
+			}
+		}
+
+		units, ok = entry["ReadingUnits"].(string)
+		if !ok {
+			units, ok = entry["Units"].(string)
+			if !ok {
+				continue
+			}
+		}
+
+		value, ok = entry["Reading"].(float64)
+		if !ok {
+			value, ok = entry["CurrentReading"].(float64)
+			if !ok {
+				continue
+			}
+		}
+
+		args = stringmap{
+			"name": name,
+			"units": strings.ToLower(units),
+		}
+
+		metricsAppend(host, "sensors_tachometer", args, value)
 	}
 
 	return true
@@ -123,7 +177,7 @@ func redfishSystem(host *HostConfig) bool {
 	var args stringmap
 	var entry dict
 
-	data, ok := redfishGet(host, host.SystemCollection)
+	data, ok := redfishGet(host, host.SystemEndpoint)
 	if !ok {
 		return false
 	}
