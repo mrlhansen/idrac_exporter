@@ -6,6 +6,15 @@ http://localhost:9348/metrics?target=123.45.6.78
 
 Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the target will be flagged as invalid, and any subsequent call to that target will simply be ignored and a status code 500 is returned.
 
+## Supported Systems
+The latest version of the program does not only support iDRAC, but several systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
+
+* HPE iLO 4/5
+* Dell iDRAC 9
+* Lenovo XClarity
+
+The `system` and `sensors` metrics (see the details below) are fully supported on all these systems, while the `sel` metrics are limited to iDRAC at the moment.
+
 ## Download
 The exporter is written in [Go](https://golang.org) and it can be downloaded and compiled using:
 ```bash
@@ -30,6 +39,8 @@ metrics:
   - sel
 ```
 
+As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` to can select what kind of metrics that should be returned, as described in more detail below.
+
 ## List of Metrics
 At the moment the exporter only exposes a very limited set of information.
 
@@ -45,10 +56,10 @@ idrac_bios_version{version="2.3.10"} NaN
 ```
 
 ### Sensors
-These metrics include temperature (in degrees Celcius) and FAN speeds (in RPM).
+These metrics include temperature and FAN speeds.
 ```
-idrac_sensors_temperature{name="Inlet Temp",id="iDRAC.Embedded.1#InletTemp",enabled="1"} 19.0
-idrac_sensors_tachometer{name="FAN1A",id="0x17__Fan.Embedded.1A",enabled="1"} 7224
+idrac_sensors_temperature{name="Inlet Temp",units="celsius"} 19
+idrac_sensors_tachometer{name="FAN1A",units="rpm"} 7912
 ```
 
 ### System Event Log
@@ -58,22 +69,20 @@ idrac_sel_entry{id="1",message="The process of installing an operating system or
 ```
 
 ## Prometheus Configuration
-For the situation where you have a single `idrac_exporter` and multiple iDRACs to query,
-the following `prometheus.yml` snippet can be used.
+For the situation where you have a single `idrac_exporter` and multiple iDRACs to query, the following `prometheus.yml` snippet can be used.
 
-```
+```yaml
 scrape_configs:
-  - job_name: "idrac"
+  - job_name: idrac
     static_configs:
-      - targets: ["192.168.2.1", "192.168.2.2"]
+      - targets: ['123.45.6.78', '123.45.6.79']
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: exporter:9000
+        replacement: exporter:9348
 ```
 
-where `192.168.2.1` and `192.168.2.2` are the iDRACs to query, and `exporter:9000` is the
-node and port where `idrac_exporter` is running.
+Here `123.45.6.78` and `123.45.6.79` are the iDRACs to query, and `exporter:9348` is the address and port where `idrac_exporter` is running.
