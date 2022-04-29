@@ -17,7 +17,7 @@ var transport = &http.Transport{
 
 var client = &http.Client{
 	Transport: transport,
-	Timeout: 10*time.Second,
+	Timeout: time.Duration(config.Timeout)*time.Second,
 }
 
 type dict = map[string]interface{}

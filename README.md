@@ -24,8 +24,9 @@ go get github.com/mrlhansen/idrac_exporter
 ## Configuration
 In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
 ```yaml
-address: 127.0.0.1
-port: 9348
+address: 127.0.0.1 # Listen address
+port: 9348         # Listen port
+timeout: 10        # HTTP timeout (in seconds) for Redfish API calls
 hosts:
   123.45.6.78:
     username: user
@@ -39,7 +40,7 @@ metrics:
   - sel
 ```
 
-As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` to can select what kind of metrics that should be returned, as described in more detail below.
+As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
 
 ## List of Metrics
 At the moment the exporter only exposes a very limited set of information.

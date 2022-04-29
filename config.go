@@ -22,8 +22,9 @@ type HostConfig struct {
 
 type RootConfig struct {
 	Address string               `yaml:"address"`
-	Port int                     `yaml:"port"`
+	Port uint32                  `yaml:"port"`
 	Metrics []string             `yaml:"metrics"`
+	Timeout uint32               `yaml:"timeout"`
 	Hosts map[string]*HostConfig `yaml:"hosts"`
 }
 
@@ -71,6 +72,10 @@ func readConfigFile(fileName string) {
 
 	if config.Port == 0 {
 		config.Port = 9348
+	}
+
+	if config.Timeout == 0 {
+		config.Timeout = 10
 	}
 
 	if len(config.Metrics) == 0 {
