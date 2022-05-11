@@ -5,6 +5,7 @@ import (
 	"time"
 	"math"
 	"strings"
+	"strconv"
 	"io/ioutil"
 	"net/http"
 	"crypto/tls"
@@ -68,7 +69,7 @@ func redfishFindAllEndpoints(host *HostConfig) bool {
 	entry := members[0].(dict)
 	host.SystemEndpoint = entry["@odata.id"].(string)
 
-	// Thermal
+	// Chassis
 	collection = root["Chassis"].(dict)
 	url = collection["@odata.id"].(string)
 
@@ -81,6 +82,7 @@ func redfishFindAllEndpoints(host *HostConfig) bool {
 	entry = members[0].(dict)
 	url = entry["@odata.id"].(string)
 
+	// Thermal and Power
 	data, ok = redfishGet(host, url)
 	if !ok {
 		return false
@@ -88,6 +90,9 @@ func redfishFindAllEndpoints(host *HostConfig) bool {
 
 	collection = data["Thermal"].(dict)
 	host.ThermalEndpoint = collection["@odata.id"].(string)
+
+	collection = data["Power"].(dict)
+	host.PowerEndpoint = collection["@odata.id"].(string)
 
 	return true
 }
@@ -108,8 +113,8 @@ func redfishSensors(host *HostConfig) bool {
 	temp := data["Temperatures"].(list)
 	for _, v := range temp {
 		entry = v.(dict)
-		status = entry["Status"].(dict)
 
+		status = entry["Status"].(dict)
 		if status["State"] != "Enabled" {
 			continue
 		}
@@ -259,6 +264,62 @@ func redfishSEL(host *HostConfig) bool {
 
 		value = float64(tm.Unix())
 		metricsAppend(host, "sel_entry", args, value)
+	}
+
+	return true
+}
+
+func redfishPower(host *HostConfig) bool {
+	var entry dict
+	var status dict
+	var args stringmap
+	var value float64
+
+	data, ok := redfishGet(host, host.PowerEndpoint)
+	if !ok {
+		return false
+	}
+
+	psu := data["PowerSupplies"].(list)
+	for i, v := range psu {
+		entry = v.(dict)
+
+		status = entry["Status"].(dict)
+		if status["State"] != "Enabled" {
+			continue
+		}
+
+		args = stringmap{
+			"psu": strconv.Itoa(i),
+		}
+
+		value, ok = entry["PowerOutputWatts"].(float64)
+		if !ok {
+			value, ok = entry["LastPowerOutputWatts"].(float64)
+		}
+		if ok {
+			metricsAppend(host, "power_output_watts", args, value)
+		}
+
+		value, ok = entry["PowerInputWatts"].(float64)
+		if ok {
+			metricsAppend(host, "power_input_watts", args, value)
+		}
+
+		value, ok = entry["PowerCapacityWatts"].(float64)
+		if ok {
+			metricsAppend(host, "power_capacity_watts", args, value)
+		}
+
+		value, ok = entry["LineInputVoltage"].(float64)
+		if ok {
+			metricsAppend(host, "power_input_voltage", args, value)
+		}
+
+		value, ok = entry["EfficiencyPercent"].(float64)
+		if ok {
+			metricsAppend(host, "power_efficiency_percent", args, value)
+		}
 	}
 
 	return true

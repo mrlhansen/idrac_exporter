@@ -50,6 +50,13 @@ func collectMetrics(target string) (string, bool) {
 		}
 	}
 
+	if collectPower {
+		ok = redfishPower(host)
+		if !ok {
+			return "", false
+		}
+	}
+
 	return metricsGet(host), true
 }
 

@@ -18,6 +18,7 @@ type HostConfig struct {
 	Valid bool
 	SystemEndpoint string
 	ThermalEndpoint string
+	PowerEndpoint string
 }
 
 type RootConfig struct {
@@ -32,6 +33,7 @@ var config RootConfig
 var collectSystem bool = false
 var collectSensors bool = false
 var collectSEL bool = false
+var collectPower bool = false
 
 func validateMetrics(name string) bool {
 	switch name {
@@ -40,6 +42,9 @@ func validateMetrics(name string) bool {
 			return true
 		case "sensors":
 			collectSensors = true
+			return true
+		case "power":
+			collectPower = true
 			return true
 		case "sel":
 			collectSEL = true

@@ -13,8 +13,6 @@ The latest version of the program does not only support iDRAC, but several syste
 * Dell iDRAC 9
 * Lenovo XClarity
 
-The `system` and `sensors` metrics (see the details below) are fully supported on all these systems, while the `sel` metrics are limited to iDRAC at the moment.
-
 ## Download
 The exporter is written in [Go](https://golang.org) and it can be downloaded and compiled using:
 ```bash
@@ -37,7 +35,8 @@ hosts:
 metrics:
   - system
   - sensors
-  - sel
+  - power
+  - sel            # iDRAC only
 ```
 
 As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
@@ -63,8 +62,18 @@ idrac_sensors_temperature{name="Inlet Temp",units="celsius"} 19
 idrac_sensors_tachometer{name="FAN1A",units="rpm"} 7912
 ```
 
+### Power
+These metrics are PSU power readings, such as power usage, total power capacity, input voltage and efficiency. Be aware that not all metrics are available on all systems.
+```
+idrac_power_output_watts{psu="0"} 74.5
+idrac_power_input_watts{psu="0"} 89
+idrac_power_capacity_watts{psu="0"} 750
+idrac_power_input_voltage{psu="0"} 232
+idrac_power_efficiency_percent{psu="0"} 91
+```
+
 ### System Event Log
-The system event log is also exported. This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the unix timestamp for when the entry was created (as reported by iDRAC).
+On iDRAC only, the system event log can also be exported. This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the unix timestamp for when the entry was created (as reported by iDRAC).
 ```
 idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 1631175352
 ```
