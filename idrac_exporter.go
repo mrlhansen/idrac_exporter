@@ -14,16 +14,18 @@ func collectMetrics(target string) (string, bool) {
 		host = config.Hosts[target]
 		host.Token = config.Hosts["default"].Token
 		host.Hostname = target
-		host.Active = false
+		host.Initialized = false
+		host.Retries = 0
 	}
 
-	if !host.Active {
+	if !host.Initialized {
 		ok = redfishFindAllEndpoints(host)
-		host.Active = true
-		host.Valid = ok
+		host.Retries++
+		host.Initialized = (ok || (host.Retries >= config.Retries))
+		host.Reachable = ok
 	}
 
-	if !host.Valid {
+	if !host.Reachable {
 		return "", false
 	}
 

@@ -14,8 +14,9 @@ type HostConfig struct {
 	Hostname string
 	Token string
 	Metrics string
-	Active bool
-	Valid bool
+	Initialized bool
+	Reachable bool
+	Retries uint32
 	SystemEndpoint string
 	ThermalEndpoint string
 	PowerEndpoint string
@@ -26,6 +27,7 @@ type RootConfig struct {
 	Port uint32                  `yaml:"port"`
 	Metrics []string             `yaml:"metrics"`
 	Timeout uint32               `yaml:"timeout"`
+	Retries uint32               `yaml:"retries"`
 	Hosts map[string]*HostConfig `yaml:"hosts"`
 }
 
@@ -83,6 +85,10 @@ func readConfigFile(fileName string) {
 		config.Timeout = 10
 	}
 
+	if config.Retries == 0 {
+		config.Retries = 1
+	}
+
 	if len(config.Metrics) == 0 {
 		parseError("missing section", "metrics")
 	}
@@ -108,6 +114,7 @@ func readConfigFile(fileName string) {
 		data := []byte(v.Username + ":" + v.Password)
 		v.Token = base64.StdEncoding.EncodeToString(data)
 		v.Hostname = k
-		v.Active = false
+		v.Initialized = false
+		v.Retries = 0
 	}
 }

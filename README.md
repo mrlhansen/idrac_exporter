@@ -4,7 +4,7 @@ This is a (very) simple iDRAC exporter for [Prometheus](https://prometheus.io). 
 http://localhost:9348/metrics?target=123.45.6.78
 ```
 
-Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the target will be flagged as invalid, and any subsequent call to that target will simply be ignored and a status code 500 is returned.
+Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the target will eventually be flagged as invalid, and any subsequent call to that target will simply be ignored and a status code 500 is returned.
 
 ## Supported Systems
 The latest version of the program does not only support iDRAC, but several systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
@@ -25,6 +25,7 @@ In the configuration file for the iDRAC exporter you can specify the bind addres
 address: 127.0.0.1 # Listen address
 port: 9348         # Listen port
 timeout: 10        # HTTP timeout (in seconds) for Redfish API calls
+retries: 1         # Number of retries before a target is marked as unreachable
 hosts:
   123.45.6.78:
     username: user
