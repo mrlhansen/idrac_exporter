@@ -220,15 +220,37 @@ func redfishSystem(host *HostConfig) bool {
 	}
 	metricsAppend(host, "memory_size", nil, value)
 
+	args = stringmap{}
 	entry = data["ProcessorSummary"].(dict)
-	text = entry["Model"].(string)
+	text, ok = entry["Model"].(string)
+	if ok {
+		args["model"] = text
+	}
 	value = entry["Count"].(float64)
-	args = stringmap{"model": text}
 	metricsAppend(host, "cpu_count", args, value)
 
 	text = data["BiosVersion"].(string)
 	args = stringmap{"version": text}
 	metricsAppend(host, "bios_version", args, -1)
+
+	args = stringmap{}
+	text, ok = data["Manufacturer"].(string)
+	if ok {
+		args["manufacturer"] = text
+	}
+	text, ok = data["Model"].(string)
+	if ok {
+		args["model"] = text
+	}
+	text, ok = data["SerialNumber"].(string)
+	if ok {
+		args["serial"] = text
+	}
+	text, ok = data["SKU"].(string)
+	if ok {
+		args["sku"] = text
+	}
+	metricsAppend(host, "machine", args, -1)
 
 	return true
 }

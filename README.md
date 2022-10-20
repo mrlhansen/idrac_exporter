@@ -46,7 +46,7 @@ As shown in the example above, under `hosts` you can specify login information f
 At the moment the exporter only exposes a very limited set of information.
 
 ### System
-These metrics include power, health, and LED state, total memory size in MiB, number of physical processors and the BIOS version.
+These metrics include power, health, and LED state, total memory size in MiB, number of physical processors, BIOS version and machine information.
 ```
 idrac_power_on 1
 idrac_health_ok{status="OK"} 1
@@ -54,6 +54,7 @@ idrac_indicator_led_on 0
 idrac_memory_size 393216
 idrac_cpu_count{model="Intel(R) Xeon(R) Gold 6130 CPU @ 2.10GHz"} 2
 idrac_bios_version{version="2.3.10"} NaN
+idrac_machine{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc",sku="xyz"} NaN
 ```
 
 ### Sensors
