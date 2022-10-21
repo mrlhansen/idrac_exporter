@@ -204,12 +204,14 @@ func redfishSystem(host *HostConfig) bool {
 	}
 	metricsAppend(host, "health_ok", args, value)
 
-	if data["IndicatorLED"] == "Off" {
+	text = data["IndicatorLED"].(string)
+	if text == "Off" {
 		value = 0
 	} else {
 		value = 1
 	}
-	metricsAppend(host, "indicator_led_on", nil, value)
+	args = stringmap{"state": text}
+	metricsAppend(host, "indicator_led_on", args, value)
 
 	entry = data["MemorySummary"].(dict)
 	value = entry["TotalSystemMemoryGiB"].(float64) // depending on the bios version, this is reported in either GB or GiB
