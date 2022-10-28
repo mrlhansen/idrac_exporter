@@ -298,6 +298,7 @@ func redfishPower(host *HostConfig) bool {
 	var status dict
 	var args stringmap
 	var value float64
+	var text string
 
 	data, ok := redfishGet(host, host.PowerEndpoint)
 	if !ok {
@@ -322,27 +323,76 @@ func redfishPower(host *HostConfig) bool {
 			value, ok = entry["LastPowerOutputWatts"].(float64)
 		}
 		if ok {
-			metricsAppend(host, "power_output_watts", args, value)
+			metricsAppend(host, "power_supply_output_watts", args, value)
 		}
 
 		value, ok = entry["PowerInputWatts"].(float64)
 		if ok {
-			metricsAppend(host, "power_input_watts", args, value)
+			metricsAppend(host, "power_supply_input_watts", args, value)
 		}
 
 		value, ok = entry["PowerCapacityWatts"].(float64)
 		if ok {
-			metricsAppend(host, "power_capacity_watts", args, value)
+			metricsAppend(host, "power_supply_capacity_watts", args, value)
 		}
 
 		value, ok = entry["LineInputVoltage"].(float64)
 		if ok {
-			metricsAppend(host, "power_input_voltage", args, value)
+			metricsAppend(host, "power_supply_input_voltage", args, value)
 		}
 
 		value, ok = entry["EfficiencyPercent"].(float64)
 		if ok {
-			metricsAppend(host, "power_efficiency_percent", args, value)
+			metricsAppend(host, "power_supply_efficiency_percent", args, value)
+		}
+	}
+
+	pc := data["PowerControl"].(list)
+	for i, v := range pc {
+		entry = v.(dict)
+
+		args = stringmap{
+			"id": strconv.Itoa(i),
+		}
+
+		text, ok = entry["Name"].(string)
+		if ok {
+			args["name"] = text
+		}
+
+		value, ok = entry["PowerConsumedWatts"].(float64)
+		if ok {
+			metricsAppend(host, "power_control_consumed_watts", args, value)
+		}
+
+		value, ok = entry["PowerCapacityWatts"].(float64)
+		if ok {
+			metricsAppend(host, "power_control_capacity_watts", args, value)
+		}
+
+		entry, ok = entry["PowerMetrics"].(dict)
+		if !ok {
+			continue
+		}
+
+		value, ok = entry["MinConsumedWatts"].(float64)
+		if ok {
+			metricsAppend(host, "power_control_min_consumed_watts", args, value)
+		}
+
+		value, ok = entry["MaxConsumedWatts"].(float64)
+		if ok {
+			metricsAppend(host, "power_control_max_consumed_watts", args, value)
+		}
+
+		value, ok = entry["AverageConsumedWatts"].(float64)
+		if ok {
+			metricsAppend(host, "power_control_avg_consumed_watts", args, value)
+		}
+
+		value, ok = entry["IntervalInMin"].(float64)
+		if ok {
+			metricsAppend(host, "power_control_interval_in_minutes", args, value)
 		}
 	}
 

@@ -65,13 +65,23 @@ idrac_sensors_tachometer{name="FAN1A",units="rpm"} 7912
 ```
 
 ### Power
-These metrics are PSU power readings, such as power usage, total power capacity, input voltage and efficiency. Be aware that not all metrics are available on all systems.
+These metrics include two sets of power readings. The first set is PSU power readings, such as power usage, total power capacity, input voltage and efficiency. Be aware that not all metrics are available on all systems.
 ```
-idrac_power_output_watts{psu="0"} 74.5
-idrac_power_input_watts{psu="0"} 89
-idrac_power_capacity_watts{psu="0"} 750
-idrac_power_input_voltage{psu="0"} 232
-idrac_power_efficiency_percent{psu="0"} 91
+idrac_power_supply_output_watts{psu="0"} 74.5
+idrac_power_supply_input_watts{psu="0"} 89
+idrac_power_supply_capacity_watts{psu="0"} 750
+idrac_power_supply_input_voltage{psu="0"} 232
+idrac_power_supply_efficiency_percent{psu="0"} 91
+```
+
+The second set is the power consumption for the entire system (and sometimes also for certain subsystems, such as the CPUs). The first two metrics are instantaneous readings, while the last four metrics are the minimum, maximum and average power consumption as measure over the reported interval.
+```
+idrac_power_control_consumed_watts{id="0",name="System Power Control"} 166
+idrac_power_control_capacity_watts{id="0",name="System Power Control"} 816
+idrac_power_control_min_consumed_watts{id="0",name="System Power Control"} 165
+idrac_power_control_max_consumed_watts{id="0",name="System Power Control"} 177
+idrac_power_control_avg_consumed_watts{id="0",name="System Power Control"} 166
+idrac_power_control_interval_in_minutes{id="0",name="System Power Control"} 1
 ```
 
 ### System Event Log
