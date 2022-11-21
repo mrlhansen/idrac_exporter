@@ -1,16 +1,18 @@
-package main
+package redfish
 
 import (
-	"strings"
-	"math"
 	"fmt"
+	"math"
+	"strings"
+
+	"github.com/mrlhansen/idrac_exporter/internals/config"
 )
 
-func metricsClear(host *HostConfig) {
+func MetricsClear(host *config.HostConfig) {
 	host.Metrics = ""
 }
 
-func metricsAppend(host *HostConfig, name string, args map[string]string, value float64) {
+func metricsAppend(host *config.HostConfig, name string, args map[string]string, value float64) {
 	name = "idrac_" + name
 	length := len(args)
 
@@ -39,6 +41,6 @@ func metricsAppend(host *HostConfig, name string, args map[string]string, value 
 	host.Metrics += name
 }
 
-func metricsGet(host *HostConfig) string {
+func MetricsGet(host *config.HostConfig) string {
 	return host.Metrics
 }
