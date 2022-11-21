@@ -3,9 +3,10 @@ FROM golang:1.19-alpine3.16 as builder
 WORKDIR /app/src
 
 COPY go.* ./
-COPY *.go ./
+COPY cmd/ ./cmd/
+COPY internals/ ./internals/
 
-RUN go build -o /app/bin/idrac_exporter github.com/mrlhansen/idrac_exporter
+RUN go build -o /app/bin/idrac_exporter cmd/idrac_exporter/main.go
 
 FROM alpine:3.16
 

@@ -1,15 +1,17 @@
-package main
+package redfish
 
 import (
-	"log"
-	"time"
-	"math"
-	"strings"
-	"strconv"
-	"io/ioutil"
-	"net/http"
 	"crypto/tls"
 	"encoding/json"
+	"io/ioutil"
+	"log"
+	"math"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
+
+	"github.com/mrlhansen/idrac_exporter/internals/config"
 )
 
 var transport = &http.Transport{
@@ -18,19 +20,19 @@ var transport = &http.Transport{
 
 var client = &http.Client{
 	Transport: transport,
-	Timeout: time.Duration(config.Timeout)*time.Second,
+	Timeout:   time.Duration(config.Config.Timeout) * time.Second,
 }
 
 type dict = map[string]interface{}
 type list = []interface{}
 type stringmap = map[string]string
 
-func redfishGet(host *HostConfig, path string) (dict, bool) {
+func redfishGet(host *config.HostConfig, path string) (dict, bool) {
 	var result dict
 
 	url := "https://" + host.Hostname + path
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "Basic " + host.Token)
+	req.Header.Add("Authorization", "Basic "+host.Token)
 	req.Header.Add("Accept", "application/json")
 	resp, err := client.Do(req)
 
@@ -50,7 +52,7 @@ func redfishGet(host *HostConfig, path string) (dict, bool) {
 	return result, true
 }
 
-func redfishFindAllEndpoints(host *HostConfig) bool {
+func RedfishFindAllEndpoints(host *config.HostConfig) bool {
 	root, ok := redfishGet(host, "/redfish/v1/")
 	if !ok {
 		return false
@@ -97,7 +99,7 @@ func redfishFindAllEndpoints(host *HostConfig) bool {
 	return true
 }
 
-func redfishSensors(host *HostConfig) bool {
+func RedfishSensors(host *config.HostConfig) bool {
 	var name string
 	var value float64
 	var args stringmap
@@ -120,7 +122,7 @@ func redfishSensors(host *HostConfig) bool {
 		}
 
 		args = stringmap{
-			"name": entry["Name"].(string),
+			"name":  entry["Name"].(string),
 			"units": "celsius",
 		}
 
@@ -166,7 +168,7 @@ func redfishSensors(host *HostConfig) bool {
 		}
 
 		args = stringmap{
-			"name": name,
+			"name":  name,
 			"units": strings.ToLower(units),
 		}
 
@@ -176,7 +178,7 @@ func redfishSensors(host *HostConfig) bool {
 	return true
 }
 
-func redfishSystem(host *HostConfig) bool {
+func RedfishSystem(host *config.HostConfig) bool {
 	var text string
 	var value float64
 	var args stringmap
@@ -218,7 +220,7 @@ func redfishSystem(host *HostConfig) bool {
 	if value == math.Trunc(value) {
 		value = value * 1024
 	} else {
-		value = math.Floor(value*1099511627776.0/1000000000.0)
+		value = math.Floor(value * 1099511627776.0 / 1000000000.0)
 	}
 	metricsAppend(host, "memory_size", nil, value)
 
@@ -257,7 +259,7 @@ func redfishSystem(host *HostConfig) bool {
 	return true
 }
 
-func redfishSEL(host *HostConfig) bool {
+func RedfishSEL(host *config.HostConfig) bool {
 	var args stringmap
 	var text string
 	var value float64
@@ -273,10 +275,10 @@ func redfishSEL(host *HostConfig) bool {
 		component, _ := entry["SensorType"].(string) // sometimes reported as null
 
 		args = stringmap{
-			"id": entry["Id"].(string),
-			"message": entry["Message"].(string),
+			"id":        entry["Id"].(string),
+			"message":   entry["Message"].(string),
 			"component": component,
-			"severity": entry["Severity"].(string),
+			"severity":  entry["Severity"].(string),
 		}
 
 		text = entry["Created"].(string)
@@ -293,7 +295,7 @@ func redfishSEL(host *HostConfig) bool {
 	return true
 }
 
-func redfishPower(host *HostConfig) bool {
+func RedfishPower(host *config.HostConfig) bool {
 	var entry dict
 	var status dict
 	var args stringmap
