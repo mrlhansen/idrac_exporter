@@ -3,8 +3,7 @@ package redfish
 import (
 	"crypto/tls"
 	"encoding/json"
-	"io/ioutil"
-	"log"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -14,305 +13,191 @@ import (
 	"github.com/mrlhansen/idrac_exporter/internals/config"
 )
 
-var transport = &http.Transport{
-	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-}
+const redfishRootPath = "/redfish/v1"
 
 var client = &http.Client{
-	Transport: transport,
-	Timeout:   time.Duration(config.Config.Timeout) * time.Second,
+	Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	},
+	Timeout: time.Duration(config.Config.Timeout) * time.Second,
 }
 
-type dict = map[string]interface{}
-type list = []interface{}
 type stringmap = map[string]string
 
-func redfishGet(host *config.HostConfig, path string) (dict, bool) {
-	var result dict
-
-	url := "https://" + host.Hostname + path
-	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "Basic "+host.Token)
-	req.Header.Add("Accept", "application/json")
-	resp, err := client.Do(req)
-
-	if err != nil {
-		log.Print(err)
-		return result, false
+func FindAllEndpoints(host *config.HostConfig) error {
+	var resp V1Response
+	if err := redfishGet(host, redfishRootPath, &resp); err != nil {
+		return err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	s := []byte(body)
-
-	if resp.StatusCode != 200 {
-		return result, false
+	var sysResp GroupResponse
+	if err := redfishGet(host, resp.Systems.OdataId, &sysResp); err != nil {
+		return err
 	}
 
-	json.Unmarshal(s, &result)
-	return result, true
-}
-
-func RedfishFindAllEndpoints(host *config.HostConfig) bool {
-	root, ok := redfishGet(host, "/redfish/v1/")
-	if !ok {
-		return false
-	}
-
-	// Systems
-	collection := root["Systems"].(dict)
-	url := collection["@odata.id"].(string)
-
-	data, ok := redfishGet(host, url)
-	if !ok {
-		return false
-	}
-
-	members := data["Members"].(list)
-	entry := members[0].(dict)
-	host.SystemEndpoint = entry["@odata.id"].(string)
+	host.SystemEndpoint = sysResp.Members[0].OdataId
 
 	// Chassis
-	collection = root["Chassis"].(dict)
-	url = collection["@odata.id"].(string)
-
-	data, ok = redfishGet(host, url)
-	if !ok {
-		return false
+	var chSysResp GroupResponse
+	if err := redfishGet(host, resp.Chassis.OdataId, &chSysResp); err != nil {
+		return err
 	}
-
-	members = data["Members"].(list)
-	entry = members[0].(dict)
-	url = entry["@odata.id"].(string)
 
 	// Thermal and Power
-	data, ok = redfishGet(host, url)
-	if !ok {
-		return false
+	var chResponse ChassisResponse
+	if err := redfishGet(host, chSysResp.Members[0].OdataId, &chResponse); err != nil {
+		return err
 	}
 
-	collection = data["Thermal"].(dict)
-	host.ThermalEndpoint = collection["@odata.id"].(string)
+	host.ThermalEndpoint = chResponse.Thermal.OdataId
+	host.PowerEndpoint = chResponse.Power.OdataId
 
-	collection = data["Power"].(dict)
-	host.PowerEndpoint = collection["@odata.id"].(string)
-
-	return true
+	return nil
 }
 
-func RedfishSensors(host *config.HostConfig) bool {
-	var name string
-	var value float64
-	var args stringmap
-	var entry dict
-	var status dict
-	var units string
-
-	data, ok := redfishGet(host, host.ThermalEndpoint)
-	if !ok {
-		return false
+func Sensors(host *config.HostConfig) error {
+	var resp ThermalResponse
+	if err := redfishGet(host, host.ThermalEndpoint, &resp); err != nil {
+		return err
 	}
 
-	temp := data["Temperatures"].(list)
-	for _, v := range temp {
-		entry = v.(dict)
-
-		status = entry["Status"].(dict)
-		if status["State"] != "Enabled" {
+	for _, t := range resp.Temperatures {
+		if t.Status.State != StateEnabled {
 			continue
 		}
 
-		args = stringmap{
-			"name":  entry["Name"].(string),
+		args := stringmap{
+			"name":  t.Name,
 			"units": "celsius",
 		}
 
-		value = entry["ReadingCelsius"].(float64)
-		if value < 0 {
-			continue
-		}
-
-		metricsAppend(host, "sensors_temperature", args, value)
+		metricsAppend(host, "sensors_temperature", args, t.ReadingCelsius)
 	}
 
-	fans := data["Fans"].(list)
-	for _, v := range fans {
-		entry = v.(dict)
-		status = entry["Status"].(dict)
+	for _, f := range resp.Fans {
+		status := f.Status
 
-		if status["State"] != "Enabled" {
+		if status.State != StateEnabled {
 			continue
 		}
 
-		name, ok = entry["Name"].(string)
-		if !ok {
-			name, ok = entry["FanName"].(string)
-			if !ok {
-				continue
-			}
+		name := f.GetName()
+		if name == "" {
+			continue
 		}
 
-		units, ok = entry["ReadingUnits"].(string)
-		if !ok {
-			units, ok = entry["Units"].(string)
-			if !ok {
-				continue
-			}
+		units := f.GetUnits()
+		if units == "" {
+			continue
 		}
 
-		value, ok = entry["Reading"].(float64)
-		if !ok {
-			value, ok = entry["CurrentReading"].(float64)
-			if !ok {
-				continue
-			}
-		}
-
-		args = stringmap{
+		args := stringmap{
 			"name":  name,
 			"units": strings.ToLower(units),
 		}
 
-		metricsAppend(host, "sensors_tachometer", args, value)
+		metricsAppend(host, "sensors_tachometer", args, float64(f.GetReading()))
 	}
 
-	return true
+	return nil
 }
 
-func RedfishSystem(host *config.HostConfig) bool {
-	var text string
+func System(host *config.HostConfig) error {
 	var value float64
-	var args stringmap
-	var entry dict
+	var labels stringmap
 
-	data, ok := redfishGet(host, host.SystemEndpoint)
-	if !ok {
-		return false
+	var sysResp SystemResponse
+	if err := redfishGet(host, host.SystemEndpoint, &sysResp); err != nil {
+		return err
 	}
 
-	if data["PowerState"] == "On" {
+	if sysResp.PowerState == "On" {
 		value = 1
 	} else {
 		value = 0
 	}
 	metricsAppend(host, "power_on", nil, value)
 
-	entry = data["Status"].(dict)
-	text = entry["Health"].(string)
-	args = stringmap{"status": text}
-	if text == "OK" {
+	if sysResp.Status.Health == "OK" {
 		value = 1
 	} else {
 		value = 0
 	}
-	metricsAppend(host, "health_ok", args, value)
+	metricsAppend(host, "health_ok", stringmap{"status": sysResp.Status.Health}, value)
 
-	text = data["IndicatorLED"].(string)
-	if text == "Off" {
+	if sysResp.IndicatorLED == "Off" {
 		value = 0
 	} else {
 		value = 1
 	}
-	args = stringmap{"state": text}
-	metricsAppend(host, "indicator_led_on", args, value)
+	metricsAppend(host, "indicator_led_on", stringmap{"state": sysResp.IndicatorLED}, value)
 
-	entry = data["MemorySummary"].(dict)
-	value = entry["TotalSystemMemoryGiB"].(float64) // depending on the bios version, this is reported in either GB or GiB
+	value = sysResp.MemorySummary.TotalSystemMemoryGiB // depending on the bios version, this is reported in either GB or GiB
 	if value == math.Trunc(value) {
 		value = value * 1024
 	} else {
-		value = math.Floor(value * 1099511627776.0 / 1000000000.0)
+		value = math.Floor(value * 1099511627776.0 / 1e9)
 	}
 	metricsAppend(host, "memory_size", nil, value)
 
-	args = stringmap{}
-	entry = data["ProcessorSummary"].(dict)
-	text, ok = entry["Model"].(string)
-	if ok {
-		args["model"] = text
+	if sysResp.ProcessorSummary.Model != "" {
+		labels = stringmap{"model": sysResp.ProcessorSummary.Model}
 	}
-	value = entry["Count"].(float64)
-	metricsAppend(host, "cpu_count", args, value)
+	metricsAppend(host, "cpu_count", labels, float64(sysResp.ProcessorSummary.Count))
 
-	text = data["BiosVersion"].(string)
-	args = stringmap{"version": text}
-	metricsAppend(host, "bios_version", args, -1)
+	metricsAppend(host, "bios_version", stringmap{"version": sysResp.BiosVersion}, -1)
 
-	args = stringmap{}
-	text, ok = data["Manufacturer"].(string)
-	if ok {
-		args["manufacturer"] = text
+	labels = make(stringmap)
+	if sysResp.Manufacturer != "" {
+		labels["manufacturer"] = sysResp.Manufacturer
 	}
-	text, ok = data["Model"].(string)
-	if ok {
-		args["model"] = text
+	if sysResp.Model != "" {
+		labels["model"] = sysResp.Model
 	}
-	text, ok = data["SerialNumber"].(string)
-	if ok {
-		args["serial"] = text
+	if sysResp.SerialNumber != "" {
+		labels["serial"] = sysResp.SerialNumber
 	}
-	text, ok = data["SKU"].(string)
-	if ok {
-		args["sku"] = text
+	if sysResp.Sku != "" {
+		labels["sku"] = sysResp.Sku
 	}
-	metricsAppend(host, "machine", args, -1)
 
-	return true
+	metricsAppend(host, "machine", labels, -1)
+
+	return nil
 }
 
-func RedfishSEL(host *config.HostConfig) bool {
+func IdracSel(host *config.HostConfig) error {
 	var args stringmap
-	var text string
-	var value float64
 
-	data, ok := redfishGet(host, "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel")
-	if !ok {
-		return false
+	var resp IdracSelResponse
+	if err := redfishGet(host, "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel", &resp); err != nil {
+		return err
 	}
 
-	members := data["Members"].(list)
-	for _, v := range members {
-		entry := v.(dict)
-		component, _ := entry["SensorType"].(string) // sometimes reported as null
-
+	for _, e := range resp.Members {
 		args = stringmap{
-			"id":        entry["Id"].(string),
-			"message":   entry["Message"].(string),
-			"component": component,
-			"severity":  entry["Severity"].(string),
+			"id":        e.Id,
+			"message":   e.Message,
+			"component": e.SensorType, // sometimes reported as null
+			"severity":  e.Severity,
 		}
 
-		text = entry["Created"].(string)
-		tm, err := time.Parse(time.RFC3339, text)
-		if err != nil {
-			log.Print(err)
-			return false
-		}
-
-		value = float64(tm.Unix())
-		metricsAppend(host, "sel_entry", args, value)
+		metricsAppend(host, "sel_entry", args, float64(e.Created.Unix()))
 	}
 
-	return true
+	return nil
 }
 
-func RedfishPower(host *config.HostConfig) bool {
-	var entry dict
-	var status dict
+func Power(host *config.HostConfig) error {
 	var args stringmap
-	var value float64
-	var text string
 
-	data, ok := redfishGet(host, host.PowerEndpoint)
-	if !ok {
-		return false
+	var resp PowerResponse
+	if err := redfishGet(host, host.PowerEndpoint, &resp); err != nil {
+		return err
 	}
 
-	psu := data["PowerSupplies"].(list)
-	for i, v := range psu {
-		entry = v.(dict)
-
-		status = entry["Status"].(dict)
-		if status["State"] != "Enabled" {
+	for i, psu := range resp.PowerSupplies {
+		if psu.Status.State != StateEnabled {
 			continue
 		}
 
@@ -320,83 +205,62 @@ func RedfishPower(host *config.HostConfig) bool {
 			"psu": strconv.Itoa(i),
 		}
 
-		value, ok = entry["PowerOutputWatts"].(float64)
-		if !ok {
-			value, ok = entry["LastPowerOutputWatts"].(float64)
+		if psu.PowerOutputWatts > 0 {
+			metricsAppend(host, "power_supply_output_watts", args, psu.PowerOutputWatts)
+		} else if psu.LastPowerOutputWatts > 0 {
+			metricsAppend(host, "power_supply_output_watts", args, psu.LastPowerOutputWatts)
 		}
-		if ok {
-			metricsAppend(host, "power_supply_output_watts", args, value)
-		}
-
-		value, ok = entry["PowerInputWatts"].(float64)
-		if ok {
-			metricsAppend(host, "power_supply_input_watts", args, value)
-		}
-
-		value, ok = entry["PowerCapacityWatts"].(float64)
-		if ok {
-			metricsAppend(host, "power_supply_capacity_watts", args, value)
-		}
-
-		value, ok = entry["LineInputVoltage"].(float64)
-		if ok {
-			metricsAppend(host, "power_supply_input_voltage", args, value)
-		}
-
-		value, ok = entry["EfficiencyPercent"].(float64)
-		if ok {
-			metricsAppend(host, "power_supply_efficiency_percent", args, value)
-		}
+		metricsAppend(host, "power_supply_input_watts", args, psu.PowerInputWatts)
+		metricsAppend(host, "power_supply_capacity_watts", args, psu.PowerCapacityWatts)
+		metricsAppend(host, "power_supply_input_voltage", args, psu.LineInputVoltage)
+		metricsAppend(host, "power_supply_efficiency_percent", args, psu.EfficiencyPercent)
 	}
 
-	pc := data["PowerControl"].(list)
-	for i, v := range pc {
-		entry = v.(dict)
-
+	for i, pc := range resp.PowerControl {
 		args = stringmap{
 			"id": strconv.Itoa(i),
 		}
 
-		text, ok = entry["Name"].(string)
-		if ok {
-			args["name"] = text
+		if pc.Name != "" {
+			args["name"] = pc.Name
 		}
 
-		value, ok = entry["PowerConsumedWatts"].(float64)
-		if ok {
-			metricsAppend(host, "power_control_consumed_watts", args, value)
-		}
+		metricsAppend(host, "power_control_consumed_watts", args, pc.PowerConsumedWatts)
+		metricsAppend(host, "power_control_capacity_watts", args, pc.PowerCapacityWatts)
 
-		value, ok = entry["PowerCapacityWatts"].(float64)
-		if ok {
-			metricsAppend(host, "power_control_capacity_watts", args, value)
-		}
-
-		entry, ok = entry["PowerMetrics"].(dict)
-		if !ok {
+		if pc.PowerMetrics == nil {
 			continue
 		}
+		pm := pc.PowerMetrics
 
-		value, ok = entry["MinConsumedWatts"].(float64)
-		if ok {
-			metricsAppend(host, "power_control_min_consumed_watts", args, value)
-		}
-
-		value, ok = entry["MaxConsumedWatts"].(float64)
-		if ok {
-			metricsAppend(host, "power_control_max_consumed_watts", args, value)
-		}
-
-		value, ok = entry["AverageConsumedWatts"].(float64)
-		if ok {
-			metricsAppend(host, "power_control_avg_consumed_watts", args, value)
-		}
-
-		value, ok = entry["IntervalInMin"].(float64)
-		if ok {
-			metricsAppend(host, "power_control_interval_in_minutes", args, value)
-		}
+		metricsAppend(host, "power_control_min_consumed_watts", args, pm.MinConsumedWatts)
+		metricsAppend(host, "power_control_max_consumed_watts", args, pm.MaxConsumedWatts)
+		metricsAppend(host, "power_control_avg_consumed_watts", args, pm.AverageConsumedWatts)
+		metricsAppend(host, "power_control_interval_in_minutes", args, pm.IntervalInMin)
 	}
 
-	return true
+	return nil
+}
+
+func redfishGet(host *config.HostConfig, path string, res any) error {
+	url := "https://" + host.Hostname + path
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Add("Authorization", "Basic "+host.Token)
+	req.Header.Add("Accept", "application/json")
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(res)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
