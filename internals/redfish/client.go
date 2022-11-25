@@ -118,7 +118,7 @@ func (h *Client) RefreshSystem(store systemMetricsStore) error {
 
 	store.SetPowerOn(sysResp.PowerState == "On")
 	store.SetHealthOk(sysResp.Status.Health == "OK", sysResp.Status.Health)
-	store.SetLedOn(sysResp.IndicatorLED == "Off", sysResp.IndicatorLED)
+	store.SetLedOn(sysResp.IndicatorLED != "Off", sysResp.IndicatorLED)
 
 	value := sysResp.MemorySummary.TotalSystemMemoryGiB // depending on the bios version, this is reported in either GB or GiB
 	if value == math.Trunc(value) {
