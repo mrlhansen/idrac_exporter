@@ -11,9 +11,12 @@ import (
 	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internals/config"
+	"github.com/mrlhansen/idrac_exporter/internals/logging"
 )
 
 const redfishRootPath = "/redfish/v1"
+
+var logger = logging.NewLogger().Sugar()
 
 type Client struct {
 	hostname  string
@@ -198,17 +201,21 @@ func (h *Client) redfishGet(path string, res interface{}) error {
 	req.Header.Add("Authorization", "Basic "+h.basicAuth)
 	req.Header.Add("Accept", "application/json")
 
+	logger.Debugf("Querying url %q", url)
+
 	resp, err := h.httpClient.Do(req)
 	if err != nil {
+		logger.Debugf("Failed to query url %q: %v", url, err)
 		return err
 	}
 
 	if resp.StatusCode != 200 {
+		logger.Debugf("Query to url %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
 		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(res)
-	if err != nil {
+	if err = json.NewDecoder(resp.Body).Decode(res); err != nil {
+		logger.Debugf("Error decoding response from url %q: %v", url, err)
 		return err
 	}
 

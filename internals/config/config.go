@@ -2,10 +2,10 @@ package config
 
 import (
 	"encoding/base64"
-	"log"
 	"os"
 	"sync"
 
+	"github.com/mrlhansen/idrac_exporter/internals/logging"
 	"gopkg.in/yaml.v2"
 )
 
@@ -45,6 +45,8 @@ func (c *RootConfig) GetHostCfg(target string) *HostConfig {
 	return hostCfg
 }
 
+var logger = logging.NewLogger().Sugar()
+
 var Config RootConfig
 var CollectSystem bool
 var CollectSensors bool
@@ -70,13 +72,13 @@ func validateMetrics(name string) bool {
 }
 
 func parseError(s0, s1 string) {
-	log.Fatalf("Error parsing configuration file: %s: %s", s0, s1)
+	logger.Fatalf("Error parsing configuration file: %s: %s", s0, s1)
 }
 
 func ReadConfigFile(fileName string) {
 	yamlFile, err := os.Open(fileName)
 	if err != nil {
-		log.Fatalf("Error opening configuration file %s: %s", fileName, err)
+		logger.Fatalf("Error opening configuration file %s: %s", fileName, err)
 	}
 
 	err = yaml.NewDecoder(yamlFile).Decode(&Config)
