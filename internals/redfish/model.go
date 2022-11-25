@@ -116,8 +116,8 @@ type Fan struct {
 	MaxReadingRange           interface{}   `json:"MaxReadingRange"`
 	MinReadingRange           interface{}   `json:"MinReadingRange"`
 	PhysicalContext           string        `json:"PhysicalContext"`
-	Reading                   int           `json:"Reading"`
-	CurrentReading            int           `json:"CurrentReading"`
+	Reading                   float64       `json:"Reading"`
+	CurrentReading            float64       `json:"CurrentReading"`
 	Units                     string        `json:"Units"`
 	ReadingUnits              string        `json:"ReadingUnits"`
 	Redundancy                []interface{} `json:"Redundancy"`
@@ -135,7 +135,7 @@ func (f *Fan) GetName() string {
 	return f.Name
 }
 
-func (f *Fan) GetReading() int {
+func (f *Fan) GetReading() float64 {
 	if f.Reading > 0 {
 		return f.Reading
 	}
@@ -225,65 +225,11 @@ type SystemResponse struct {
 }
 
 type PowerResponse struct {
-	Name         string `json:"Name"`
-	Description  string `json:"Description"`
-	PowerControl []struct {
-		Name                string  `json:"Name"`
-		Id                  string  `json:"Id"`
-		PowerAllocatedWatts float64 `json:"PowerAllocatedWatts"`
-		PowerAvailableWatts float64 `json:"PowerAvailableWatts"`
-		PowerCapacityWatts  float64 `json:"PowerCapacityWatts"`
-		PowerConsumedWatts  float64 `json:"PowerConsumedWatts"`
-		PowerRequestedWatts float64 `json:"PowerRequestedWatts"`
-		PowerLimit          *struct {
-			CorrectionInMs int    `json:"CorrectionInMs"`
-			LimitException string `json:"LimitException"`
-			LimitInWatts   int    `json:"LimitInWatts"`
-		} `json:"PowerLimit"`
-		PowerMetrics *struct {
-			AverageConsumedWatts float64 `json:"AverageConsumedWatts"`
-			IntervalInMin        float64 `json:"IntervalInMin"`
-			MaxConsumedWatts     float64 `json:"MaxConsumedWatts"`
-			MinConsumedWatts     float64 `json:"MinConsumedWatts"`
-		} `json:"PowerMetrics"`
-	} `json:"PowerControl"`
-	PowerSupplies []struct {
-		Name            string `json:"Name"`
-		Assembly        Odata  `json:"Assembly"`
-		FirmwareVersion string `json:"FirmwareVersion"`
-		InputRanges     []struct {
-			InputType          string  `json:"InputType"`
-			MaximumFrequencyHz float64 `json:"MaximumFrequencyHz"`
-			MaximumVoltage     float64 `json:"MaximumVoltage"`
-			MinimumFrequencyHz float64 `json:"MinimumFrequencyHz"`
-			MinimumVoltage     float64 `json:"MinimumVoltage"`
-			OutputWattage      float64 `json:"OutputWattage"`
-		} `json:"InputRanges"`
-		HotPluggable         bool    `json:"HotPluggable"`
-		EfficiencyPercent    float64 `json:"EfficiencyPercent"`
-		PowerOutputWatts     float64 `json:"PowerOutputWatts"`
-		LastPowerOutputWatts float64 `json:"LastPowerOutputWatts"`
-		PowerInputWatts      float64 `json:"PowerInputWatts"`
-		PowerCapacityWatts   float64 `json:"PowerCapacityWatts"`
-		LineInputVoltage     float64 `json:"LineInputVoltage"`
-		LineInputVoltageType string  `json:"LineInputVoltageType"`
-		Manufacturer         string  `json:"Manufacturer"`
-		Model                string  `json:"Model"`
-		PartNumber           string  `json:"PartNumber"`
-		PowerSupplyType      string  `json:"PowerSupplyType"`
-		SerialNumber         string  `json:"SerialNumber"`
-		SparePartNumber      string  `json:"SparePartNumber"`
-		Status               Status  `json:"Status"`
-		Redundancy           []struct {
-			Name            string  `json:"Name"`
-			MaxNumSupported int     `json:"MaxNumSupported"`
-			MinNumNeeded    int     `json:"MinNumNeeded"`
-			Mode            string  `json:"Mode"`
-			RedundancySet   []Odata `json:"RedundancySet"`
-			Status          Status  `json:"Status"`
-		} `json:"Redundancy"`
-	} `json:"PowerSupplies"`
-	Redundancy []struct {
+	Name          string             `json:"Name"`
+	Description   string             `json:"Description"`
+	PowerControl  []PowerControlUnit `json:"PowerControl"`
+	PowerSupplies []PowerSupplyUnit  `json:"PowerSupplies"`
+	Redundancy    []struct {
 		Name            string `json:"Name"`
 		MinNumNeeded    int    `json:"MinNumNeeded"`
 		MaxNumSupported int    `json:"MaxNumSupported"`
@@ -303,6 +249,72 @@ type PowerResponse struct {
 		UpperThresholdNonCritical float64 `json:"UpperThresholdNonCritical"`
 		Status                    Status  `json:"Status"`
 	} `json:"Voltages"`
+}
+
+type PowerControlUnit struct {
+	Name                string  `json:"Name"`
+	Id                  string  `json:"Id"`
+	PowerAllocatedWatts float64 `json:"PowerAllocatedWatts"`
+	PowerAvailableWatts float64 `json:"PowerAvailableWatts"`
+	PowerCapacityWatts  float64 `json:"PowerCapacityWatts"`
+	PowerConsumedWatts  float64 `json:"PowerConsumedWatts"`
+	PowerRequestedWatts float64 `json:"PowerRequestedWatts"`
+	PowerLimit          *struct {
+		CorrectionInMs int    `json:"CorrectionInMs"`
+		LimitException string `json:"LimitException"`
+		LimitInWatts   int    `json:"LimitInWatts"`
+	} `json:"PowerLimit"`
+	PowerMetrics *struct {
+		AverageConsumedWatts float64 `json:"AverageConsumedWatts"`
+		IntervalInMin        int     `json:"IntervalInMin"`
+		MaxConsumedWatts     float64 `json:"MaxConsumedWatts"`
+		MinConsumedWatts     float64 `json:"MinConsumedWatts"`
+	} `json:"PowerMetrics"`
+}
+
+type PowerSupplyUnit struct {
+	Name            string `json:"Name"`
+	Assembly        Odata  `json:"Assembly"`
+	FirmwareVersion string `json:"FirmwareVersion"`
+	InputRanges     []struct {
+		InputType          string  `json:"InputType"`
+		MaximumFrequencyHz float64 `json:"MaximumFrequencyHz"`
+		MaximumVoltage     float64 `json:"MaximumVoltage"`
+		MinimumFrequencyHz float64 `json:"MinimumFrequencyHz"`
+		MinimumVoltage     float64 `json:"MinimumVoltage"`
+		OutputWattage      float64 `json:"OutputWattage"`
+	} `json:"InputRanges"`
+	HotPluggable         bool    `json:"HotPluggable"`
+	EfficiencyPercent    float64 `json:"EfficiencyPercent"`
+	PowerOutputWatts     float64 `json:"PowerOutputWatts"`
+	LastPowerOutputWatts float64 `json:"LastPowerOutputWatts"`
+	PowerInputWatts      float64 `json:"PowerInputWatts"`
+	PowerCapacityWatts   float64 `json:"PowerCapacityWatts"`
+	LineInputVoltage     float64 `json:"LineInputVoltage"`
+	LineInputVoltageType string  `json:"LineInputVoltageType"`
+	Manufacturer         string  `json:"Manufacturer"`
+	Model                string  `json:"Model"`
+	PartNumber           string  `json:"PartNumber"`
+	PowerSupplyType      string  `json:"PowerSupplyType"`
+	SerialNumber         string  `json:"SerialNumber"`
+	SparePartNumber      string  `json:"SparePartNumber"`
+	Status               Status  `json:"Status"`
+	Redundancy           []struct {
+		Name            string  `json:"Name"`
+		MaxNumSupported int     `json:"MaxNumSupported"`
+		MinNumNeeded    int     `json:"MinNumNeeded"`
+		Mode            string  `json:"Mode"`
+		RedundancySet   []Odata `json:"RedundancySet"`
+		Status          Status  `json:"Status"`
+	} `json:"Redundancy"`
+}
+
+func (psu *PowerSupplyUnit) GetOutputPower() float64 {
+	if psu.PowerOutputWatts > 0 {
+		return psu.PowerOutputWatts
+	}
+
+	return psu.LastPowerOutputWatts
 }
 
 type IdracSelResponse struct {
