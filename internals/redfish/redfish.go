@@ -15,16 +15,11 @@ import (
 
 const redfishRootPath = "/redfish/v1"
 
-var client = &http.Client{
-	Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	},
-	Timeout: time.Duration(config.Config.Timeout) * time.Second,
-}
-
 type Client struct {
 	hostname  string
 	basicAuth string
+
+	httpClient *http.Client
 
 	systemPath  string
 	thermalPath string
@@ -33,8 +28,9 @@ type Client struct {
 
 func NewClient(hostConfig *config.HostConfig) (*Client, error) {
 	h := &Client{
-		hostname:  hostConfig.Hostname,
-		basicAuth: hostConfig.Token,
+		hostname:   hostConfig.Hostname,
+		basicAuth:  hostConfig.Token,
+		httpClient: newHttpClient(),
 	}
 
 	if err := h.findAllEndpoints(); err != nil {
@@ -202,7 +198,7 @@ func (h *Client) redfishGet(path string, res interface{}) error {
 	req.Header.Add("Authorization", "Basic "+h.basicAuth)
 	req.Header.Add("Accept", "application/json")
 
-	resp, err := client.Do(req)
+	resp, err := h.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -217,6 +213,15 @@ func (h *Client) redfishGet(path string, res interface{}) error {
 	}
 
 	return nil
+}
+
+func newHttpClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: time.Duration(config.Config.Timeout) * time.Second,
+	}
 }
 
 // Store interfaces
