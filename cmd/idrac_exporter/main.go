@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mrlhansen/idrac_exporter/internals/config"
-	"github.com/mrlhansen/idrac_exporter/internals/logging"
-	"github.com/mrlhansen/idrac_exporter/internals/promexporter"
+	"github.com/mrlhansen/idrac_exporter/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/promexporter"
 )
 
 var logger = logging.NewLogger().Sugar()

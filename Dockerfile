@@ -4,7 +4,7 @@ WORKDIR /app/src
 
 COPY go.* ./
 COPY cmd/ ./cmd/
-COPY internals/ ./internals/
+COPY internal/ ./internal/
 
 RUN go build -o /app/bin/idrac_exporter cmd/idrac_exporter/main.go
 

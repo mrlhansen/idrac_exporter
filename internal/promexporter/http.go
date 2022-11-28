@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mrlhansen/idrac_exporter/internals/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/logging"
 )
 
 const (

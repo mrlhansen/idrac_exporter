@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/mrlhansen/idrac_exporter/internals/config"
-	"github.com/mrlhansen/idrac_exporter/internals/redfish"
+	"github.com/mrlhansen/idrac_exporter/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/redfish"
 )
 
 var mapMu sync.Mutex
