@@ -19,6 +19,10 @@ type MetricsStore struct {
 }
 
 func NewMetricsStore(prefix string) *MetricsStore {
+	if prefix != "" {
+		// Separate the prefix with an underscore
+		prefix += "_"
+	}
 	return &MetricsStore{
 		prefix,
 		new(strings.Builder),

@@ -19,12 +19,13 @@ type HostConfig struct {
 type RootConfig struct {
 	mu sync.Mutex
 
-	Address string                 `yaml:"address"`
-	Port    uint                   `yaml:"port"`
-	Metrics []string               `yaml:"metrics"`
-	Timeout uint                   `yaml:"timeout"`
-	Retries uint                   `yaml:"retries"`
-	Hosts   map[string]*HostConfig `yaml:"hosts"`
+	Address       string                 `yaml:"address"`
+	Port          uint                   `yaml:"port"`
+	MetricsPrefix string                 `yaml:"metrics_prefix"`
+	Metrics       []string               `yaml:"metrics"`
+	Timeout       uint                   `yaml:"timeout"`
+	Retries       uint                   `yaml:"retries"`
+	Hosts         map[string]*HostConfig `yaml:"hosts"`
 }
 
 func (c *RootConfig) GetHostCfg(target string) *HostConfig {
@@ -46,6 +47,8 @@ func (c *RootConfig) GetHostCfg(target string) *HostConfig {
 }
 
 var logger = logging.NewLogger().Sugar()
+
+const defaultMetrixPrefix = "idrac"
 
 var Config RootConfig
 var CollectSystem bool
@@ -115,6 +118,10 @@ func ReadConfigFile(fileName string) {
 		if !validateMetrics(v) {
 			parseError("invalid metrics name", v)
 		}
+	}
+
+	if Config.MetricsPrefix == "" {
+		Config.MetricsPrefix = defaultMetrixPrefix
 	}
 
 	for k, v := range Config.Hosts {

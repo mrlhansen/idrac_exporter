@@ -76,13 +76,13 @@ func (c *metricsCollector) CollectMetrics() (string, error) {
 	return c.store.Gather(), nil
 }
 
-func getCollector(target, metricsPrefix string) (*metricsCollector, error) {
+func getCollector(target string) (*metricsCollector, error) {
 	mapMu.Lock()
 	collector, ok := collectors[target]
 	if !ok {
 		collector = &metricsCollector{
 			collected: sync.NewCond(new(sync.Mutex)),
-			store:     NewMetricsStore(metricsPrefix),
+			store:     NewMetricsStore(config.Config.MetricsPrefix),
 		}
 		collectors[target] = collector
 	}

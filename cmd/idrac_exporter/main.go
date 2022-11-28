@@ -15,11 +15,9 @@ var logger = logging.NewLogger().Sugar()
 func main() {
 	var verbose bool
 	var configFile string
-	var metricsPrefix string
 
 	flag.BoolVar(&verbose, "verbose", false, "Set verbose logging")
 	flag.StringVar(&configFile, "config", "/etc/prometheus/idrac.yml", "Path to idrac exporter configuration file")
-	flag.StringVar(&metricsPrefix, "prefix", "idrac_", "Prefix to prepend to metrics names")
 	flag.Parse()
 
 	config.ReadConfigFile(configFile)
@@ -28,7 +26,7 @@ func main() {
 		logging.SetVerboseLevel()
 	}
 
-	http.HandleFunc("/metrics", promexporter.MetricsHandler(metricsPrefix))
+	http.HandleFunc("/metrics", promexporter.MetricsHandler)
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
 	logger.Infof("Server listening on %s", bind)
