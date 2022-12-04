@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 )
 
@@ -18,7 +17,6 @@ const (
 )
 
 var logger = logging.NewLogger().Sugar()
-
 var gzipPool = sync.Pool{
 	New: func() interface{} {
 		return gzip.NewWriter(nil)

@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"os"
 	"sync"
-
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 	"gopkg.in/yaml.v2"
 )
@@ -17,8 +16,7 @@ type HostConfig struct {
 }
 
 type RootConfig struct {
-	mu sync.Mutex
-
+	mutex         sync.Mutex
 	Address       string                 `yaml:"address"`
 	Port          uint                   `yaml:"port"`
 	MetricsPrefix string                 `yaml:"metrics_prefix"`
@@ -28,27 +26,25 @@ type RootConfig struct {
 	Hosts         map[string]*HostConfig `yaml:"hosts"`
 }
 
-func (c *RootConfig) GetHostCfg(target string) *HostConfig {
-	c.mu.Lock()
-	defer c.mu.Unlock()
+func (config *RootConfig) GetHostCfg(target string) *HostConfig {
+	config.mutex.Lock()
+	defer config.mutex.Unlock()
 
-	hostCfg, ok := c.Hosts[target]
+	hostCfg, ok := config.Hosts[target]
 	if !ok {
 		hostCfg = &HostConfig{
 			Hostname: target,
-			Username: c.Hosts["default"].Username,
-			Password: c.Hosts["default"].Password,
-			Token:    c.Hosts["default"].Token,
+			Username: config.Hosts["default"].Username,
+			Password: config.Hosts["default"].Password,
+			Token:    config.Hosts["default"].Token,
 		}
-		c.Hosts[target] = hostCfg
+		config.Hosts[target] = hostCfg
 	}
 
 	return hostCfg
 }
 
 var logger = logging.NewLogger().Sugar()
-
-const defaultMetrixPrefix = "idrac"
 
 var Config RootConfig
 var CollectSystem bool
@@ -121,7 +117,7 @@ func ReadConfigFile(fileName string) {
 	}
 
 	if Config.MetricsPrefix == "" {
-		Config.MetricsPrefix = defaultMetrixPrefix
+		Config.MetricsPrefix = "idrac"
 	}
 
 	for k, v := range Config.Hosts {

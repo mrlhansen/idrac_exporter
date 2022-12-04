@@ -9,74 +9,123 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 )
 
 const redfishRootPath = "/redfish/v1"
-
 var logger = logging.NewLogger().Sugar()
 
+type systemMetricsStore interface {
+	SetPowerOn(on bool)
+	SetHealthOk(ok bool, status string)
+	SetLedOn(on bool, state string)
+	SetMemorySize(memory float64)
+	SetCpuCount(numCpus int, model string)
+	SetBiosVersion(version string)
+	SetMachineInfo(manufacturer, model, serial, sku string)
+}
+
+type sensorsMetricsStore interface {
+	SetTemperature(temperature float64, name, units string)
+	SetFanSpeed(speed float64, name, units string)
+}
+
+type powerMetricsStore interface {
+	SetPowerSupplyInputWatts(value float64, id string)
+	SetPowerSupplyInputVoltage(value float64, id string)
+	SetPowerSupplyOutputWatts(value float64, id string)
+	SetPowerSupplyCapacityWatts(value float64, id string)
+	SetPowerSupplyEfficiencyPercent(value float64, id string)
+
+	SetPowerControlConsumedWatts(value float64, id, name string)
+	SetPowerControlMinConsumedWatts(value float64, id, name string)
+	SetPowerControlMaxConsumedWatts(value float64, id, name string)
+	SetPowerControlAvgConsumedWatts(value float64, id, name string)
+	SetPowerControlCapacityWatts(value float64, id, name string)
+	SetPowerControlInterval(interval int, id, name string)
+}
+
+type selStore interface {
+	AddSelEntry(id string, message string, component string, severity string, created time.Time)
+}
+
 type Client struct {
-	hostname  string
-	basicAuth string
-
-	httpClient *http.Client
-
+	hostname    string
+	basicAuth   string
+	httpClient  *http.Client
 	systemPath  string
 	thermalPath string
 	powerPath   string
 }
 
+func newHttpClient() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: time.Duration(config.Config.Timeout) * time.Second,
+	}
+}
+
 func NewClient(hostConfig *config.HostConfig) (*Client, error) {
-	h := &Client{
+	client := &Client{
 		hostname:   hostConfig.Hostname,
 		basicAuth:  hostConfig.Token,
 		httpClient: newHttpClient(),
 	}
 
-	if err := h.findAllEndpoints(); err != nil {
+	err := client.findAllEndpoints();
+	if err != nil {
 		return nil, err
 	}
 
-	return h, nil
+	return client, nil
 }
 
-func (h *Client) findAllEndpoints() error {
-	var resp V1Response
-	if err := h.redfishGet(redfishRootPath, &resp); err != nil {
+func (client *Client) findAllEndpoints() error {
+	var root V1Response
+	var group GroupResponse
+	var chassis ChassisResponse
+	var err error
+
+	// Root
+	err = client.redfishGet(redfishRootPath, &root);
+	if err != nil {
 		return err
 	}
 
-	var sysResp GroupResponse
-	if err := h.redfishGet(resp.Systems.OdataId, &sysResp); err != nil {
+	// System
+	err = client.redfishGet(root.Systems.OdataId, &group);
+	if err != nil {
 		return err
 	}
 
-	h.systemPath = sysResp.Members[0].OdataId
+	client.systemPath = group.Members[0].OdataId
 
 	// Chassis
-	var chSysResp GroupResponse
-	if err := h.redfishGet(resp.Chassis.OdataId, &chSysResp); err != nil {
+	err = client.redfishGet(root.Chassis.OdataId, &group);
+	if err != nil {
 		return err
 	}
 
 	// Thermal and Power
-	var chResponse ChassisResponse
-	if err := h.redfishGet(chSysResp.Members[0].OdataId, &chResponse); err != nil {
+	err = client.redfishGet(group.Members[0].OdataId, &chassis);
+	if err != nil {
 		return err
 	}
 
-	h.thermalPath = chResponse.Thermal.OdataId
-	h.powerPath = chResponse.Power.OdataId
+	client.thermalPath = chassis.Thermal.OdataId
+	client.powerPath = chassis.Power.OdataId
 
 	return nil
 }
 
-func (h *Client) RefreshSensors(store sensorsMetricsStore) error {
+func (client *Client) RefreshSensors(store sensorsMetricsStore) error {
 	var resp ThermalResponse
-	if err := h.redfishGet(h.thermalPath, &resp); err != nil {
+
+	err := client.redfishGet(client.thermalPath, &resp);
+	if err != nil {
 		return err
 	}
 
@@ -88,9 +137,7 @@ func (h *Client) RefreshSensors(store sensorsMetricsStore) error {
 	}
 
 	for _, f := range resp.Fans {
-		status := f.Status
-
-		if status.State != StateEnabled {
+		if f.Status.State != StateEnabled {
 			continue
 		}
 
@@ -110,17 +157,19 @@ func (h *Client) RefreshSensors(store sensorsMetricsStore) error {
 	return nil
 }
 
-func (h *Client) RefreshSystem(store systemMetricsStore) error {
-	var sysResp SystemResponse
-	if err := h.redfishGet(h.systemPath, &sysResp); err != nil {
+func (client *Client) RefreshSystem(store systemMetricsStore) error {
+	var resp SystemResponse
+
+	err := client.redfishGet(client.systemPath, &resp);
+	if err != nil {
 		return err
 	}
 
-	store.SetPowerOn(sysResp.PowerState == "On")
-	store.SetHealthOk(sysResp.Status.Health == "OK", sysResp.Status.Health)
-	store.SetLedOn(sysResp.IndicatorLED != "Off", sysResp.IndicatorLED)
+	store.SetPowerOn(resp.PowerState == "On")
+	store.SetHealthOk(resp.Status.Health == "OK", resp.Status.Health)
+	store.SetLedOn(resp.IndicatorLED != "Off", resp.IndicatorLED)
 
-	value := sysResp.MemorySummary.TotalSystemMemoryGiB // depending on the bios version, this is reported in either GB or GiB
+	value := resp.MemorySummary.TotalSystemMemoryGiB // depending on the bios version, this is reported in either GB or GiB
 	if value == math.Trunc(value) {
 		value = value * 1024
 	} else {
@@ -128,58 +177,58 @@ func (h *Client) RefreshSystem(store systemMetricsStore) error {
 	}
 	store.SetMemorySize(value)
 
-	store.SetCpuCount(sysResp.ProcessorSummary.Count, sysResp.ProcessorSummary.Model)
-	store.SetBiosVersion(sysResp.BiosVersion)
-	store.SetMachineInfo(sysResp.Manufacturer, sysResp.Model, sysResp.SerialNumber, sysResp.Sku)
+	store.SetCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
+	store.SetBiosVersion(resp.BiosVersion)
+	store.SetMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
 
 	return nil
 }
 
-func (h *Client) RefreshPower(store powerMetricsStore) error {
+func (client *Client) RefreshPower(store powerMetricsStore) error {
 	var resp PowerResponse
-	if err := h.redfishGet(h.powerPath, &resp); err != nil {
+
+	err := client.redfishGet(client.powerPath, &resp);
+	if err != nil {
 		return err
 	}
 
-	var psuId string
 	for i, psu := range resp.PowerSupplies {
 		if psu.Status.State != StateEnabled {
 			continue
 		}
 
-		psuId = strconv.Itoa(i)
-
-		store.SetPowerSupplyInputWatts(psu.PowerInputWatts, psuId)
-		store.SetPowerSupplyInputVoltage(psu.LineInputVoltage, psuId)
-		store.SetPowerSupplyOutputWatts(psu.GetOutputPower(), psuId)
-		store.SetPowerSupplyCapacityWatts(psu.PowerCapacityWatts, psuId)
-		store.SetPowerSupplyEfficiencyPercent(psu.EfficiencyPercent, psuId)
+		id := strconv.Itoa(i)
+		store.SetPowerSupplyInputWatts(psu.PowerInputWatts, id)
+		store.SetPowerSupplyInputVoltage(psu.LineInputVoltage, id)
+		store.SetPowerSupplyOutputWatts(psu.GetOutputPower(), id)
+		store.SetPowerSupplyCapacityWatts(psu.PowerCapacityWatts, id)
+		store.SetPowerSupplyEfficiencyPercent(psu.EfficiencyPercent, id)
 	}
 
-	var pcId string
 	for i, pc := range resp.PowerControl {
-		pcId = strconv.Itoa(i)
-
-		store.SetPowerControlConsumedWatts(pc.PowerConsumedWatts, pcId, pc.Name)
-		store.SetPowerControlCapacityWatts(pc.PowerCapacityWatts, pcId, pc.Name)
+		id := strconv.Itoa(i)
+		store.SetPowerControlConsumedWatts(pc.PowerConsumedWatts, id, pc.Name)
+		store.SetPowerControlCapacityWatts(pc.PowerCapacityWatts, id, pc.Name)
 
 		if pc.PowerMetrics == nil {
 			continue
 		}
-		pm := pc.PowerMetrics
 
-		store.SetPowerControlMinConsumedWatts(pm.MinConsumedWatts, pcId, pc.Name)
-		store.SetPowerControlMaxConsumedWatts(pm.MaxConsumedWatts, pcId, pc.Name)
-		store.SetPowerControlAvgConsumedWatts(pm.AverageConsumedWatts, pcId, pc.Name)
-		store.SetPowerControlInterval(pm.IntervalInMin, pcId, pc.Name)
+		pm := pc.PowerMetrics
+		store.SetPowerControlMinConsumedWatts(pm.MinConsumedWatts, id, pc.Name)
+		store.SetPowerControlMaxConsumedWatts(pm.MaxConsumedWatts, id, pc.Name)
+		store.SetPowerControlAvgConsumedWatts(pm.AverageConsumedWatts, id, pc.Name)
+		store.SetPowerControlInterval(pm.IntervalInMin, id, pc.Name)
 	}
 
 	return nil
 }
 
-func (h *Client) RefreshIdracSel(store selStore) error {
+func (client *Client) RefreshIdracSel(store selStore) error {
 	var resp IdracSelResponse
-	if err := h.redfishGet(redfishRootPath+"/Managers/iDRAC.Embedded.1/Logs/Sel", &resp); err != nil {
+
+	err := client.redfishGet(redfishRootPath + "/Managers/iDRAC.Embedded.1/Logs/Sel", &resp);
+	if err != nil {
 		return err
 	}
 
@@ -190,20 +239,20 @@ func (h *Client) RefreshIdracSel(store selStore) error {
 	return nil
 }
 
-func (h *Client) redfishGet(path string, res interface{}) error {
-	url := "https://" + h.hostname + path
+func (client *Client) redfishGet(path string, res interface{}) error {
+	url := "https://" + client.hostname + path
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Basic "+h.basicAuth)
+	req.Header.Add("Authorization", "Basic " + client.basicAuth)
 	req.Header.Add("Accept", "application/json")
 
 	logger.Debugf("Querying url %q", url)
 
-	resp, err := h.httpClient.Do(req)
+	resp, err := client.httpClient.Do(req)
 	if err != nil {
 		logger.Debugf("Failed to query url %q: %v", url, err)
 		return err
@@ -214,55 +263,11 @@ func (h *Client) redfishGet(path string, res interface{}) error {
 		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
-	if err = json.NewDecoder(resp.Body).Decode(res); err != nil {
+	err = json.NewDecoder(resp.Body).Decode(res);
+	if err != nil {
 		logger.Debugf("Error decoding response from url %q: %v", url, err)
 		return err
 	}
 
 	return nil
-}
-
-func newHttpClient() *http.Client {
-	return &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-		Timeout: time.Duration(config.Config.Timeout) * time.Second,
-	}
-}
-
-// Store interfaces
-
-type systemMetricsStore interface {
-	SetPowerOn(on bool)
-	SetHealthOk(ok bool, status string)
-	SetLedOn(on bool, state string)
-	SetMemorySize(memory float64)
-	SetCpuCount(numCpus int, model string)
-	SetBiosVersion(version string)
-	SetMachineInfo(manufacturer, model, serial, sku string)
-}
-
-type sensorsMetricsStore interface {
-	SetTemperature(temperature float64, name, units string)
-	SetFanSpeed(speed float64, name, units string)
-}
-
-type powerMetricsStore interface {
-	SetPowerSupplyInputWatts(value float64, psuId string)
-	SetPowerSupplyInputVoltage(value float64, psuId string)
-	SetPowerSupplyOutputWatts(value float64, psuId string)
-	SetPowerSupplyCapacityWatts(value float64, psuId string)
-	SetPowerSupplyEfficiencyPercent(value float64, psuId string)
-
-	SetPowerControlConsumedWatts(value float64, pcId, pcName string)
-	SetPowerControlMinConsumedWatts(value float64, pcId, pcName string)
-	SetPowerControlMaxConsumedWatts(value float64, pcId, pcName string)
-	SetPowerControlAvgConsumedWatts(value float64, pcId, pcName string)
-	SetPowerControlCapacityWatts(value float64, pcId, pcName string)
-	SetPowerControlInterval(interval int, pcId, pcName string)
-}
-
-type selStore interface {
-	AddSelEntry(id string, message string, component string, severity string, created time.Time)
 }

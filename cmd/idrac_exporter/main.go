@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 	"github.com/mrlhansen/idrac_exporter/internal/promexporter"
@@ -31,7 +30,8 @@ func main() {
 
 	logger.Infof("Server listening on %s", bind)
 
-	if err := http.ListenAndServe(bind, nil); err != nil {
+	err := http.ListenAndServe(bind, nil);
+	if err != nil {
 		logger.Fatal(err)
 	}
 }

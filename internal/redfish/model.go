@@ -1,6 +1,8 @@
 package redfish
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	StateEnabled = "Enabled"
@@ -58,7 +60,7 @@ type ChassisResponse struct {
 	ChassisType        string `json:"ChassisType"`
 	Manufacturer       string `json:"Manufacturer"`
 	Description        string `json:"Description"`
-	SKU                string `json:"Sku"`
+	SKU                string `json:"SKU"`
 	PowerState         string `json:"PowerState"`
 	EnvironmentalClass string `json:"EnvironmentalClass"`
 	IndicatorLED       string `json:"IndicatorLED"`
@@ -210,7 +212,7 @@ type SystemResponse struct {
 		Status                Status `json:"Status"`
 	} `json:"ProcessorSummary"`
 	Processors     Odata  `json:"Processors"`
-	Sku            string `json:"Sku"`
+	SKU            string `json:"SKU"`
 	SecureBoot     Odata  `json:"SecureBoot"`
 	SerialNumber   string `json:"SerialNumber"`
 	SimpleStorage  Odata  `json:"SimpleStorage"`
@@ -313,7 +315,6 @@ func (psu *PowerSupplyUnit) GetOutputPower() float64 {
 	if psu.PowerOutputWatts > 0 {
 		return psu.PowerOutputWatts
 	}
-
 	return psu.LastPowerOutputWatts
 }
 

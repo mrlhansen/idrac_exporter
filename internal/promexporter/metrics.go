@@ -8,14 +8,12 @@ import (
 	"time"
 )
 
-type labels map[string]string
-
-var nan = math.NaN()
+type dict map[string]string
 
 // MetricsStore can be used to accumulate metrics
 type MetricsStore struct {
-	prefix string
-	b      *strings.Builder
+	prefix  string
+	builder *strings.Builder
 }
 
 func NewMetricsStore(prefix string) *MetricsStore {
@@ -42,7 +40,10 @@ func (s *MetricsStore) SetHealthOk(ok bool, status string) {
 	if ok {
 		value = 1
 	}
-	s.appendMetric("health_ok", value, labels{"status": status})
+	labels := dict{
+		"status": status,
+	}
+	s.appendMetric("health_ok", value, labels)
 }
 
 func (s *MetricsStore) SetLedOn(on bool, state string) {
@@ -50,7 +51,10 @@ func (s *MetricsStore) SetLedOn(on bool, state string) {
 	if on {
 		value = 1
 	}
-	s.appendMetric("indicator_led_on", value, labels{"state": state})
+	labels := dict{
+		"state": state,
+	}
+	s.appendMetric("indicator_led_on", value, labels)
 }
 
 func (s *MetricsStore) SetMemorySize(memory float64) {
@@ -58,121 +62,180 @@ func (s *MetricsStore) SetMemorySize(memory float64) {
 }
 
 func (s *MetricsStore) SetCpuCount(numCpus int, model string) {
-	s.appendMetric("cpu_count", float64(numCpus), labels{"model": model})
+	labels := dict{
+		"model": model,
+	}
+	s.appendMetric("cpu_count", float64(numCpus), labels)
 }
 
 func (s *MetricsStore) SetBiosVersion(version string) {
-	s.appendMetric("bios_version", nan, labels{"version": version})
+	labels := dict{
+		"version": version,
+	}
+	s.appendMetric("bios_version", math.NaN(), labels)
 }
 
 func (s *MetricsStore) SetMachineInfo(manufacturer, model, serial, sku string) {
-	l := make(labels)
+	labels := make(dict)
 	if manufacturer != "" {
-		l["manufacturer"] = manufacturer
+		labels["manufacturer"] = manufacturer
 	}
 	if model != "" {
-		l["model"] = model
+		labels["model"] = model
 	}
 	if serial != "" {
-		l["serial"] = serial
+		labels["serial"] = serial
 	}
 	if sku != "" {
-		l["sku"] = sku
+		labels["sku"] = sku
 	}
-	if len(l) > 0 {
-		s.appendMetric("machine", nan, l)
+	if len(labels) > 0 {
+		s.appendMetric("machine", math.NaN(), labels)
 	}
 }
 
 func (s *MetricsStore) SetTemperature(temperature float64, name, units string) {
-	s.appendMetric("sensors_temperature", temperature, labels{"name": name, "units": units})
+	labels := dict{
+		"name": name,
+		"units": units,
+	}
+	s.appendMetric("sensors_temperature", temperature, labels)
 }
 
 func (s *MetricsStore) SetFanSpeed(speed float64, name, units string) {
-	s.appendMetric("sensors_tachometer", speed, labels{"name": name, "units": units})
+	labels := dict{
+		"name": name,
+		"units": units,
+	}
+	s.appendMetric("sensors_tachometer", speed, labels)
 }
 
-func (s *MetricsStore) SetPowerSupplyInputWatts(value float64, psuId string) {
-	s.appendMetric("power_supply_input_watts", value, labels{"id": psuId})
+func (s *MetricsStore) SetPowerSupplyInputWatts(value float64, id string) {
+	labels := dict{
+		"psu": id,
+	}
+	s.appendMetric("power_supply_input_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerSupplyInputVoltage(value float64, psuId string) {
-	s.appendMetric("power_supply_input_voltage", value, labels{"id": psuId})
+func (s *MetricsStore) SetPowerSupplyInputVoltage(value float64, id string) {
+	labels := dict{
+		"psu": id,
+	}
+	s.appendMetric("power_supply_input_voltage", value, labels)
 }
 
-func (s *MetricsStore) SetPowerSupplyOutputWatts(value float64, psuId string) {
-	s.appendMetric("power_supply_output_watts", value, labels{"id": psuId})
+func (s *MetricsStore) SetPowerSupplyOutputWatts(value float64, id string) {
+	labels := dict{
+		"psu": id,
+	}
+	s.appendMetric("power_supply_output_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerSupplyCapacityWatts(value float64, psuId string) {
-	s.appendMetric("power_supply_capacity_watts", value, labels{"id": psuId})
+func (s *MetricsStore) SetPowerSupplyCapacityWatts(value float64, id string) {
+	labels := dict{
+		"psu": id,
+	}
+	s.appendMetric("power_supply_capacity_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerSupplyEfficiencyPercent(value float64, psuId string) {
-	s.appendMetric("power_supply_efficiency_percent", value, labels{"id": psuId})
+func (s *MetricsStore) SetPowerSupplyEfficiencyPercent(value float64, id string) {
+	labels := dict{
+		"psu": id,
+	}
+	s.appendMetric("power_supply_efficiency_percent", value, labels)
 }
 
-func (s *MetricsStore) SetPowerControlConsumedWatts(value float64, pcId, pcName string) {
-	s.appendMetric("power_control_consumed_watts", value, labels{"id": pcId, "name": pcName})
+func (s *MetricsStore) SetPowerControlConsumedWatts(value float64, id, name string) {
+	labels := dict{
+		"id": id,
+		"name": name,
+	}
+	s.appendMetric("power_control_consumed_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerControlMinConsumedWatts(value float64, pcId, pcName string) {
-	s.appendMetric("power_control_min_consumed_watts", value, labels{"id": pcId, "name": pcName})
+func (s *MetricsStore) SetPowerControlMinConsumedWatts(value float64, id, name string) {
+	labels := dict{
+		"id": id,
+		"name": name,
+	}
+	s.appendMetric("power_control_min_consumed_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerControlMaxConsumedWatts(value float64, pcId, pcName string) {
-	s.appendMetric("power_control_max_consumed_watts", value, labels{"id": pcId, "name": pcName})
+func (s *MetricsStore) SetPowerControlMaxConsumedWatts(value float64, id, name string) {
+	labels := dict{
+		"id": id,
+		"name": name,
+	}
+	s.appendMetric("power_control_max_consumed_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerControlAvgConsumedWatts(value float64, pcId, pcName string) {
-	s.appendMetric("power_control_avg_consumed_watts", value, labels{"id": pcId, "name": pcName})
+func (s *MetricsStore) SetPowerControlAvgConsumedWatts(value float64, id, name string) {
+	labels := dict{
+		"id": id,
+		"name": name,
+	}
+	s.appendMetric("power_control_avg_consumed_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerControlCapacityWatts(value float64, pcId, pcName string) {
-	s.appendMetric("power_control_capacity_watts", value, labels{"id": pcId, "name": pcName})
+func (s *MetricsStore) SetPowerControlCapacityWatts(value float64, id, name string) {
+	labels := dict{
+		"id": id,
+		"name": name,
+	}
+	s.appendMetric("power_control_capacity_watts", value, labels)
 }
 
-func (s *MetricsStore) SetPowerControlInterval(interval int, pcId, pcName string) {
-	s.appendMetric("power_control_interval_in_minutes", float64(interval), labels{"id": pcId, "name": pcName})
+func (s *MetricsStore) SetPowerControlInterval(interval int, id, name string) {
+	labels := dict{
+		"id": id,
+		"name": name,
+	}
+	s.appendMetric("power_control_interval_in_minutes", float64(interval), labels)
 }
 
 func (s *MetricsStore) AddSelEntry(id string, message string, component string, severity string, created time.Time) {
-	s.appendMetric("sel_entry", float64(created.Unix()), labels{"id": id, "message": message, "component": component, "severity": severity})
+	labels := dict{
+		"id": id,
+		"message": message,
+		"component": component,
+		"severity": severity,
+	}
+	s.appendMetric("sel_entry", float64(created.Unix()), labels)
 }
 
 // Reset the accumulated string in the MetricsStore buffer
 func (s *MetricsStore) Reset() {
-	s.b.Reset()
+	s.builder.Reset()
 }
 
 // Gather returns the accumulated string in the MetricsStore buffer representing the metrics in OpenMetrics format
 func (s *MetricsStore) Gather() string {
-	return s.b.String()
+	return s.builder.String()
 }
 
 // appendMetric appends the given metric to the current metrics list
-func (s *MetricsStore) appendMetric(name string, value float64, labels labels) {
-	_, _ = s.b.WriteString(s.prefix + name)
+func (s *MetricsStore) appendMetric(name string, value float64, labels dict) {
+	_, _ = s.builder.WriteString(s.prefix + name)
 
 	if length := len(labels); length > 0 {
-		_, _ = s.b.WriteRune('{')
+		_, _ = s.builder.WriteRune('{')
 		for k, v := range labels {
-			_, _ = s.b.WriteString(fmt.Sprintf("%s=%q", k, strings.TrimSpace(v)))
+			_, _ = s.builder.WriteString(fmt.Sprintf("%s=%q", k, strings.TrimSpace(v)))
 			length--
 			if length > 0 {
-				_, _ = s.b.WriteRune(',')
+				_, _ = s.builder.WriteRune(',')
 			}
 		}
-		_, _ = s.b.WriteRune('}')
+		_, _ = s.builder.WriteRune('}')
 	}
 
-	s.b.WriteRune(' ')
+	s.builder.WriteRune(' ')
 
 	if value == math.Trunc(value) {
-		_, _ = s.b.WriteString(strconv.FormatFloat(value, 'f', 0, 64))
+		_, _ = s.builder.WriteString(strconv.FormatFloat(value, 'f', 0, 64))
 	} else {
-		_, _ = s.b.WriteString(strconv.FormatFloat(value, 'g', 4, 64))
+		_, _ = s.builder.WriteString(strconv.FormatFloat(value, 'g', 4, 64))
 	}
 
-	s.b.WriteRune('\n')
+	s.builder.WriteRune('\n')
 }

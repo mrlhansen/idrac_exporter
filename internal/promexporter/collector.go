@@ -3,7 +3,6 @@ package promexporter
 import (
 	"fmt"
 	"sync"
-
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/redfish"
 )
@@ -13,13 +12,11 @@ var collectors = map[string]*metricsCollector{}
 
 type metricsCollector struct {
 	*redfish.Client
-	store *MetricsStore
-
+	store      *MetricsStore
 	collected  *sync.Cond
 	collecting bool
-
-	reachable bool
-	retries   uint
+	reachable  bool
+	retries    uint
 }
 
 // CollectMetrics collect the metrics using the underlying redfish.Client, storing them in the MetricsStore.
@@ -31,8 +28,8 @@ type metricsCollector struct {
 func (c *metricsCollector) CollectMetrics() (string, error) {
 	c.collected.L.Lock()
 
+	// If a collection is already in progress wait for it to complete and return the cached data
 	if c.collecting {
-		// If a collection is already in progress wait for it to complete and return the cached data
 		c.collected.Wait()
 		metrics := c.store.Gather()
 		c.collected.L.Unlock()
@@ -52,23 +49,28 @@ func (c *metricsCollector) CollectMetrics() (string, error) {
 	}()
 
 	c.store.Reset()
+
 	if config.CollectSystem {
-		if err := c.RefreshSystem(c.store); err != nil {
+		err := c.RefreshSystem(c.store);
+		if err != nil {
 			return "", err
 		}
 	}
 	if config.CollectSensors {
-		if err := c.RefreshSensors(c.store); err != nil {
+		err := c.RefreshSensors(c.store);
+		if err != nil {
 			return "", err
 		}
 	}
 	if config.CollectPower {
-		if err := c.RefreshPower(c.store); err != nil {
+		err := c.RefreshPower(c.store);
+		if err != nil {
 			return "", err
 		}
 	}
 	if config.CollectSEL {
-		if err := c.RefreshIdracSel(c.store); err != nil {
+		err := c.RefreshIdracSel(c.store);
+		if err != nil {
 			return "", err
 		}
 	}
