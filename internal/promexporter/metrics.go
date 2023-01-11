@@ -69,13 +69,15 @@ func (s *MetricsStore) SetCpuCount(numCpus int, model string) {
 }
 
 func (s *MetricsStore) SetBiosVersion(version string) {
+	value := 1.0
 	labels := dict{
 		"version": version,
 	}
-	s.appendMetric("bios_version", math.NaN(), labels)
+	s.appendMetric("bios_version", value, labels)
 }
 
 func (s *MetricsStore) SetMachineInfo(manufacturer, model, serial, sku string) {
+	value := 1.0
 	labels := make(dict)
 	if manufacturer != "" {
 		labels["manufacturer"] = manufacturer
@@ -90,13 +92,13 @@ func (s *MetricsStore) SetMachineInfo(manufacturer, model, serial, sku string) {
 		labels["sku"] = sku
 	}
 	if len(labels) > 0 {
-		s.appendMetric("machine", math.NaN(), labels)
+		s.appendMetric("machine", value, labels)
 	}
 }
 
 func (s *MetricsStore) SetTemperature(temperature float64, name, units string) {
 	labels := dict{
-		"name": name,
+		"name":  name,
 		"units": units,
 	}
 	s.appendMetric("sensors_temperature", temperature, labels)
@@ -104,7 +106,7 @@ func (s *MetricsStore) SetTemperature(temperature float64, name, units string) {
 
 func (s *MetricsStore) SetFanSpeed(speed float64, name, units string) {
 	labels := dict{
-		"name": name,
+		"name":  name,
 		"units": units,
 	}
 	s.appendMetric("sensors_tachometer", speed, labels)
@@ -147,7 +149,7 @@ func (s *MetricsStore) SetPowerSupplyEfficiencyPercent(value float64, id string)
 
 func (s *MetricsStore) SetPowerControlConsumedWatts(value float64, id, name string) {
 	labels := dict{
-		"id": id,
+		"id":   id,
 		"name": name,
 	}
 	s.appendMetric("power_control_consumed_watts", value, labels)
@@ -155,7 +157,7 @@ func (s *MetricsStore) SetPowerControlConsumedWatts(value float64, id, name stri
 
 func (s *MetricsStore) SetPowerControlMinConsumedWatts(value float64, id, name string) {
 	labels := dict{
-		"id": id,
+		"id":   id,
 		"name": name,
 	}
 	s.appendMetric("power_control_min_consumed_watts", value, labels)
@@ -163,7 +165,7 @@ func (s *MetricsStore) SetPowerControlMinConsumedWatts(value float64, id, name s
 
 func (s *MetricsStore) SetPowerControlMaxConsumedWatts(value float64, id, name string) {
 	labels := dict{
-		"id": id,
+		"id":   id,
 		"name": name,
 	}
 	s.appendMetric("power_control_max_consumed_watts", value, labels)
@@ -171,7 +173,7 @@ func (s *MetricsStore) SetPowerControlMaxConsumedWatts(value float64, id, name s
 
 func (s *MetricsStore) SetPowerControlAvgConsumedWatts(value float64, id, name string) {
 	labels := dict{
-		"id": id,
+		"id":   id,
 		"name": name,
 	}
 	s.appendMetric("power_control_avg_consumed_watts", value, labels)
@@ -179,7 +181,7 @@ func (s *MetricsStore) SetPowerControlAvgConsumedWatts(value float64, id, name s
 
 func (s *MetricsStore) SetPowerControlCapacityWatts(value float64, id, name string) {
 	labels := dict{
-		"id": id,
+		"id":   id,
 		"name": name,
 	}
 	s.appendMetric("power_control_capacity_watts", value, labels)
@@ -187,7 +189,7 @@ func (s *MetricsStore) SetPowerControlCapacityWatts(value float64, id, name stri
 
 func (s *MetricsStore) SetPowerControlInterval(interval int, id, name string) {
 	labels := dict{
-		"id": id,
+		"id":   id,
 		"name": name,
 	}
 	s.appendMetric("power_control_interval_in_minutes", float64(interval), labels)
@@ -195,10 +197,10 @@ func (s *MetricsStore) SetPowerControlInterval(interval int, id, name string) {
 
 func (s *MetricsStore) AddSelEntry(id string, message string, component string, severity string, created time.Time) {
 	labels := dict{
-		"id": id,
-		"message": message,
+		"id":        id,
+		"message":   message,
 		"component": component,
-		"severity": severity,
+		"severity":  severity,
 	}
 	s.appendMetric("sel_entry", float64(created.Unix()), labels)
 }
