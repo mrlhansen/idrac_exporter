@@ -53,8 +53,8 @@ idrac_health_ok{status="OK"} 1
 idrac_indicator_led_on{state="Lit"} 1
 idrac_memory_size 393216
 idrac_cpu_count{model="Intel(R) Xeon(R) Gold 6130 CPU @ 2.10GHz"} 2
-idrac_bios_version{version="2.3.10"} NaN
-idrac_machine{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc",sku="xyz"} NaN
+idrac_bios_version{version="2.3.10"} 1
+idrac_machine{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc",sku="xyz"} 1
 ```
 
 ### Sensors
