@@ -16,7 +16,7 @@ The latest version of the program does not only support iDRAC, but several syste
 ## Download
 The exporter is written in [Go](https://golang.org) and it can be downloaded and compiled using:
 ```bash
-go install github.com/mrlhansen/idrac_exporter@latest
+go install github.com/mrlhansen/idrac_exporter/cmd/idrac_exporter@latest
 ```
 
 ## Configuration
@@ -53,8 +53,8 @@ idrac_health_ok{status="OK"} 1
 idrac_indicator_led_on{state="Lit"} 1
 idrac_memory_size 393216
 idrac_cpu_count{model="Intel(R) Xeon(R) Gold 6130 CPU @ 2.10GHz"} 2
-idrac_bios_version{version="2.3.10"} 1
-idrac_machine{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc",sku="xyz"} 1
+idrac_bios_info{version="2.3.10"} 1
+idrac_machine_info{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc",sku="xyz"} 1
 ```
 
 ### Sensors

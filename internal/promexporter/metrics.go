@@ -73,7 +73,7 @@ func (s *MetricsStore) SetBiosVersion(version string) {
 	labels := dict{
 		"version": version,
 	}
-	s.appendMetric("bios_version", value, labels)
+	s.appendMetric("bios_info", value, labels)
 }
 
 func (s *MetricsStore) SetMachineInfo(manufacturer, model, serial, sku string) {
@@ -92,7 +92,7 @@ func (s *MetricsStore) SetMachineInfo(manufacturer, model, serial, sku string) {
 		labels["sku"] = sku
 	}
 	if len(labels) > 0 {
-		s.appendMetric("machine", value, labels)
+		s.appendMetric("machine_info", value, labels)
 	}
 }
 

@@ -23,6 +23,10 @@ var gzipPool = sync.Pool{
 	},
 }
 
+func HealthHandler(rsp http.ResponseWriter, req *http.Request) {
+	// just return a simple 200 for now
+}
+
 func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {

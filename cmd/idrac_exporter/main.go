@@ -26,6 +26,7 @@ func main() {
 	}
 
 	http.HandleFunc("/metrics", promexporter.MetricsHandler)
+	http.HandleFunc("/health", promexporter.HealthHandler)
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
 	logger.Infof("Server listening on %s", bind)
