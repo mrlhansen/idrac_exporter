@@ -1,48 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_INFRASTRUCTURE",
-      "label": "Infrastructure",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    },
-    {
-      "name": "VAR_JOB",
-      "type": "constant",
-      "label": "job",
-      "value": "idrac",
-      "description": ""
-    }
-  ],
-  "__elements": {},
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "9.0.5"
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "stat",
-      "name": "Stat",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "timeseries",
-      "name": "Time series",
-      "version": ""
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -62,14 +18,41 @@
           "type": "dashboard"
         },
         "type": "dashboard"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "enable": true,
+        "expr": "idrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
+        "iconColor": "purple",
+        "name": "SEL",
+        "tagKeys": "instance,component,severity",
+        "textFormat": "{{ message }}",
+        "titleFormat": "{{id}}:{{ component }}",
+        "useValueForTime": "on"
       }
     ]
   },
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": null,
-  "links": [],
+  "id": 66,
+  "links": [
+    {
+      "asDropdown": false,
+      "icon": "dashboard",
+      "includeVars": false,
+      "keepTime": true,
+      "tags": [],
+      "targetBlank": false,
+      "title": "BMC overview",
+      "tooltip": "",
+      "type": "link",
+      "url": "d/3faidY24k"
+    }
+  ],
   "liveNow": false,
   "panels": [
     {
@@ -88,7 +71,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -142,7 +125,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -158,7 +141,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -184,7 +167,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -238,7 +221,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -254,7 +237,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -280,7 +263,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -324,7 +307,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -340,7 +323,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -368,7 +351,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -430,7 +413,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -446,11 +429,11 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_health_ok{instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_health_ok{instance=~\"$instance\", job=\"$job\"}",
           "instant": true,
           "legendFormat": "{{status}}",
           "metrics": [
@@ -472,7 +455,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -532,7 +515,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -548,7 +531,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -574,7 +557,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -628,7 +611,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -644,7 +627,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -670,7 +653,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -724,7 +707,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -740,7 +723,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -766,7 +749,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -820,7 +803,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -836,7 +819,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -862,7 +845,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -906,7 +889,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -922,7 +905,7 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -963,7 +946,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -971,18 +954,20 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1026,11 +1011,12 @@
             "mean"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
       "targets": [
@@ -1048,11 +1034,11 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_sensors_temperature{instance=\"$instance\",job=\"$job\"}",
+          "expr": "avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "instant": false,
           "legendFormat": "{{name}}",
           "metrics": [
@@ -1073,7 +1059,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1081,18 +1067,20 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1136,11 +1124,12 @@
             "mean"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
       "targets": [
@@ -1158,11 +1147,11 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_sensors_tachometer{instance=\"$instance\",job=\"$job\"}",
+          "expr": "avg_over_time(idrac_sensors_tachometer{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "instant": false,
           "legendFormat": "{{name}}",
           "metrics": [
@@ -1196,7 +1185,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1204,18 +1193,20 @@
             "mode": "palette-classic"
           },
           "custom": {
-            "axisLabel": "",
+            "axisCenteredZero": true,
+            "axisColorMode": "text",
+            "axisLabel": "In/Out",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1231,7 +1222,6 @@
               "mode": "off"
             }
           },
-          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1244,7 +1234,20 @@
           },
           "unit": "watt"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": ".*Input.*"
+            },
+            "properties": [
+              {
+                "id": "custom.transform",
+                "value": "negative-Y"
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -1259,11 +1262,12 @@
             "mean"
           ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "showLegend": true
         },
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
       "targets": [
@@ -1281,10 +1285,10 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_power_supply_output_watts{instance=\"$instance\",job=\"$job\"}",
+          "expr": "avg_over_time(idrac_power_supply_output_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "legendFormat": "Output PSU-{{psu}}",
           "metrics": [
             {
@@ -1300,10 +1304,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_power_supply_input_watts{instance=\"$instance\",job=\"$job\"}",
+          "expr": "avg_over_time(idrac_power_supply_input_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "hide": false,
           "legendFormat": "Input PSU-{{psu}}",
           "range": true,
@@ -1316,7 +1320,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1360,7 +1364,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -1376,11 +1380,11 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(idrac_power_supply_input_voltage{instance=\"$instance\", job=\"$job\"})",
+          "expr": "avg(idrac_power_supply_input_voltage{instance=~\"$instance\", job=\"$job\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1404,7 +1408,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1412,18 +1416,20 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -1439,7 +1445,6 @@
               "mode": "off"
             }
           },
-          "decimals": 0,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1466,12 +1471,13 @@
           "calcs": [
             "mean"
           ],
-          "displayMode": "hidden",
-          "placement": "right"
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": false
         },
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
       "targets": [
@@ -1489,10 +1495,10 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_power_control_avg_consumed_watts{instance=\"$instance\",job=\"$job\"}",
+          "expr": "avg_over_time(idrac_power_control_avg_consumed_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "legendFormat": "{{name}}",
           "metrics": [
             {
@@ -1512,7 +1518,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_INFRASTRUCTURE}"
+        "uid": "${datasource}"
       },
       "fieldConfig": {
         "defaults": {
@@ -1556,7 +1562,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.0.5",
+      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -1572,11 +1578,11 @@
           ],
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_INFRASTRUCTURE}"
+            "uid": "${datasource}"
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_power_control_capacity_watts{id=\"0\",instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_power_control_capacity_watts{id=\"0\",instance=~\"$instance\", job=\"$job\"}",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1596,20 +1602,251 @@
       "timeFrom": "1m",
       "title": "Capacity",
       "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 24
+      },
+      "id": 29,
+      "panels": [],
+      "title": "Event log",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsSystem"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 52
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 168
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 91
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Critical": {
+                        "color": "red",
+                        "index": 0
+                      },
+                      "OK": {
+                        "color": "green",
+                        "index": 2
+                      },
+                      "Warning": {
+                        "color": "yellow",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.displayMode",
+                "value": "color-text"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "component"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 217
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "instance"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 103
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 27,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.2.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "idrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "{{id}} {{component}}:  {{message}}",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "System Event Log (SEL)",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "number",
+                "targetField": "id"
+              }
+            ],
+            "fields": {}
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "id"
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "message|id|component|severity|Value"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "Value": 0,
+              "component": 4,
+              "id": 2,
+              "instance": 1,
+              "message": 5,
+              "severity": 3
+            },
+            "renameByName": {
+              "Value": "Time"
+            }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": false,
-  "schemaVersion": 36,
+  "schemaVersion": 37,
   "style": "dark",
-  "tags": [],
+  "tags": [
+    "dell",
+    "idrac"
+  ],
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "Infrastructure",
-          "value": "Infrastructure"
-        },
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
@@ -1619,20 +1856,41 @@
         "query": "prometheus",
         "queryValue": "",
         "refresh": 1,
-        "regex": "",
+        "regex": ".+",
         "skipUrlSync": false,
         "type": "datasource"
       },
       {
-        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "${DS_INFRASTRUCTURE}"
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(idrac_machine_info,job)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": true,
+        "name": "job",
+        "options": [],
+        "query": {
+          "query": "label_values(idrac_machine_info,job)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".+",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
         },
         "definition": "label_values(idrac_machine_info{job=\"$job\"}, instance)",
         "hide": 0,
         "includeAll": false,
-        "label": "Host: ",
+        "label": "",
         "multi": false,
         "name": "instance",
         "options": [],
@@ -1643,38 +1901,19 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
-      },
-      {
-        "hide": 2,
-        "name": "job",
-        "query": "${VAR_JOB}",
-        "skipUrlSync": false,
-        "type": "constant",
-        "current": {
-          "value": "${VAR_JOB}",
-          "text": "${VAR_JOB}",
-          "selected": false
-        },
-        "options": [
-          {
-            "value": "${VAR_JOB}",
-            "text": "${VAR_JOB}",
-            "selected": false
-          }
-        ]
       }
     ]
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "BMC",
   "uid": "YVz226S4z",
-  "version": 25,
+  "version": 18,
   "weekStart": ""
 }
