@@ -61,7 +61,7 @@ idrac_machine_info{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc"
 These metrics include temperature and FAN speeds.
 ```
 idrac_sensors_temperature{name="Inlet Temp",units="celsius"} 19
-idrac_sensors_tachometer{name="FAN1A",units="rpm"} 7912
+idrac_sensors_fan_speed{name="FAN1A",units="rpm"} 7912
 ```
 
 ### Power

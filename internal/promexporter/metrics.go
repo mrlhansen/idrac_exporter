@@ -109,7 +109,7 @@ func (s *MetricsStore) SetFanSpeed(speed float64, name, units string) {
 		"name":  name,
 		"units": units,
 	}
-	s.appendMetric("sensors_tachometer", speed, labels)
+	s.appendMetric("sensors_fan_speed", speed, labels)
 }
 
 func (s *MetricsStore) SetPowerSupplyInputWatts(value float64, id string) {
