@@ -718,7 +718,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "avg_over_time(idrac_sensors_tachometer{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
+            "expr": "avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
             "instant": false,
             "legendFormat": "{{instance}}: {{name}}",
             "metrics": [
@@ -1359,4 +1359,3 @@
     "version": 6,
     "weekStart": ""
   }
-  

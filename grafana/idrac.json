@@ -277,7 +277,7 @@
               }
             ]
           },
-          "unit": "mbytes"
+          "unit": "bytes"
         },
         "overrides": []
       },
@@ -327,7 +327,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_memory_size{instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_memory_size_bytes{instance=\"$instance\", job=\"$job\"}",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1151,7 +1151,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg_over_time(idrac_sensors_tachometer{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
+          "expr": "avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "instant": false,
           "legendFormat": "{{name}}",
           "metrics": [
