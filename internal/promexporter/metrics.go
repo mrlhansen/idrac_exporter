@@ -58,7 +58,7 @@ func (s *MetricsStore) SetLedOn(on bool, state string) {
 }
 
 func (s *MetricsStore) SetMemorySize(memory float64) {
-	s.appendMetric("memory_size", memory, nil)
+	s.appendMetric("memory_size_bytes", memory, nil)
 }
 
 func (s *MetricsStore) SetCpuCount(numCpus int, model string) {

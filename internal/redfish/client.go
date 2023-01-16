@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -168,15 +167,7 @@ func (client *Client) RefreshSystem(store systemMetricsStore) error {
 	store.SetPowerOn(resp.PowerState == "On")
 	store.SetHealthOk(resp.Status.Health == "OK", resp.Status.Health)
 	store.SetLedOn(resp.IndicatorLED != "Off", resp.IndicatorLED)
-
-	value := resp.MemorySummary.TotalSystemMemoryGiB // depending on the bios version, this is reported in either GB or GiB
-	if value == math.Trunc(value) {
-		value = value * 1024
-	} else {
-		value = math.Floor(value * 1099511627776.0 / 1e9)
-	}
-	store.SetMemorySize(value)
-
+	store.SetMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
 	store.SetCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
 	store.SetBiosVersion(resp.BiosVersion)
 	store.SetMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
