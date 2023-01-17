@@ -13,7 +13,6 @@ import (
 )
 
 const redfishRootPath = "/redfish/v1"
-var logger = logging.NewLogger().Sugar()
 
 type systemMetricsStore interface {
 	SetPowerOn(on bool)
@@ -21,7 +20,7 @@ type systemMetricsStore interface {
 	SetLedOn(on bool, state string)
 	SetMemorySize(memory float64)
 	SetCpuCount(numCpus int, model string)
-	SetBiosVersion(version string)
+	SetBiosInfo(version string)
 	SetMachineInfo(manufacturer, model, serial, sku string)
 }
 
@@ -169,7 +168,7 @@ func (client *Client) RefreshSystem(store systemMetricsStore) error {
 	store.SetLedOn(resp.IndicatorLED != "Off", resp.IndicatorLED)
 	store.SetMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
 	store.SetCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
-	store.SetBiosVersion(resp.BiosVersion)
+	store.SetBiosInfo(resp.BiosVersion)
 	store.SetMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
 
 	return nil
@@ -209,7 +208,7 @@ func (client *Client) RefreshPower(store powerMetricsStore) error {
 		store.SetPowerControlMinConsumedWatts(pm.MinConsumedWatts, id, pc.Name)
 		store.SetPowerControlMaxConsumedWatts(pm.MaxConsumedWatts, id, pc.Name)
 		store.SetPowerControlAvgConsumedWatts(pm.AverageConsumedWatts, id, pc.Name)
-		store.SetPowerControlInterval(pm.IntervalInMin, id, pc.Name)
+		store.SetPowerControlInterval(pm.IntervalInMinutes, id, pc.Name)
 	}
 
 	return nil
@@ -241,22 +240,22 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 	req.Header.Add("Authorization", "Basic " + client.basicAuth)
 	req.Header.Add("Accept", "application/json")
 
-	logger.Debugf("Querying url %q", url)
+	logging.Debugf("Querying url %q", url)
 
 	resp, err := client.httpClient.Do(req)
 	if err != nil {
-		logger.Debugf("Failed to query url %q: %v", url, err)
+		logging.Debugf("Failed to query url %q: %v", url, err)
 		return err
 	}
 
 	if resp.StatusCode != 200 {
-		logger.Debugf("Query to url %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
+		logging.Debugf("Query to url %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
 		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(res);
 	if err != nil {
-		logger.Debugf("Error decoding response from url %q: %v", url, err)
+		logging.Debugf("Error decoding response from url %q: %v", url, err)
 		return err
 	}
 

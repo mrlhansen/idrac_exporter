@@ -16,7 +16,6 @@ const (
 	acceptEncodingHeader  = "Accept-Encoding"
 )
 
-var logger = logging.NewLogger().Sugar()
 var gzipPool = sync.Pool{
 	New: func() interface{} {
 		return gzip.NewWriter(nil)
@@ -30,32 +29,32 @@ func HealthHandler(rsp http.ResponseWriter, req *http.Request) {
 func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {
-		logger.Errorf("Received request from %s without 'target' parameter", req.Host)
+		logging.Errorf("Received request from %s without 'target' parameter", req.Host)
 		http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
 		return
 	}
 
-	logger.Debugf("Handling request from %s for host %s", req.Host, target)
+	logging.Debugf("Handling request from %s for host %s", req.Host, target)
 
 	c, err := getCollector(target)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error instantiating metrics collector for host %s: %v\n", target, err)
-		logger.Error(errorMsg)
+		logging.Error(errorMsg)
 		http.Error(rsp, errorMsg, http.StatusInternalServerError)
 		return
 	}
 
-	logger.Debugf("Collecting metrics for host %s", target)
+	logging.Debugf("Collecting metrics for host %s", target)
 
 	metrics, err := c.CollectMetrics()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error collecting metrics for host %s: %v\n", target, err)
-		logger.Error(errorMsg)
+		logging.Error(errorMsg)
 		http.Error(rsp, errorMsg, http.StatusInternalServerError)
 		return
 	}
 
-	logger.Debugf("Metrics for host %s collected", target)
+	logging.Debugf("Metrics for host %s collected", target)
 
 	header := rsp.Header()
 	header.Set(contentTypeHeader, "text/plain")

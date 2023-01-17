@@ -268,7 +268,7 @@ type PowerControlUnit struct {
 	} `json:"PowerLimit"`
 	PowerMetrics *struct {
 		AverageConsumedWatts float64 `json:"AverageConsumedWatts"`
-		IntervalInMin        int     `json:"IntervalInMin"`
+		IntervalInMinutes    int     `json:"IntervalInMin"`
 		MaxConsumedWatts     float64 `json:"MaxConsumedWatts"`
 		MinConsumedWatts     float64 `json:"MinConsumedWatts"`
 	} `json:"PowerMetrics"`

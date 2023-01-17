@@ -44,8 +44,6 @@ func (config *RootConfig) GetHostCfg(target string) *HostConfig {
 	return hostCfg
 }
 
-var logger = logging.NewLogger().Sugar()
-
 var Config RootConfig
 var CollectSystem bool
 var CollectSensors bool
@@ -71,13 +69,13 @@ func validateMetrics(name string) bool {
 }
 
 func parseError(s0, s1 string) {
-	logger.Fatalf("Error parsing configuration file: %s: %s", s0, s1)
+	logging.Fatalf("Error parsing configuration file: %s: %s", s0, s1)
 }
 
 func ReadConfigFile(fileName string) {
 	yamlFile, err := os.Open(fileName)
 	if err != nil {
-		logger.Fatalf("Error opening configuration file %s: %s", fileName, err)
+		logging.Fatalf("Error opening configuration file %s: %s", fileName, err)
 	}
 
 	err = yaml.NewDecoder(yamlFile).Decode(&Config)

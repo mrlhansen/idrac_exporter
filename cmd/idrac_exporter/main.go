@@ -9,8 +9,6 @@ import (
 	"github.com/mrlhansen/idrac_exporter/internal/promexporter"
 )
 
-var logger = logging.NewLogger().Sugar()
-
 func main() {
 	var verbose bool
 	var configFile string
@@ -22,17 +20,17 @@ func main() {
 	config.ReadConfigFile(configFile)
 
 	if verbose {
-		logging.SetVerboseLevel()
+		logging.SetVerbose(true)
 	}
 
 	http.HandleFunc("/metrics", promexporter.MetricsHandler)
 	http.HandleFunc("/health", promexporter.HealthHandler)
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
-	logger.Infof("Server listening on %s", bind)
+	logging.Infof("Server listening on %s", bind)
 
 	err := http.ListenAndServe(bind, nil);
 	if err != nil {
-		logger.Fatal(err)
+		logging.Fatal(err)
 	}
 }

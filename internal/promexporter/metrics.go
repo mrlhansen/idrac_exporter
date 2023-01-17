@@ -68,7 +68,7 @@ func (s *MetricsStore) SetCpuCount(numCpus int, model string) {
 	s.appendMetric("cpu_count", float64(numCpus), labels)
 }
 
-func (s *MetricsStore) SetBiosVersion(version string) {
+func (s *MetricsStore) SetBiosInfo(version string) {
 	value := 1.0
 	labels := dict{
 		"version": version,
