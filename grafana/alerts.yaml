@@ -1,0 +1,19 @@
+groups:
+  - name: 'idrac-alerts'
+    rules:
+      - alert: ServerNotHealthy
+        expr: idrac_health_ok{status!="OK"}
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          description: Server {{ $labels.instance }} is not healthy, current status is {{ $labels.status }}.
+          summary: Hardware server status is not healthy.
+      - alert: ServerNotReporting
+        expr: up{job=~".*idrac.*"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          description: Server {{ $labels.instance }} is not reporting.
+          summary: Hardware server failed to reply to monitoring.
