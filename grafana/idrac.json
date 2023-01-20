@@ -38,7 +38,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 66,
+  "id": 56,
   "links": [
     {
       "asDropdown": false,
@@ -107,9 +107,7 @@
       },
       "hideTimeOverride": true,
       "id": 4,
-      "interval": "1m",
       "links": [],
-      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -119,13 +117,13 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^manufacturer$/",
           "values": false
         },
         "text": {},
-        "textMode": "name"
+        "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -146,6 +144,7 @@
           "editorMode": "code",
           "exemplar": false,
           "expr": "idrac_machine_info{instance=\"$instance\", job=\"$job\"}",
+          "format": "table",
           "instant": true,
           "legendFormat": "{{manufacturer}}",
           "metrics": [
@@ -160,14 +159,13 @@
           "timeField": "@timestamp"
         }
       ],
-      "timeFrom": "1m",
       "title": "Vendor",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
+        "type": "datasource",
+        "uid": "-- Dashboard --"
       },
       "fieldConfig": {
         "defaults": {
@@ -203,9 +201,7 @@
       },
       "hideTimeOverride": true,
       "id": 6,
-      "interval": "1m",
       "links": [],
-      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -215,48 +211,23 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^serial$/",
           "values": false
         },
         "text": {},
-        "textMode": "name"
+        "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
-          "alias": "",
-          "bucketAggs": [
-            {
-              "field": "@timestamp",
-              "id": "2",
-              "settings": {
-                "interval": "auto"
-              },
-              "type": "date_histogram"
-            }
-          ],
           "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
+            "type": "datasource",
+            "uid": "-- Dashboard --"
           },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "idrac_machine_info{instance=\"$instance\", job=\"$job\"}",
-          "instant": true,
-          "legendFormat": "{{serial}}",
-          "metrics": [
-            {
-              "id": "1",
-              "type": "count"
-            }
-          ],
-          "query": "",
-          "range": false,
-          "refId": "A",
-          "timeField": "@timestamp"
+          "panelId": 4,
+          "refId": "A"
         }
       ],
-      "timeFrom": "1m",
       "title": "Serial Number",
       "type": "stat"
     },
@@ -307,7 +278,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -413,7 +384,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -515,7 +486,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -611,7 +582,7 @@
         "text": {},
         "textMode": "name"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -652,8 +623,8 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
+        "type": "datasource",
+        "uid": "-- Dashboard --"
       },
       "fieldConfig": {
         "defaults": {
@@ -689,9 +660,7 @@
       },
       "hideTimeOverride": true,
       "id": 5,
-      "interval": "1m",
       "links": [],
-      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -701,55 +670,30 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^model$/",
           "values": false
         },
         "text": {},
-        "textMode": "name"
+        "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
-          "alias": "",
-          "bucketAggs": [
-            {
-              "field": "@timestamp",
-              "id": "2",
-              "settings": {
-                "interval": "auto"
-              },
-              "type": "date_histogram"
-            }
-          ],
           "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
+            "type": "datasource",
+            "uid": "-- Dashboard --"
           },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "idrac_machine_info{instance=\"$instance\", job=\"$job\"}",
-          "instant": true,
-          "legendFormat": "{{model}}",
-          "metrics": [
-            {
-              "id": "1",
-              "type": "count"
-            }
-          ],
-          "query": "",
-          "range": false,
-          "refId": "A",
-          "timeField": "@timestamp"
+          "panelId": 4,
+          "refId": "A"
         }
       ],
-      "timeFrom": "1m",
       "title": "Model",
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
+        "type": "datasource",
+        "uid": "-- Dashboard --"
       },
       "fieldConfig": {
         "defaults": {
@@ -785,9 +729,7 @@
       },
       "hideTimeOverride": true,
       "id": 7,
-      "interval": "1m",
       "links": [],
-      "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -797,48 +739,23 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^sku$/",
           "values": false
         },
         "text": {},
-        "textMode": "name"
+        "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
-          "alias": "",
-          "bucketAggs": [
-            {
-              "field": "@timestamp",
-              "id": "2",
-              "settings": {
-                "interval": "auto"
-              },
-              "type": "date_histogram"
-            }
-          ],
           "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
+            "type": "datasource",
+            "uid": "-- Dashboard --"
           },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "idrac_machine_info{instance=\"$instance\", job=\"$job\"}",
-          "instant": true,
-          "legendFormat": "{{sku}}",
-          "metrics": [
-            {
-              "id": "1",
-              "type": "count"
-            }
-          ],
-          "query": "",
-          "range": false,
-          "refId": "A",
-          "timeField": "@timestamp"
+          "panelId": 4,
+          "refId": "A"
         }
       ],
-      "timeFrom": "1m",
       "title": "SKU",
       "type": "stat"
     },
@@ -889,7 +806,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -1364,7 +1281,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -1562,7 +1479,7 @@
         "text": {},
         "textMode": "value"
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "alias": "",
@@ -1765,7 +1682,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "9.2.7",
+      "pluginVersion": "9.3.2",
       "targets": [
         {
           "datasource": {
@@ -1837,7 +1754,7 @@
       "type": "table"
     }
   ],
-  "refresh": false,
+  "refresh": "30s",
   "schemaVersion": 37,
   "style": "dark",
   "tags": [
@@ -1914,6 +1831,6 @@
   "timezone": "",
   "title": "BMC",
   "uid": "YVz226S4z",
-  "version": 18,
+  "version": 19,
   "weekStart": ""
 }
