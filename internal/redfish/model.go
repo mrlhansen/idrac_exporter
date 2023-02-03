@@ -326,7 +326,7 @@ type IdracSelResponse struct {
 		Name         string        `json:"Name"`
 		Created      time.Time     `json:"Created"`
 		Description  string        `json:"Description"`
-		EntryCode    string        `json:"EntryCode"`
+		EntryCode    interface{}   `json:"EntryCode"` // An array in iDRAC8 but a string in iDRAC9
 		EntryType    string        `json:"EntryType"`
 		Message      string        `json:"Message"`
 		MessageArgs  []interface{} `json:"MessageArgs"`
