@@ -223,7 +223,13 @@ func (client *Client) RefreshIdracSel(store selStore) error {
 	}
 
 	for _, e := range resp.Members {
-		store.AddSelEntry(e.Id, e.Message, e.SensorType, e.Severity, e.Created)
+		s, ok := e.SensorType.(string)
+		if !ok {
+			list := e.SensorType.([]interface{})
+			dict := list[0].(map[string]interface{})
+			s = dict["Member"].(string)
+		}
+		store.AddSelEntry(e.Id, e.Message, s, e.Severity, e.Created)
 	}
 
 	return nil

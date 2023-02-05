@@ -22,6 +22,17 @@ type Status struct {
 	State        string `json:"State"`
 }
 
+// Redundancy is a common structure used in any entity with redundancy
+type Redundancy struct {
+	Name              string        `json:"Name"`
+	MaxNumSupported   int           `json:"MaxNumSupported"`
+	MinNumNeeded      int           `json:"MinNumNeeded"`
+	Mode              interface{}   `json:"Mode"` // An array in iDRAC8 but a string in iDRAC9
+	RedundancyEnabled bool          `json:"RedundancyEnabled"`
+	RedundancySet     []interface{} `json:"RedundancySet"`
+	Status            Status        `json:"Status"`
+}
+
 // V1Response represents structure of the response body from /redfish/v1
 type V1Response struct {
 	RedfishVersion     string `json:"RedfishVersion"`
@@ -96,15 +107,7 @@ type ThermalResponse struct {
 	Description  string        `json:"Description"`
 	Fans         []Fan         `json:"Fans"`
 	Temperatures []Temperature `json:"Temperatures"`
-	Redundancy   []struct {
-		Name              string        `json:"Name"`
-		MaxNumSupported   int           `json:"MaxNumSupported"`
-		MinNumNeeded      int           `json:"MinNumNeeded"`
-		Mode              string        `json:"Mode"`
-		RedundancyEnabled bool          `json:"RedundancyEnabled"`
-		RedundancySet     []interface{} `json:"RedundancySet"`
-		Status            Status        `json:"Status"`
-	} `json:"Redundancy"`
+	Redundancy   []Redundancy  `json:"Redundancy"`
 }
 
 type Fan struct {
@@ -231,14 +234,8 @@ type PowerResponse struct {
 	Description   string             `json:"Description"`
 	PowerControl  []PowerControlUnit `json:"PowerControl"`
 	PowerSupplies []PowerSupplyUnit  `json:"PowerSupplies"`
-	Redundancy    []struct {
-		Name            string `json:"Name"`
-		MinNumNeeded    int    `json:"MinNumNeeded"`
-		MaxNumSupported int    `json:"MaxNumSupported"`
-		Mode            string `json:"Mode"`
-		Status          Status `json:"Status"`
-	} `json:"Redundancy"`
-	Voltages []struct {
+	Redundancy    []Redundancy       `json:"Redundancy"`
+	Voltages      []struct {
 		Name                      string  `json:"Name"`
 		ReadingVolts              float64 `json:"ReadingVolts"`
 		SensorNumber              int     `json:"SensorNumber"`
@@ -286,29 +283,22 @@ type PowerSupplyUnit struct {
 		MinimumVoltage     float64 `json:"MinimumVoltage"`
 		OutputWattage      float64 `json:"OutputWattage"`
 	} `json:"InputRanges"`
-	HotPluggable         bool    `json:"HotPluggable"`
-	EfficiencyPercent    float64 `json:"EfficiencyPercent"`
-	PowerOutputWatts     float64 `json:"PowerOutputWatts"`
-	LastPowerOutputWatts float64 `json:"LastPowerOutputWatts"`
-	PowerInputWatts      float64 `json:"PowerInputWatts"`
-	PowerCapacityWatts   float64 `json:"PowerCapacityWatts"`
-	LineInputVoltage     float64 `json:"LineInputVoltage"`
-	LineInputVoltageType string  `json:"LineInputVoltageType"`
-	Manufacturer         string  `json:"Manufacturer"`
-	Model                string  `json:"Model"`
-	PartNumber           string  `json:"PartNumber"`
-	PowerSupplyType      string  `json:"PowerSupplyType"`
-	SerialNumber         string  `json:"SerialNumber"`
-	SparePartNumber      string  `json:"SparePartNumber"`
-	Status               Status  `json:"Status"`
-	Redundancy           []struct {
-		Name            string  `json:"Name"`
-		MaxNumSupported int     `json:"MaxNumSupported"`
-		MinNumNeeded    int     `json:"MinNumNeeded"`
-		Mode            string  `json:"Mode"`
-		RedundancySet   []Odata `json:"RedundancySet"`
-		Status          Status  `json:"Status"`
-	} `json:"Redundancy"`
+	HotPluggable         bool         `json:"HotPluggable"`
+	EfficiencyPercent    float64      `json:"EfficiencyPercent"`
+	PowerOutputWatts     float64      `json:"PowerOutputWatts"`
+	LastPowerOutputWatts float64      `json:"LastPowerOutputWatts"`
+	PowerInputWatts      float64      `json:"PowerInputWatts"`
+	PowerCapacityWatts   float64      `json:"PowerCapacityWatts"`
+	LineInputVoltage     float64      `json:"LineInputVoltage"`
+	LineInputVoltageType string       `json:"LineInputVoltageType"`
+	Manufacturer         string       `json:"Manufacturer"`
+	Model                string       `json:"Model"`
+	PartNumber           string       `json:"PartNumber"`
+	PowerSupplyType      string       `json:"PowerSupplyType"`
+	SerialNumber         string       `json:"SerialNumber"`
+	SparePartNumber      string       `json:"SparePartNumber"`
+	Status               Status       `json:"Status"`
+	Redundancy           []Redundancy `json:"Redundancy"`
 }
 
 func (psu *PowerSupplyUnit) GetOutputPower() float64 {
@@ -332,7 +322,7 @@ type IdracSelResponse struct {
 		MessageArgs  []interface{} `json:"MessageArgs"`
 		MessageId    string        `json:"MessageId"`
 		SensorNumber int           `json:"SensorNumber"`
-		SensorType   string        `json:"SensorType"`
+		SensorType   interface{}   `json:"SensorType"` // An array in iDRAC8 but a string in iDRAC9
 		Severity     string        `json:"Severity"`
 	} `json:"Members"`
 }
