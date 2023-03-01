@@ -224,9 +224,10 @@ func (s *MetricsStore) AddDriveEntry(name, mediatype, manufacturer, model string
 		"manufacturer": manufacturer,
 		"model":        model,
 		"capacity":     fmt.Sprint(capacitybytes),
+		"health":       health,
 		"state":        state,
 	}
-	s.appendMetric("drive_entry", float64(stateId), labels)
+	s.appendMetric("drive_health", float64(stateId), labels)
 }
 
 // Reset the accumulated string in the MetricsStore buffer
