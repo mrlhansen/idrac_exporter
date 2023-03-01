@@ -133,6 +133,28 @@ type Fan struct {
 	UpperThresholdNonCritical interface{}   `json:"UpperThresholdNonCritical"`
 }
 
+type Drive struct {
+	Name             string `json:"Name"`
+	Description      string `json:"Description"`
+	MediaType        string `json:"MediaType"`
+	Manufacturer     string `json:"Manufacturer"`
+	Model            string `json:"Model"`
+	CapacityBytes    int    `json:"CapacityBytes"`
+	Status           Status `json:"Status"`
+	PhysicalLocation *struct {
+		PartLocation *struct {
+			LocationOrdinalValue int `json:"LocationOrdinalValue"`
+		} `json:"PartLocation"`
+	} `json:"PhysicalLocation"`
+}
+
+type ControllerResponse struct {
+	Name        string  `json:"Name"`
+	Description string  `json:"Description"`
+	Drives      []Odata `json:"Drives"`
+	Status      Status  `json:"Status"`
+}
+
 func (f *Fan) GetName() string {
 	if f.FanName != "" {
 		return f.FanName

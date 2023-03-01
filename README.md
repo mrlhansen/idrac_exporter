@@ -38,6 +38,7 @@ metrics:
   - sensors
   - power
   - sel            # iDRAC only
+  - drives
 ```
 
 As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
@@ -89,6 +90,12 @@ On iDRAC only, the system event log can also be exported. This is not exactly an
 ```
 idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 1631175352
 ```
+
+### Drive status
+Physical drive metrics could be exported. The value represents disk's health: 0 is OK, 1 is Warning, 2 is Critical, 10 is unknown status.
+
+idrac_drive_entry{manufacturer="TOSHIBA",model="AL14SXB30ENY",capacity="299439751168",state="StandbyOffline",name="Physical Disk 0:1:24",slot="24",mediatype="HDD"} 2
+idrac_drive_entry{manufacturer="TOSHIBA",model="AL14SXB30ENY",capacity="299439751168",state="Enabled",name="Physical Disk 0:1:25",slot="25",mediatype="HDD"} 0
 
 ## Prometheus Configuration
 For the situation where you have a single `idrac_exporter` and multiple iDRACs to query, the following `prometheus.yml` snippet can be used.

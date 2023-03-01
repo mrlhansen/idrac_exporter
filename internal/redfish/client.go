@@ -48,6 +48,10 @@ type selStore interface {
 	AddSelEntry(id string, message string, component string, severity string, created time.Time)
 }
 
+type driveStore interface {
+	AddDriveEntry(name, mediatype, manufacturer, model string, slot, capacitybytes int, health, state string)
+}
+
 type Client struct {
 	hostname    string
 	basicAuth   string
@@ -55,6 +59,7 @@ type Client struct {
 	systemPath  string
 	thermalPath string
 	powerPath   string
+	storagePath string
 }
 
 func newHttpClient() *http.Client {
@@ -85,6 +90,7 @@ func (client *Client) findAllEndpoints() error {
 	var root V1Response
 	var group GroupResponse
 	var chassis ChassisResponse
+	var system SystemResponse
 	var err error
 
 	// Root
@@ -113,6 +119,12 @@ func (client *Client) findAllEndpoints() error {
 		return err
 	}
 
+	err = client.redfishGet(client.systemPath, &system)
+	if err != nil {
+		return err
+	}
+
+	client.storagePath = system.Storage.OdataId
 	client.thermalPath = chassis.Thermal.OdataId
 	client.powerPath = chassis.Power.OdataId
 
@@ -230,6 +242,34 @@ func (client *Client) RefreshIdracSel(store selStore) error {
 			s = dict["Member"].(string)
 		}
 		store.AddSelEntry(e.Id, e.Message, s, e.Severity, e.Created)
+	}
+
+	return nil
+}
+
+func (client *Client) RefreshStorage(store driveStore) error {
+	var group GroupResponse
+	var controller ControllerResponse
+	var d Drive
+
+	err := client.redfishGet(client.storagePath, &group)
+	if err != nil {
+		return err
+	}
+
+	var controllerPath = group.Members[0].OdataId
+
+	err = client.redfishGet(controllerPath, &controller)
+	if err != nil {
+		return err
+	}
+
+	for _, drive := range controller.Drives {
+		err = client.redfishGet(drive.OdataId, &d)
+		if err != nil {
+			return err
+		}
+		store.AddDriveEntry(d.Name, d.MediaType, d.Manufacturer, d.Model, d.PhysicalLocation.PartLocation.LocationOrdinalValue, d.CapacityBytes, d.Status.Health, d.Status.State)
 	}
 
 	return nil

@@ -205,6 +205,31 @@ func (s *MetricsStore) AddSelEntry(id string, message string, component string, 
 	s.appendMetric("sel_entry", float64(created.Unix()), labels)
 }
 
+func (s *MetricsStore) AddDriveEntry(name, mediatype, manufacturer, model string, slot, capacitybytes int, health, state string) {
+	var stateId int
+	switch health {
+	case "OK":
+		stateId = 0
+	case "Warning":
+		stateId = 1
+	case "Critical":
+		stateId = 2
+	default:
+		stateId = 10
+	}
+	labels := dict{
+		"name":         name,
+		"slot":         fmt.Sprint(slot),
+		"mediatype":    mediatype,
+		"manufacturer": manufacturer,
+		"model":        model,
+		"capacity":     fmt.Sprint(capacitybytes),
+		"health":       health,
+		"state":        state,
+	}
+	s.appendMetric("drive_health", float64(stateId), labels)
+}
+
 // Reset the accumulated string in the MetricsStore buffer
 func (s *MetricsStore) Reset() {
 	s.builder.Reset()
