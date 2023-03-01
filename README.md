@@ -1,5 +1,5 @@
 # iDRAC Exporter
-This is a (very) simple iDRAC exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL addresse.
+This is a simple iDRAC exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL addresse.
 ```
 http://localhost:9348/metrics?target=123.45.6.78
 ```
@@ -92,10 +92,11 @@ idrac_sel_entry{id="1",message="The process of installing an operating system or
 ```
 
 ### Drive status
-Physical drive metrics could be exported. The value represents disk's health: 0 is OK, 1 is Warning, 2 is Critical, 10 is unknown status.
-
-idrac_drive_entry{manufacturer="TOSHIBA",model="AL14SXB30ENY",capacity="299439751168",state="StandbyOffline",name="Physical Disk 0:1:24",slot="24",mediatype="HDD"} 2
-idrac_drive_entry{manufacturer="TOSHIBA",model="AL14SXB30ENY",capacity="299439751168",state="Enabled",name="Physical Disk 0:1:25",slot="25",mediatype="HDD"} 0
+These metrics include information about disk drives in the machine. The value represents health: 0 is OK, 1 is Warning, 2 is Critical, 10 is unknown status.
+```
+idrac_drive_health{capacity="299439751168",health="Critical",manufacturer="TOSHIBA",mediatype="HDD",model="AL14SXB30ENY",name="Physical Disk 0:1:24",slot="24",state="StandbyOffline"} 2
+idrac_drive_health{capacity="299439751168",health="OK",manufacturer="TOSHIBA",mediatype="HDD",model="AL14SXB30ENY",name="Physical Disk 0:1:25",slot="25",state="Enabled"} 0
+```
 
 ## Prometheus Configuration
 For the situation where you have a single `idrac_exporter` and multiple iDRACs to query, the following `prometheus.yml` snippet can be used.

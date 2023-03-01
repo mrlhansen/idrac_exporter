@@ -3,6 +3,7 @@ package promexporter
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -242,26 +243,36 @@ func (s *MetricsStore) Gather() string {
 
 // appendMetric appends the given metric to the current metrics list
 func (s *MetricsStore) appendMetric(name string, value float64, labels dict) {
-	_, _ = s.builder.WriteString(s.prefix + name)
+	s.builder.WriteString(s.prefix + name)
 
-	if length := len(labels); length > 0 {
-		_, _ = s.builder.WriteRune('{')
-		for k, v := range labels {
-			_, _ = s.builder.WriteString(fmt.Sprintf("%s=%q", k, strings.TrimSpace(v)))
+	keys := []string{}
+	for k, v := range labels {
+		if len(v) > 0 {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	if length := len(keys); length > 0 {
+		s.builder.WriteRune('{')
+
+		for _, k := range keys {
+			s.builder.WriteString(fmt.Sprintf("%s=%q", k, strings.TrimSpace(labels[k])))
 			length--
 			if length > 0 {
-				_, _ = s.builder.WriteRune(',')
+				s.builder.WriteRune(',')
 			}
 		}
-		_, _ = s.builder.WriteRune('}')
+
+		s.builder.WriteRune('}')
 	}
 
 	s.builder.WriteRune(' ')
 
 	if value == math.Trunc(value) {
-		_, _ = s.builder.WriteString(strconv.FormatFloat(value, 'f', 0, 64))
+		s.builder.WriteString(strconv.FormatFloat(value, 'f', 0, 64))
 	} else {
-		_, _ = s.builder.WriteString(strconv.FormatFloat(value, 'g', 4, 64))
+		s.builder.WriteString(strconv.FormatFloat(value, 'g', 4, 64))
 	}
 
 	s.builder.WriteRune('\n')

@@ -257,19 +257,19 @@ func (client *Client) RefreshStorage(store driveStore) error {
 		return err
 	}
 
-	var controllerPath = group.Members[0].OdataId
-
-	err = client.redfishGet(controllerPath, &controller)
-	if err != nil {
-		return err
-	}
-
-	for _, drive := range controller.Drives {
-		err = client.redfishGet(drive.OdataId, &d)
+	for _, c := range group.Members {
+		err = client.redfishGet(c.OdataId, &controller)
 		if err != nil {
 			return err
 		}
-		store.AddDriveEntry(d.Name, d.MediaType, d.Manufacturer, d.Model, d.PhysicalLocation.PartLocation.LocationOrdinalValue, d.CapacityBytes, d.Status.Health, d.Status.State)
+
+		for _, drive := range controller.Drives {
+			err = client.redfishGet(drive.OdataId, &d)
+			if err != nil {
+				return err
+			}
+			store.AddDriveEntry(d.Name, d.MediaType, d.Manufacturer, d.Model, d.PhysicalLocation.PartLocation.LocationOrdinalValue, d.CapacityBytes, d.Status.Health, d.Status.State)
+		}
 	}
 
 	return nil
