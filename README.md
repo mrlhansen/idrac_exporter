@@ -44,7 +44,7 @@ metrics:
 As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
 
 ## List of Metrics
-At the moment the exporter only exposes a very limited set of information.
+At the moment the exporter exposes the following list of metrics.
 
 ### System
 These metrics include power, health, and LED state, total memory size, number of physical processors, BIOS version and machine information.

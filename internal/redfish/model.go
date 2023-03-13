@@ -27,7 +27,7 @@ type Redundancy struct {
 	Name              string        `json:"Name"`
 	MaxNumSupported   int           `json:"MaxNumSupported"`
 	MinNumNeeded      int           `json:"MinNumNeeded"`
-	Mode              interface{}   `json:"Mode"` // An array in iDRAC8 but a string in iDRAC9
+	Mode              xstring       `json:"Mode"`
 	RedundancyEnabled bool          `json:"RedundancyEnabled"`
 	RedundancySet     []interface{} `json:"RedundancySet"`
 	Status            Status        `json:"Status"`
@@ -338,13 +338,13 @@ type IdracSelResponse struct {
 		Name         string        `json:"Name"`
 		Created      time.Time     `json:"Created"`
 		Description  string        `json:"Description"`
-		EntryCode    interface{}   `json:"EntryCode"` // An array in iDRAC8 but a string in iDRAC9
+		EntryCode    xstring       `json:"EntryCode"`
 		EntryType    string        `json:"EntryType"`
 		Message      string        `json:"Message"`
 		MessageArgs  []interface{} `json:"MessageArgs"`
 		MessageId    string        `json:"MessageId"`
 		SensorNumber int           `json:"SensorNumber"`
-		SensorType   interface{}   `json:"SensorType"` // An array in iDRAC8 but a string in iDRAC9
+		SensorType   xstring       `json:"SensorType"`
 		Severity     string        `json:"Severity"`
 	} `json:"Members"`
 }
