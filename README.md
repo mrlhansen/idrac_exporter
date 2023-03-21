@@ -15,9 +15,25 @@ The latest version of the program does not only support iDRAC, but several syste
 
 ## Download
 The exporter is written in [Go](https://golang.org) and it can be downloaded and compiled using:
-```bash
+
+```sh
 go install github.com/mrlhansen/idrac_exporter/cmd/idrac_exporter@latest
 ```
+
+## Docker
+There is a `Dockerfile` in the repository for building a container image. To build it locally use:
+
+```sh
+docker build -t idrac_exporter .
+```
+
+There are also pre-built images available on [Docker Hub](https://hub.docker.com/r/mrlhansen/idrac_exporter). To download and run these images, use the following command and replace `{tag}` with an actual tag number.
+
+```sh
+docker run -v /host-path/config.yml:/etc/prometheus/idrac.yml -p 9348:9348 mrlhansen/idrac_exporter:{tag}
+```
+
+Remember to set the listen address to `0.0.0.0` when running inside a container.
 
 ## Configuration
 In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
