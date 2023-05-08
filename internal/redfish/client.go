@@ -252,6 +252,7 @@ func (client *Client) RefreshStorage(store driveStore) error {
 	var group GroupResponse
 	var controller ControllerResponse
 	var d Drive
+	var slot int
 
 	err := client.redfishGet(client.storagePath, &group)
 	if err != nil {
@@ -269,7 +270,13 @@ func (client *Client) RefreshStorage(store driveStore) error {
 			if err != nil {
 				return err
 			}
-			store.AddDriveEntry(d.Name, d.MediaType, d.Manufacturer, d.Model, d.PhysicalLocation.PartLocation.LocationOrdinalValue, d.CapacityBytes, d.Status.Health, d.Status.State)
+			slot = -1
+			if d.PhysicalLocation != nil {
+				if d.PhysicalLocation.PartLocation != nil {
+					slot = d.PhysicalLocation.PartLocation.LocationOrdinalValue
+				}
+			}
+			store.AddDriveEntry(d.Name, d.MediaType, d.Manufacturer, d.Model, slot, d.CapacityBytes, d.Status.Health, d.Status.State)
 		}
 	}
 

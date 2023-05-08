@@ -79,22 +79,13 @@ func (s *MetricsStore) SetBiosInfo(version string) {
 
 func (s *MetricsStore) SetMachineInfo(manufacturer, model, serial, sku string) {
 	value := 1.0
-	labels := make(dict)
-	if manufacturer != "" {
-		labels["manufacturer"] = manufacturer
+	labels := dict{
+		"manufacturer": manufacturer,
+		"model": model,
+		"serial": serial,
+		"sku": sku,
 	}
-	if model != "" {
-		labels["model"] = model
-	}
-	if serial != "" {
-		labels["serial"] = serial
-	}
-	if sku != "" {
-		labels["sku"] = sku
-	}
-	if len(labels) > 0 {
-		s.appendMetric("machine_info", value, labels)
-	}
+	s.appendMetric("machine_info", value, labels)
 }
 
 func (s *MetricsStore) SetTemperature(temperature float64, name, units string) {
@@ -207,20 +198,29 @@ func (s *MetricsStore) AddSelEntry(id string, message string, component string, 
 }
 
 func (s *MetricsStore) AddDriveEntry(name, mediatype, manufacturer, model string, slot, capacitybytes int, health, state string) {
-	var stateId int
+	var value int
+	var slotstr string
+
 	switch health {
 	case "OK":
-		stateId = 0
+		value = 0
 	case "Warning":
-		stateId = 1
+		value = 1
 	case "Critical":
-		stateId = 2
+		value = 2
 	default:
-		stateId = 10
+		value = 10
 	}
+
+	if slot < 0 {
+		slotstr = ""
+	} else {
+		slotstr = fmt.Sprint(slot)
+	}
+
 	labels := dict{
 		"name":         name,
-		"slot":         fmt.Sprint(slot),
+		"slot":         slotstr,
 		"mediatype":    mediatype,
 		"manufacturer": manufacturer,
 		"model":        model,
@@ -228,7 +228,7 @@ func (s *MetricsStore) AddDriveEntry(name, mediatype, manufacturer, model string
 		"health":       health,
 		"state":        state,
 	}
-	s.appendMetric("drive_health", float64(stateId), labels)
+	s.appendMetric("drive_health", float64(value), labels)
 }
 
 // Reset the accumulated string in the MetricsStore buffer
