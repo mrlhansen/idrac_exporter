@@ -1,5 +1,5 @@
 # iDRAC Exporter
-This is a simple iDRAC exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL addresse.
+This is a simple iDRAC (and iLO and XClarity) exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL addresse.
 ```
 http://localhost:9348/metrics?target=123.45.6.78
 ```
@@ -7,7 +7,7 @@ http://localhost:9348/metrics?target=123.45.6.78
 Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the target will eventually be flagged as invalid, and any subsequent call to that target will simply be ignored and a status code 500 is returned.
 
 ## Supported Systems
-The latest version of the program does not only support iDRAC, but several systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
+The program supports several different systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
 
 * HPE iLO 4/5
 * Dell iDRAC 9
