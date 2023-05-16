@@ -112,7 +112,7 @@ idrac_sel_entry{id="1",message="The process of installing an operating system or
 These metrics include information about disk drives in the machine. The value of the health metric is: 0 is OK, 1 is Warning, 2 is Critical.
 ```
 idrac_drive_info{id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
-idrac_drive_health{id="Disk.Direct.1-1:AHCI.Slot.5-1",state="OK"} 0
+idrac_drive_health{id="Disk.Direct.1-1:AHCI.Slot.5-1",status="OK"} 0
 idrac_drive_capacity_bytes{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
 ```
 
@@ -120,7 +120,7 @@ idrac_drive_capacity_bytes{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
 These metrics include information about memory modules in the machine. The value of the health metric is: 0 is OK, 1 is Warning, 2 is Critical.
 ```
 idrac_memory_module_info{ecc="MultiBitECC",id="DIMM.Socket.A2",manufacturer="Micron Technology",name="DIMM A2",rank="2",serial="xyz",type="DDR4"} 1
-idrac_memory_module_health{id="DIMM.Socket.A2",state="OK"} 0
+idrac_memory_module_health{id="DIMM.Socket.A2",status="OK"} 0
 idrac_memory_module_capacity_bytes{id="DIMM.Socket.A2"} 34359738368
 idrac_memory_module_speed_mhz{id="DIMM.Socket.A2"} 2400
 ```

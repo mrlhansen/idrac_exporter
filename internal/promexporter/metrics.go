@@ -235,7 +235,7 @@ func (s *MetricsStore) SetDriveHealth(id, health string) {
 	value := health2value(health)
 	labels := dict{
 		"id":    id,
-		"state": health,
+		"status": health,
 	}
 	s.appendMetric("drive_health", float64(value), labels)
 }
@@ -264,7 +264,7 @@ func (s *MetricsStore) SetMemoryHealth(id, health string) {
 	value := health2value(health)
 	labels := dict{
 		"id":    id,
-		"state": health,
+		"status": health,
 	}
 	s.appendMetric("memory_module_health", float64(value), labels)
 }
