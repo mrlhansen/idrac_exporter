@@ -133,28 +133,6 @@ type Fan struct {
 	UpperThresholdNonCritical interface{}   `json:"UpperThresholdNonCritical"`
 }
 
-type Drive struct {
-	Name             string `json:"Name"`
-	Description      string `json:"Description"`
-	MediaType        string `json:"MediaType"`
-	Manufacturer     string `json:"Manufacturer"`
-	Model            string `json:"Model"`
-	CapacityBytes    int    `json:"CapacityBytes"`
-	Status           Status `json:"Status"`
-	PhysicalLocation *struct {
-		PartLocation *struct {
-			LocationOrdinalValue int `json:"LocationOrdinalValue"`
-		} `json:"PartLocation"`
-	} `json:"PhysicalLocation"`
-}
-
-type ControllerResponse struct {
-	Name        string  `json:"Name"`
-	Description string  `json:"Description"`
-	Drives      []Odata `json:"Drives"`
-	Status      Status  `json:"Status"`
-}
-
 func (f *Fan) GetName() string {
 	if f.FanName != "" {
 		return f.FanName
@@ -190,6 +168,74 @@ type Temperature struct {
 	UpperThresholdFatal       float64 `json:"UpperThresholdFatal"`
 	UpperThresholdNonCritical float64 `json:"UpperThresholdNonCritical"`
 	Status                    Status  `json:"Status"`
+}
+
+type StorageController struct {
+	Id                 string  `json:"Id"`
+	Name               string  `json:"Name"`
+	Description        string  `json:"Description"`
+	Drives             []Odata `json:"Drives"`
+	Status             Status  `json:"Status"`
+	StorageControllers []struct {
+		FirmwareVersion string `json:"FirmwareVersion"`
+		Manufacturer    string `json:"Manufacturer"`
+		Model           string `json:"Model"`
+		Name            string `json:"Name"`
+		SpeedGbps       int    `json:"SpeedGbps"`
+		Status          Status `json:"Status"`
+	}
+}
+
+type Drive struct {
+	Id               string  `json:"Id"`
+	Name             string  `json:"Name"`
+	Description      string  `json:"Description"`
+	MediaType        string  `json:"MediaType"`
+	Manufacturer     string  `json:"Manufacturer"`
+	Model            string  `json:"Model"`
+	CapacityBytes    int     `json:"CapacityBytes"`
+	BlockSizeBytes   int     `json:"BlockSizeBytes"`
+	CapableSpeedGbs  float64 `json:"CapableSpeedGbs"`
+	Status           Status  `json:"Status"`
+	SerialNumber     string  `json:"SerialNumber"`
+	Protocol         string  `json:"Protocol"`
+	Revision         string  `json:"Revision"`
+	PartNumber       string  `json:"PartNumber"`
+	RotationSpeedRPM int     `json:"RotationSpeedRPM"`
+	PhysicalLocation *struct {
+		PartLocation *struct {
+			LocationOrdinalValue int `json:"LocationOrdinalValue"`
+		} `json:"PartLocation"`
+	} `json:"PhysicalLocation"`
+}
+
+func (d *Drive) GetSlot() int {
+	slot := -1
+	if d.PhysicalLocation != nil {
+		if d.PhysicalLocation.PartLocation != nil {
+			slot = d.PhysicalLocation.PartLocation.LocationOrdinalValue
+		}
+	}
+	return slot
+}
+
+type Memory struct {
+	Id                string  `json:"Id"`
+	Name              string  `json:"Name"`
+	Description       string  `json:"Description"`
+	Manufacturer      string  `json:"Manufacturer"`
+	ErrorCorrection   string  `json:"ErrorCorrection"`
+	MemoryDeviceType  string  `json:"MemoryDeviceType"`
+	AllowedSpeedsMHz  []int   `json:"AllowedSpeedsMHz"`
+	OperatingSpeedMhz int     `json:"OperatingSpeedMhz"`
+	CapacityMiB       int     `json:"CapacityMiB"`
+	PartNumber        string  `json:"PartNumber"`
+	SerialNumber      string  `json:"SerialNumber"`
+	DeviceLocator     string  `json:"DeviceLocator"`
+	RankCount         int     `json:"RankCount"`
+	BusWidthBits      int     `json:"BusWidthBits"`
+	DataWidthBits     int     `json:"DataWidthBits"`
+	Status            Status  `json:"Status"`
 }
 
 type SystemResponse struct {

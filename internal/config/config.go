@@ -50,6 +50,7 @@ var CollectSensors bool
 var CollectSEL bool
 var CollectPower bool
 var CollectDrives bool
+var CollectMemory bool
 
 func validateMetrics(name string) bool {
 	switch name {
@@ -67,6 +68,9 @@ func validateMetrics(name string) bool {
 		return true
 	case "drives":
 		CollectDrives = true
+		return true
+	case "memory":
+		CollectMemory = true
 		return true
 	}
 	return false

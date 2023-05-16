@@ -80,6 +80,12 @@ func (c *metricsCollector) CollectMetrics() (string, error) {
 			return "", err
 		}
 	}
+	if config.CollectMemory {
+		err := c.RefreshMemory(c.store);
+		if err != nil {
+			return "", err
+		}
+	}
 
 	return c.store.Gather(), nil
 }

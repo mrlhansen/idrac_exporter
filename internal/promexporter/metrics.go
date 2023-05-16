@@ -11,6 +11,18 @@ import (
 
 type dict map[string]string
 
+func health2value(health string) int {
+	switch health {
+	case "OK":
+		return 0
+	case "Warning":
+		return 1
+	case "Critical":
+		return 2
+	}
+	return 10
+}
+
 // MetricsStore can be used to accumulate metrics
 type MetricsStore struct {
 	prefix  string
@@ -197,20 +209,8 @@ func (s *MetricsStore) AddSelEntry(id string, message string, component string, 
 	s.appendMetric("sel_entry", float64(created.Unix()), labels)
 }
 
-func (s *MetricsStore) AddDriveEntry(name, mediatype, manufacturer, model string, slot, capacitybytes int, health, state string) {
-	var value int
+func (s *MetricsStore) SetDriveInfo(id, name, manufacturer, model, serial, mediatype, protocol string, slot int) {
 	var slotstr string
-
-	switch health {
-	case "OK":
-		value = 0
-	case "Warning":
-		value = 1
-	case "Critical":
-		value = 2
-	default:
-		value = 10
-	}
 
 	if slot < 0 {
 		slotstr = ""
@@ -219,17 +219,70 @@ func (s *MetricsStore) AddDriveEntry(name, mediatype, manufacturer, model string
 	}
 
 	labels := dict{
+		"id":           id,
 		"name":         name,
-		"slot":         slotstr,
-		"mediatype":    mediatype,
 		"manufacturer": manufacturer,
 		"model":        model,
-		"capacity":     fmt.Sprint(capacitybytes),
-		"health":       health,
-		"state":        state,
+		"serial":       serial,
+		"mediatype":    mediatype,
+		"protocol":     protocol,
+		"slot":         slotstr,
+	}
+	s.appendMetric("drive_info", 1.0, labels)
+}
+
+func (s *MetricsStore) SetDriveHealth(id, health string) {
+	value := health2value(health)
+	labels := dict{
+		"id":    id,
+		"state": health,
 	}
 	s.appendMetric("drive_health", float64(value), labels)
 }
+
+func (s *MetricsStore) SetDriveCapacity(id string, capacity int) {
+	labels := dict{
+		"id": id,
+	}
+	s.appendMetric("drive_capacity_bytes", float64(capacity), labels)
+}
+
+func (s *MetricsStore) SetMemoryInfo(id, name, manufacturer, memtype, serial, ecc string, rank int) {
+	labels := dict{
+		"id":           id,
+		"name":         name,
+		"manufacturer": manufacturer,
+		"type":         memtype,
+		"serial":       serial,
+		"ecc":          ecc,
+		"rank":         fmt.Sprint(rank),
+	}
+	s.appendMetric("memory_module_info", 1.0, labels)
+}
+
+func (s *MetricsStore) SetMemoryHealth(id, health string) {
+	value := health2value(health)
+	labels := dict{
+		"id":    id,
+		"state": health,
+	}
+	s.appendMetric("memory_module_health", float64(value), labels)
+}
+
+func (s *MetricsStore) SetMemoryCapacity(id string, capacity int) {
+	labels := dict{
+		"id": id,
+	}
+	s.appendMetric("memory_module_capacity_bytes", float64(capacity), labels)
+}
+
+func (s *MetricsStore) SetMemorySpeed(id string, speed int) {
+	labels := dict{
+		"id": id,
+	}
+	s.appendMetric("memory_module_speed_mhz", float64(speed), labels)
+}
+
 
 // Reset the accumulated string in the MetricsStore buffer
 func (s *MetricsStore) Reset() {

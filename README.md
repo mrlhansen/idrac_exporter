@@ -55,6 +55,7 @@ metrics:
   - power
   - sel            # iDRAC only
   - drives
+  - memory
 ```
 
 As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
@@ -107,11 +108,21 @@ On iDRAC only, the system event log can also be exported. This is not exactly an
 idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 1631175352
 ```
 
-### Drive status
-These metrics include information about disk drives in the machine. The value represents health: 0 is OK, 1 is Warning, 2 is Critical, 10 is unknown status.
+### Drives
+These metrics include information about disk drives in the machine. The value of the health metric is: 0 is OK, 1 is Warning, 2 is Critical.
 ```
-idrac_drive_health{capacity="299439751168",health="Critical",manufacturer="TOSHIBA",mediatype="HDD",model="AL14SXB30ENY",name="Physical Disk 0:1:24",slot="24",state="StandbyOffline"} 2
-idrac_drive_health{capacity="299439751168",health="OK",manufacturer="TOSHIBA",mediatype="HDD",model="AL14SXB30ENY",name="Physical Disk 0:1:25",slot="25",state="Enabled"} 0
+idrac_drive_info{id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
+idrac_drive_health{id="Disk.Direct.1-1:AHCI.Slot.5-1",state="OK"} 0
+idrac_drive_capacity_bytes{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
+```
+
+### Memory
+These metrics include information about memory modules in the machine. The value of the health metric is: 0 is OK, 1 is Warning, 2 is Critical.
+```
+idrac_memory_module_info{ecc="MultiBitECC",id="DIMM.Socket.A2",manufacturer="Micron Technology",name="DIMM A2",rank="2",serial="xyz",type="DDR4"} 1
+idrac_memory_module_health{id="DIMM.Socket.A2",state="OK"} 0
+idrac_memory_module_capacity_bytes{id="DIMM.Socket.A2"} 34359738368
+idrac_memory_module_speed_mhz{id="DIMM.Socket.A2"} 2400
 ```
 
 ## Prometheus Configuration

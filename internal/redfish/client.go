@@ -14,7 +14,7 @@ import (
 
 const redfishRootPath = "/redfish/v1"
 
-type systemMetricsStore interface {
+type metricsStore interface {
 	SetPowerOn(on bool)
 	SetHealthOk(ok bool, status string)
 	SetLedOn(on bool, state string)
@@ -22,14 +22,10 @@ type systemMetricsStore interface {
 	SetCpuCount(numCpus int, model string)
 	SetBiosInfo(version string)
 	SetMachineInfo(manufacturer, model, serial, sku string)
-}
 
-type sensorsMetricsStore interface {
 	SetTemperature(temperature float64, name, units string)
 	SetFanSpeed(speed float64, name, units string)
-}
 
-type powerMetricsStore interface {
 	SetPowerSupplyInputWatts(value float64, id string)
 	SetPowerSupplyInputVoltage(value float64, id string)
 	SetPowerSupplyOutputWatts(value float64, id string)
@@ -42,14 +38,17 @@ type powerMetricsStore interface {
 	SetPowerControlAvgConsumedWatts(value float64, id, name string)
 	SetPowerControlCapacityWatts(value float64, id, name string)
 	SetPowerControlInterval(interval int, id, name string)
-}
 
-type selStore interface {
 	AddSelEntry(id string, message string, component string, severity string, created time.Time)
-}
 
-type driveStore interface {
-	AddDriveEntry(name, mediatype, manufacturer, model string, slot, capacitybytes int, health, state string)
+	SetDriveInfo(id, name, manufacturer, model, serial, mediatype, protocol string, slot int)
+	SetDriveHealth(id, health string)
+	SetDriveCapacity(id string, capacity int)
+
+	SetMemoryInfo(id, name, manufacturer, memtype, serial, ecc string, rank int)
+	SetMemoryHealth(id, health string)
+	SetMemoryCapacity(id string, capacity int)
+	SetMemorySpeed(id string, speed int)
 }
 
 type Client struct {
@@ -60,6 +59,7 @@ type Client struct {
 	thermalPath string
 	powerPath   string
 	storagePath string
+	memoryPath  string
 }
 
 func newHttpClient() *http.Client {
@@ -125,13 +125,14 @@ func (client *Client) findAllEndpoints() error {
 	}
 
 	client.storagePath = system.Storage.OdataId
+	client.memoryPath = system.Memory.OdataId
 	client.thermalPath = chassis.Thermal.OdataId
 	client.powerPath = chassis.Power.OdataId
 
 	return nil
 }
 
-func (client *Client) RefreshSensors(store sensorsMetricsStore) error {
+func (client *Client) RefreshSensors(store metricsStore) error {
 	var resp ThermalResponse
 
 	err := client.redfishGet(client.thermalPath, &resp);
@@ -167,7 +168,7 @@ func (client *Client) RefreshSensors(store sensorsMetricsStore) error {
 	return nil
 }
 
-func (client *Client) RefreshSystem(store systemMetricsStore) error {
+func (client *Client) RefreshSystem(store metricsStore) error {
 	var resp SystemResponse
 
 	err := client.redfishGet(client.systemPath, &resp);
@@ -186,7 +187,7 @@ func (client *Client) RefreshSystem(store systemMetricsStore) error {
 	return nil
 }
 
-func (client *Client) RefreshPower(store powerMetricsStore) error {
+func (client *Client) RefreshPower(store metricsStore) error {
 	var resp PowerResponse
 
 	err := client.redfishGet(client.powerPath, &resp);
@@ -226,7 +227,7 @@ func (client *Client) RefreshPower(store powerMetricsStore) error {
 	return nil
 }
 
-func (client *Client) RefreshIdracSel(store selStore) error {
+func (client *Client) RefreshIdracSel(store metricsStore) error {
 	var resp IdracSelResponse
 
 	err := client.redfishGet(redfishRootPath + "/Managers/iDRAC.Embedded.1/Logs/Sel", &resp);
@@ -248,11 +249,10 @@ func (client *Client) RefreshIdracSel(store selStore) error {
 	return nil
 }
 
-func (client *Client) RefreshStorage(store driveStore) error {
+func (client *Client) RefreshStorage(store metricsStore) error {
 	var group GroupResponse
-	var controller ControllerResponse
+	var controller StorageController
 	var d Drive
-	var slot int
 
 	err := client.redfishGet(client.storagePath, &group)
 	if err != nil {
@@ -270,14 +270,38 @@ func (client *Client) RefreshStorage(store driveStore) error {
 			if err != nil {
 				return err
 			}
-			slot = -1
-			if d.PhysicalLocation != nil {
-				if d.PhysicalLocation.PartLocation != nil {
-					slot = d.PhysicalLocation.PartLocation.LocationOrdinalValue
-				}
-			}
-			store.AddDriveEntry(d.Name, d.MediaType, d.Manufacturer, d.Model, slot, d.CapacityBytes, d.Status.Health, d.Status.State)
+			store.SetDriveInfo(d.Id, d.Name, d.Manufacturer, d.Model, d.SerialNumber, d.MediaType, d.Protocol, d.GetSlot())
+			store.SetDriveHealth(d.Id, d.Status.Health)
+			store.SetDriveCapacity(d.Id, d.CapacityBytes)
 		}
+	}
+
+	return nil
+}
+
+func (client *Client) RefreshMemory(store metricsStore) error {
+	var group GroupResponse
+	var m Memory
+
+	err := client.redfishGet(client.memoryPath, &group)
+	if err != nil {
+		return err
+	}
+
+	for _, c := range group.Members {
+		err = client.redfishGet(c.OdataId, &m)
+		if err != nil {
+			return err
+		}
+
+		if m.Status.State == "Absent" {
+			continue
+		}
+
+		store.SetMemoryInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)
+		store.SetMemoryHealth(m.Id, m.Status.Health)
+		store.SetMemoryCapacity(m.Id, m.CapacityMiB * 1048576)
+		store.SetMemorySpeed(m.Id, m.OperatingSpeedMhz)
 	}
 
 	return nil
