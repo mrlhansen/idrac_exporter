@@ -50,24 +50,27 @@ hosts:
     username: user
     password: pass
 metrics:
-  - system
-  - sensors
-  - power
-  - sel            # iDRAC only
-  - drives
-  - memory
+  system: true
+  sensors: true
+  power: true
+  sel: false       # iDRAC only
+  storage: false
+  memory: false
 ```
 
 As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
 
 ## List of Metrics
-At the moment the exporter exposes the following list of metrics.
+The exporter can expose the metrics listed in the sections below. For all `<name>_health` metrics the value has the following mapping.
+* 0 = OK
+* 1 = Warning
+* 2 = Critical
 
 ### System
 These metrics include power, health, and LED state, total memory size, number of physical processors, BIOS version and machine information.
 ```
 idrac_power_on 1
-idrac_health_ok{status="OK"} 1
+idrac_health{status="OK"} 0
 idrac_indicator_led_on{state="Lit"} 1
 idrac_memory_size_bytes 137438953472
 idrac_cpu_count{model="Intel(R) Xeon(R) Gold 6130 CPU @ 2.10GHz"} 2
@@ -108,8 +111,8 @@ On iDRAC only, the system event log can also be exported. This is not exactly an
 idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 1631175352
 ```
 
-### Drives
-These metrics include information about disk drives in the machine. The value of the health metric is: 0 is OK, 1 is Warning, 2 is Critical.
+### Storage
+These metrics include information about disk drives in the machine.
 ```
 idrac_drive_info{id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
 idrac_drive_health{id="Disk.Direct.1-1:AHCI.Slot.5-1",status="OK"} 0
@@ -117,7 +120,7 @@ idrac_drive_capacity_bytes{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
 ```
 
 ### Memory
-These metrics include information about memory modules in the machine. The value of the health metric is: 0 is OK, 1 is Warning, 2 is Critical.
+These metrics include information about memory modules in the machine.
 ```
 idrac_memory_module_info{ecc="MultiBitECC",id="DIMM.Socket.A2",manufacturer="Micron Technology",name="DIMM A2",rank="2",serial="xyz",type="DDR4"} 1
 idrac_memory_module_health{id="DIMM.Socket.A2",status="OK"} 0

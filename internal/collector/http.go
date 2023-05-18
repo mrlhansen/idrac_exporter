@@ -1,4 +1,4 @@
-package promexporter
+package collector
 
 import (
 	"compress/gzip"
@@ -9,6 +9,8 @@ import (
 	"sync"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 )
+
+/// THIS SHOULD NOT BE PART OF THE COLLECTOR PACKAGE
 
 const (
 	contentTypeHeader     = "Content-Type"
@@ -46,7 +48,7 @@ func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
 
 	logging.Debugf("Collecting metrics for host %s", target)
 
-	metrics, err := c.CollectMetrics()
+	metrics, err := c.Gather()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error collecting metrics for host %s: %v\n", target, err)
 		logging.Error(errorMsg)

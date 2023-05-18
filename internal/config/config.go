@@ -20,7 +20,14 @@ type RootConfig struct {
 	Address       string                 `yaml:"address"`
 	Port          uint                   `yaml:"port"`
 	MetricsPrefix string                 `yaml:"metrics_prefix"`
-	Metrics       []string               `yaml:"metrics"`
+	Collect       struct {
+		System  bool `yaml:"system"`
+		Sensors bool `yaml:"sensors"`
+		SEL     bool `yaml:"sel"`
+		Power   bool `yaml:"power"`
+		Storage bool `yaml:"storage"`
+		Memory  bool `yaml:"memory"`
+	} `yaml:"metrics"`
 	Timeout       uint                   `yaml:"timeout"`
 	Retries       uint                   `yaml:"retries"`
 	Hosts         map[string]*HostConfig `yaml:"hosts"`
@@ -45,36 +52,6 @@ func (config *RootConfig) GetHostCfg(target string) *HostConfig {
 }
 
 var Config RootConfig
-var CollectSystem bool
-var CollectSensors bool
-var CollectSEL bool
-var CollectPower bool
-var CollectDrives bool
-var CollectMemory bool
-
-func validateMetrics(name string) bool {
-	switch name {
-	case "system":
-		CollectSystem = true
-		return true
-	case "sensors":
-		CollectSensors = true
-		return true
-	case "power":
-		CollectPower = true
-		return true
-	case "sel":
-		CollectSEL = true
-		return true
-	case "drives":
-		CollectDrives = true
-		return true
-	case "memory":
-		CollectMemory = true
-		return true
-	}
-	return false
-}
 
 func parseError(s0, s1 string) {
 	logging.Fatalf("Error parsing configuration file: %s: %s", s0, s1)
@@ -108,18 +85,8 @@ func ReadConfigFile(fileName string) {
 		Config.Retries = 1
 	}
 
-	if len(Config.Metrics) == 0 {
-		parseError("missing section", "metrics")
-	}
-
 	if len(Config.Hosts) == 0 {
 		parseError("missing section", "hosts")
-	}
-
-	for _, v := range Config.Metrics {
-		if !validateMetrics(v) {
-			parseError("invalid metrics name", v)
-		}
 	}
 
 	if Config.MetricsPrefix == "" {

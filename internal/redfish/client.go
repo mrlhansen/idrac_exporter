@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
+	// "strings"
 	"time"
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
@@ -15,9 +15,9 @@ import (
 const redfishRootPath = "/redfish/v1"
 
 type metricsStore interface {
-	SetPowerOn(on bool)
-	SetHealthOk(ok bool, status string)
-	SetLedOn(on bool, state string)
+	SetPowerOn(state string)
+	SetHealth(health string)
+	SetLedOn(state string)
 	SetMemorySize(memory float64)
 	SetCpuCount(numCpus int, model string)
 	SetBiosInfo(version string)
@@ -39,7 +39,7 @@ type metricsStore interface {
 	SetPowerControlCapacityWatts(value float64, id, name string)
 	SetPowerControlInterval(interval int, id, name string)
 
-	AddSelEntry(id string, message string, component string, severity string, created time.Time)
+	SetSelEntry(id string, message string, component string, severity string, created time.Time)
 
 	SetDriveInfo(id, name, manufacturer, model, serial, mediatype, protocol string, slot int)
 	SetDriveHealth(id, health string)
@@ -132,7 +132,7 @@ func (client *Client) findAllEndpoints() error {
 	return nil
 }
 
-func (client *Client) RefreshSensors(store metricsStore) error {
+func (client *Client) RefreshSensors(store T) error {
 	var resp ThermalResponse
 
 	err := client.redfishGet(client.thermalPath, &resp);
@@ -144,7 +144,8 @@ func (client *Client) RefreshSensors(store metricsStore) error {
 		if t.Status.State != StateEnabled {
 			continue
 		}
-		store.SetTemperature(t.ReadingCelsius, t.Name, "celsius")
+		// store.SetTemperature(t.ReadingCelsius, t.Name, "celsius")
+		store.Gather()
 	}
 
 	for _, f := range resp.Fans {
@@ -162,7 +163,7 @@ func (client *Client) RefreshSensors(store metricsStore) error {
 			continue
 		}
 
-		store.SetFanSpeed(f.GetReading(), name, strings.ToLower(units))
+		// store.SetFanSpeed(f.GetReading(), name, strings.ToLower(units))
 	}
 
 	return nil
@@ -176,9 +177,9 @@ func (client *Client) RefreshSystem(store metricsStore) error {
 		return err
 	}
 
-	store.SetPowerOn(resp.PowerState == "On")
-	store.SetHealthOk(resp.Status.Health == "OK", resp.Status.Health)
-	store.SetLedOn(resp.IndicatorLED != "Off", resp.IndicatorLED)
+	store.SetPowerOn(resp.PowerState)
+	store.SetHealth(resp.Status.Health)
+	store.SetLedOn(resp.IndicatorLED)
 	store.SetMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
 	store.SetCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
 	store.SetBiosInfo(resp.BiosVersion)
@@ -236,14 +237,11 @@ func (client *Client) RefreshIdracSel(store metricsStore) error {
 	}
 
 	for _, e := range resp.Members {
-		var st string
-
-		st = string(e.SensorType)
+		st := string(e.SensorType)
 		if st == "" {
 			st = "Unknown"
 		}
-
-		store.AddSelEntry(e.Id, e.Message, st, e.Severity, e.Created)
+		store.SetSelEntry(e.Id, e.Message, st, e.Severity, e.Created)
 	}
 
 	return nil

@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
-	"github.com/mrlhansen/idrac_exporter/internal/promexporter"
+	// "github.com/mrlhansen/idrac_exporter/internal/promexporter"
+	"github.com/mrlhansen/idrac_exporter/internal/collector"
 )
 
 func main() {
@@ -23,8 +24,8 @@ func main() {
 		logging.SetVerbose(true)
 	}
 
-	http.HandleFunc("/metrics", promexporter.MetricsHandler)
-	http.HandleFunc("/health", promexporter.HealthHandler)
+	http.HandleFunc("/metrics", collector.MetricsHandler)
+	http.HandleFunc("/health", collector.HealthHandler)
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
 	logging.Infof("Server listening on %s", bind)

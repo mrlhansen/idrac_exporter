@@ -49,43 +49,43 @@ func (c *metricsCollector) CollectMetrics() (string, error) {
 	}()
 
 	c.store.Reset()
-
-	if config.CollectSystem {
-		err := c.RefreshSystem(c.store);
-		if err != nil {
-			return "", err
-		}
-	}
-	if config.CollectSensors {
-		err := c.RefreshSensors(c.store);
-		if err != nil {
-			return "", err
-		}
-	}
-	if config.CollectPower {
-		err := c.RefreshPower(c.store);
-		if err != nil {
-			return "", err
-		}
-	}
-	if config.CollectSEL {
-		err := c.RefreshIdracSel(c.store);
-		if err != nil {
-			return "", err
-		}
-	}
-	if config.CollectDrives {
-		err := c.RefreshStorage(c.store);
-		if err != nil {
-			return "", err
-		}
-	}
-	if config.CollectMemory {
-		err := c.RefreshMemory(c.store);
-		if err != nil {
-			return "", err
-		}
-	}
+	//
+	// if config.Config.Collect.System {
+	// 	err := c.RefreshSystem(c.store);
+	// 	if err != nil {
+	// 		return "", err
+	// 	}
+	// }
+	// // if config.Config.Collect.Sensors {
+	// // 	err := c.RefreshSensors(c.store);
+	// // 	if err != nil {
+	// // 		return "", err
+	// // 	}
+	// // }
+	// if config.Config.Collect.Power {
+	// 	err := c.RefreshPower(c.store);
+	// 	if err != nil {
+	// 		return "", err
+	// 	}
+	// }
+	// if config.Config.Collect.SEL {
+	// 	err := c.RefreshIdracSel(c.store);
+	// 	if err != nil {
+	// 		return "", err
+	// 	}
+	// }
+	// if config.Config.Collect.Storage {
+	// 	err := c.RefreshStorage(c.store);
+	// 	if err != nil {
+	// 		return "", err
+	// 	}
+	// }
+	// if config.Config.Collect.Memory {
+	// 	err := c.RefreshMemory(c.store);
+	// 	if err != nil {
+	// 		return "", err
+	// 	}
+	// }
 
 	return c.store.Gather(), nil
 }

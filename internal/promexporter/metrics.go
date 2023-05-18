@@ -11,7 +11,7 @@ import (
 
 type dict map[string]string
 
-func health2value(health string) int {
+func health2value(health string) float64 {
 	switch health {
 	case "OK":
 		return 0
@@ -40,28 +40,25 @@ func NewMetricsStore(prefix string) *MetricsStore {
 	}
 }
 
-func (s *MetricsStore) SetPowerOn(on bool) {
+func (s *MetricsStore) SetPowerOn(state string) {
 	var value float64
-	if on {
+	if state == "On" {
 		value = 1
 	}
 	s.appendMetric("power_on", value, nil)
 }
 
-func (s *MetricsStore) SetHealthOk(ok bool, status string) {
-	var value float64
-	if ok {
-		value = 1
-	}
+func (s *MetricsStore) SetHealth(health string) {
+	value := health2value(health)
 	labels := dict{
-		"status": status,
+		"status": health,
 	}
-	s.appendMetric("health_ok", value, labels)
+	s.appendMetric("health", value, labels)
 }
 
-func (s *MetricsStore) SetLedOn(on bool, state string) {
+func (s *MetricsStore) SetLedOn(state string) {
 	var value float64
-	if on {
+	if state != "Off" {
 		value = 1
 	}
 	labels := dict{
@@ -199,7 +196,7 @@ func (s *MetricsStore) SetPowerControlInterval(interval int, id, name string) {
 	s.appendMetric("power_control_interval_in_minutes", float64(interval), labels)
 }
 
-func (s *MetricsStore) AddSelEntry(id string, message string, component string, severity string, created time.Time) {
+func (s *MetricsStore) SetSelEntry(id string, message string, component string, severity string, created time.Time) {
 	labels := dict{
 		"id":        id,
 		"message":   message,
@@ -237,7 +234,7 @@ func (s *MetricsStore) SetDriveHealth(id, health string) {
 		"id":    id,
 		"status": health,
 	}
-	s.appendMetric("drive_health", float64(value), labels)
+	s.appendMetric("drive_health", value, labels)
 }
 
 func (s *MetricsStore) SetDriveCapacity(id string, capacity int) {
@@ -266,7 +263,7 @@ func (s *MetricsStore) SetMemoryHealth(id, health string) {
 		"id":    id,
 		"status": health,
 	}
-	s.appendMetric("memory_module_health", float64(value), labels)
+	s.appendMetric("memory_module_health", value, labels)
 }
 
 func (s *MetricsStore) SetMemoryCapacity(id string, capacity int) {
