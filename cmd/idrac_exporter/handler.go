@@ -1,4 +1,4 @@
-package promexporter
+package main
 
 import (
 	"compress/gzip"
@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/collector"
 )
 
 const (
@@ -36,7 +37,7 @@ func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
 
 	logging.Debugf("Handling request from %s for host %s", req.Host, target)
 
-	c, err := getCollector(target)
+	c, err := collector.GetCollector(target)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error instantiating metrics collector for host %s: %v\n", target, err)
 		logging.Error(errorMsg)
@@ -46,7 +47,7 @@ func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
 
 	logging.Debugf("Collecting metrics for host %s", target)
 
-	metrics, err := c.CollectMetrics()
+	metrics, err := c.Gather()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error collecting metrics for host %s: %v\n", target, err)
 		logging.Error(errorMsg)

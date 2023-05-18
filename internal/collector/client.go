@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	// "strconv"
-	// "strings"
+	"strconv"
+	"strings"
 	"time"
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
@@ -15,7 +15,7 @@ import (
 
 const redfishRootPath = "/redfish/v1"
 
-type Client struct {
+type redfishClient struct {
 	hostname    string
 	basicAuth   string
 	httpClient  *http.Client
@@ -35,8 +35,8 @@ func newHttpClient() *http.Client {
 	}
 }
 
-func NewClient(hostConfig *config.HostConfig) (*Client, error) {
-	client := &Client{
+func NewClient(hostConfig *config.HostConfig) (*redfishClient, error) {
+	client := &redfishClient{
 		hostname:   hostConfig.Hostname,
 		basicAuth:  hostConfig.Token,
 		httpClient: newHttpClient(),
@@ -50,7 +50,7 @@ func NewClient(hostConfig *config.HostConfig) (*Client, error) {
 	return client, nil
 }
 
-func (client *Client) findAllEndpoints() error {
+func (client *redfishClient) findAllEndpoints() error {
 	var root V1Response
 	var group GroupResponse
 	var chassis ChassisResponse
@@ -96,7 +96,7 @@ func (client *Client) findAllEndpoints() error {
 	return nil
 }
 
-func (client *Client) RefreshSensors(c *myCollector, ch chan<- prometheus.Metric) error {
+func (client *redfishClient) RefreshSensors(mc *metricsCollector, ch chan<- prometheus.Metric) error {
 	var resp ThermalResponse
 
 	err := client.redfishGet(client.thermalPath, &resp);
@@ -108,14 +108,8 @@ func (client *Client) RefreshSensors(c *myCollector, ch chan<- prometheus.Metric
 		if t.Status.State != StateEnabled {
 			continue
 		}
-		// store.SetTemperature(t.ReadingCelsius, t.Name, "celsius")
-		ch <- prometheus.MustNewConstMetric(
-			c.SensorsTemperature,
-			prometheus.GaugeValue,
-			t.ReadingCelsius,
-			t.Name,
-			"celsius",
-		)
+
+		ch <- mc.NewSensorsTemperature(t.ReadingCelsius, t.Name, "celsius")
 	}
 
 	for _, f := range resp.Fans {
@@ -133,149 +127,150 @@ func (client *Client) RefreshSensors(c *myCollector, ch chan<- prometheus.Metric
 			continue
 		}
 
-		// store.SetFanSpeed(f.GetReading(), name, strings.ToLower(units))
+		ch <- mc.NewSensorsFanSpeed(f.GetReading(), name, strings.ToLower(units))
 	}
 
 	return nil
 }
 
-// func (client *Client) RefreshSystem(store metricsStore) error {
-// 	var resp SystemResponse
-//
-// 	err := client.redfishGet(client.systemPath, &resp);
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	store.SetPowerOn(resp.PowerState)
-// 	store.SetHealth(resp.Status.Health)
-// 	store.SetLedOn(resp.IndicatorLED)
-// 	store.SetMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
-// 	store.SetCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
-// 	store.SetBiosInfo(resp.BiosVersion)
-// 	store.SetMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
-//
-// 	return nil
-// }
-//
-// func (client *Client) RefreshPower(store metricsStore) error {
-// 	var resp PowerResponse
-//
-// 	err := client.redfishGet(client.powerPath, &resp);
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	for i, psu := range resp.PowerSupplies {
-// 		if psu.Status.State != StateEnabled {
-// 			continue
-// 		}
-//
-// 		id := strconv.Itoa(i)
-// 		store.SetPowerSupplyInputWatts(psu.PowerInputWatts, id)
-// 		store.SetPowerSupplyInputVoltage(psu.LineInputVoltage, id)
-// 		store.SetPowerSupplyOutputWatts(psu.GetOutputPower(), id)
-// 		store.SetPowerSupplyCapacityWatts(psu.PowerCapacityWatts, id)
-// 		store.SetPowerSupplyEfficiencyPercent(psu.EfficiencyPercent, id)
-// 	}
-//
-// 	for i, pc := range resp.PowerControl {
-// 		id := strconv.Itoa(i)
-// 		store.SetPowerControlConsumedWatts(pc.PowerConsumedWatts, id, pc.Name)
-// 		store.SetPowerControlCapacityWatts(pc.PowerCapacityWatts, id, pc.Name)
-//
-// 		if pc.PowerMetrics == nil {
-// 			continue
-// 		}
-//
-// 		pm := pc.PowerMetrics
-// 		store.SetPowerControlMinConsumedWatts(pm.MinConsumedWatts, id, pc.Name)
-// 		store.SetPowerControlMaxConsumedWatts(pm.MaxConsumedWatts, id, pc.Name)
-// 		store.SetPowerControlAvgConsumedWatts(pm.AverageConsumedWatts, id, pc.Name)
-// 		store.SetPowerControlInterval(pm.IntervalInMinutes, id, pc.Name)
-// 	}
-//
-// 	return nil
-// }
-//
-// func (client *Client) RefreshIdracSel(store metricsStore) error {
-// 	var resp IdracSelResponse
-//
-// 	err := client.redfishGet(redfishRootPath + "/Managers/iDRAC.Embedded.1/Logs/Sel", &resp);
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	for _, e := range resp.Members {
-// 		st := string(e.SensorType)
-// 		if st == "" {
-// 			st = "Unknown"
-// 		}
-// 		store.SetSelEntry(e.Id, e.Message, st, e.Severity, e.Created)
-// 	}
-//
-// 	return nil
-// }
-//
-// func (client *Client) RefreshStorage(store metricsStore) error {
-// 	var group GroupResponse
-// 	var controller StorageController
-// 	var d Drive
-//
-// 	err := client.redfishGet(client.storagePath, &group)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	for _, c := range group.Members {
-// 		err = client.redfishGet(c.OdataId, &controller)
-// 		if err != nil {
-// 			return err
-// 		}
-//
-// 		for _, drive := range controller.Drives {
-// 			err = client.redfishGet(drive.OdataId, &d)
-// 			if err != nil {
-// 				return err
-// 			}
-// 			store.SetDriveInfo(d.Id, d.Name, d.Manufacturer, d.Model, d.SerialNumber, d.MediaType, d.Protocol, d.GetSlot())
-// 			store.SetDriveHealth(d.Id, d.Status.Health)
-// 			store.SetDriveCapacity(d.Id, d.CapacityBytes)
-// 		}
-// 	}
-//
-// 	return nil
-// }
-//
-// func (client *Client) RefreshMemory(store metricsStore) error {
-// 	var group GroupResponse
-// 	var m Memory
-//
-// 	err := client.redfishGet(client.memoryPath, &group)
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	for _, c := range group.Members {
-// 		err = client.redfishGet(c.OdataId, &m)
-// 		if err != nil {
-// 			return err
-// 		}
-//
-// 		if m.Status.State == "Absent" {
-// 			continue
-// 		}
-//
-// 		store.SetMemoryInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)
-// 		store.SetMemoryHealth(m.Id, m.Status.Health)
-// 		store.SetMemoryCapacity(m.Id, m.CapacityMiB * 1048576)
-// 		store.SetMemorySpeed(m.Id, m.OperatingSpeedMhz)
-// 	}
-//
-// 	return nil
-// }
+func (client *redfishClient) RefreshSystem(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+	var resp SystemResponse
 
-func (client *Client) redfishGet(path string, res interface{}) error {
+	err := client.redfishGet(client.systemPath, &resp);
+	if err != nil {
+		return err
+	}
+
+	ch <- mc.NewSystemPowerOn(resp.PowerState)
+	ch <- mc.NewSystemHealth(resp.Status.Health)
+	ch <- mc.NewSystemIndicatorLED(resp.IndicatorLED)
+	ch <- mc.NewSystemMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
+	ch <- mc.NewSystemCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
+	ch <- mc.NewSystemBiosInfo(resp.BiosVersion)
+	ch <- mc.NewSystemMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
+
+	return nil
+}
+
+func (client *redfishClient) RefreshPower(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+	var resp PowerResponse
+
+	err := client.redfishGet(client.powerPath, &resp);
+	if err != nil {
+		return err
+	}
+
+	for i, psu := range resp.PowerSupplies {
+		if psu.Status.State != StateEnabled {
+			continue
+		}
+
+		id := strconv.Itoa(i)
+		ch <- mc.NewPowerSupplyInputWatts(psu.PowerInputWatts, id)
+		ch <- mc.NewPowerSupplyInputVoltage(psu.LineInputVoltage, id)
+		ch <- mc.NewPowerSupplyOutputWatts(psu.GetOutputPower(), id)
+		ch <- mc.NewPowerSupplyCapacityWatts(psu.PowerCapacityWatts, id)
+		ch <- mc.NewPowerSupplyEfficiencyPercent(psu.EfficiencyPercent, id)
+	}
+
+	for i, pc := range resp.PowerControl {
+		id := strconv.Itoa(i)
+		ch <- mc.NewPowerControlConsumedWatts(pc.PowerConsumedWatts, id, pc.Name)
+		ch <- mc.NewPowerControlCapacityWatts(pc.PowerCapacityWatts, id, pc.Name)
+
+		if pc.PowerMetrics == nil {
+			continue
+		}
+
+		pm := pc.PowerMetrics
+		ch <- mc.NewPowerControlMinConsumedWatts(pm.MinConsumedWatts, id, pc.Name)
+		ch <- mc.NewPowerControlMaxConsumedWatts(pm.MaxConsumedWatts, id, pc.Name)
+		ch <- mc.NewPowerControlAvgConsumedWatts(pm.AverageConsumedWatts, id, pc.Name)
+		ch <- mc.NewPowerControlInterval(pm.IntervalInMinutes, id, pc.Name)
+	}
+
+	return nil
+}
+
+func (client *redfishClient) RefreshIdracSel(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+	var resp IdracSelResponse
+
+	err := client.redfishGet(redfishRootPath + "/Managers/iDRAC.Embedded.1/Logs/Sel", &resp);
+	if err != nil {
+		return err
+	}
+
+	for _, e := range resp.Members {
+		st := string(e.SensorType)
+		if st == "" {
+			st = "Unknown"
+		}
+		ch <- mc.NewSelEntry(e.Id, e.Message, st, e.Severity, e.Created)
+	}
+
+	return nil
+}
+
+func (client *redfishClient) RefreshStorage(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+	var group GroupResponse
+	var controller StorageController
+	var d Drive
+
+	err := client.redfishGet(client.storagePath, &group)
+	if err != nil {
+		return err
+	}
+
+	for _, c := range group.Members {
+		err = client.redfishGet(c.OdataId, &controller)
+		if err != nil {
+			return err
+		}
+
+		for _, drive := range controller.Drives {
+			err = client.redfishGet(drive.OdataId, &d)
+			if err != nil {
+				return err
+			}
+
+			ch <- mc.NewDriveInfo(d.Id, d.Name, d.Manufacturer, d.Model, d.SerialNumber, d.MediaType, d.Protocol, d.GetSlot())
+			ch <- mc.NewDriveHealth(d.Id, d.Status.Health)
+			ch <- mc.NewDriveCapacity(d.Id, d.CapacityBytes)
+		}
+	}
+
+	return nil
+}
+
+func (client *redfishClient) RefreshMemory(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+	var group GroupResponse
+	var m Memory
+
+	err := client.redfishGet(client.memoryPath, &group)
+	if err != nil {
+		return err
+	}
+
+	for _, c := range group.Members {
+		err = client.redfishGet(c.OdataId, &m)
+		if err != nil {
+			return err
+		}
+
+		if m.Status.State == "Absent" {
+			continue
+		}
+
+		ch <- mc.NewMemoryModuleInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)
+		ch <- mc.NewMemoryModuleHealth(m.Id, m.Status.Health)
+		ch <- mc.NewMemoryModuleCapacity(m.Id, m.CapacityMiB * 1048576)
+		ch <- mc.NewMemoryModuleSpeed(m.Id, m.OperatingSpeedMhz)
+	}
+
+	return nil
+}
+
+func (client *redfishClient) redfishGet(path string, res interface{}) error {
 	url := "https://" + client.hostname + path
 
 	req, err := http.NewRequest("GET", url, nil)

@@ -11,11 +11,11 @@ import (
 )
 
 var mu sync.Mutex
-var collectors = map[string]*myCollector{}
+var collectors = map[string]*metricsCollector{}
 
-type myCollector struct {
+type metricsCollector struct {
 	// Internal variables
-	client     *Client
+	client     *redfishClient
 	registry   *prometheus.Registry
 	collected  *sync.Cond
 	collecting bool
@@ -66,10 +66,10 @@ type myCollector struct {
 	MemoryModuleSpeed    *prometheus.Desc
 }
 
-func newMetricsCollector() *myCollector {
+func newMetricsCollector() *metricsCollector {
 	prefix := config.Config.MetricsPrefix
 
-	collector := &myCollector{
+	collector := &metricsCollector{
 		SystemPowerOn: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "power_on"),
 			"Power state of the system",
@@ -143,32 +143,32 @@ func newMetricsCollector() *myCollector {
 		PowerControlConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "consumed_watts"),
 			"Consumption of power control system in watts",
-			[]string{"id"}, nil,
+			[]string{"id", "name"}, nil,
 		),
 		PowerControlCapacityWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "capacity_watts"),
 			"Capacity of power control system in watts",
-			[]string{"id"}, nil,
+			[]string{"id", "name"}, nil,
 		),
 		PowerControlMinConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "min_consumed_watts"),
 			"Minimum consumption of power control system during the reported interval",
-			[]string{"id"}, nil,
+			[]string{"id", "name"}, nil,
 		),
 		PowerControlMaxConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "max_consumed_watts"),
 			"Maximum consumption of power control system during the reported interval",
-			[]string{"id"}, nil,
+			[]string{"id", "name"}, nil,
 		),
 		PowerControlAvgConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "avg_consumed_watts"),
 			"Average consumption of power control system during the reported interval",
-			[]string{"id"}, nil,
+			[]string{"id", "name"}, nil,
 		),
 		PowerControlInterval: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "interval_in_minutes"),
 			"Interval for measurements of power control system",
-			[]string{"id"}, nil,
+			[]string{"id", "name"}, nil,
 		),
 		SelEntry: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sel", "entry"),
@@ -220,7 +220,7 @@ func newMetricsCollector() *myCollector {
 	return collector
 }
 
-func (collector *myCollector) Describe(ch chan<- *prometheus.Desc) {
+func (collector *metricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SystemPowerOn
 	ch <- collector.SystemHealth
 	ch <- collector.SystemIndicatorLED
@@ -251,28 +251,29 @@ func (collector *myCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.MemoryModuleSpeed
 }
 
-func (collector *myCollector) Collect(ch chan<- prometheus.Metric) {
-	// if config.Config.Collect.System {
-	// 	collector.client.RefreshSystem(collector);
-	// }
+func (collector *metricsCollector) Collect(ch chan<- prometheus.Metric) {
+	// TODO: Errors are not handled at the moment
+	if config.Config.Collect.System {
+		collector.client.RefreshSystem(collector, ch);
+	}
 	if config.Config.Collect.Sensors {
 		collector.client.RefreshSensors(collector, ch);
 	}
-	// if config.Config.Collect.Power {
-	// 	collector.client.RefreshPower(collector);
-	// }
-	// if config.Config.Collect.SEL {
-	// 	collector.client.RefreshIdracSel(collector);
-	// }
-	// if config.Config.Collect.Storage {
-	// 	collector.client.RefreshStorage(collector);
-	// }
-	// if config.Config.Collect.Memory {
-	// 	collector.client.RefreshMemory(collector);
-	// }
+	if config.Config.Collect.Power {
+		collector.client.RefreshPower(collector, ch);
+	}
+	if config.Config.Collect.SEL {
+		collector.client.RefreshIdracSel(collector, ch);
+	}
+	if config.Config.Collect.Storage {
+		collector.client.RefreshStorage(collector, ch);
+	}
+	if config.Config.Collect.Memory {
+		collector.client.RefreshMemory(collector, ch);
+	}
 }
 
-func (collector *myCollector) Gather() (string, error) {
+func (collector *metricsCollector) Gather() (string, error) {
 	collector.collected.L.Lock()
 
 	// If a collection is already in progress wait for it to complete and return the cached data
@@ -310,7 +311,7 @@ func (collector *myCollector) Gather() (string, error) {
 	return collector.builder.String(), nil
 }
 
-func getCollector(target string) (*myCollector, error) {
+func GetCollector(target string) (*metricsCollector, error) {
 	mu.Lock()
 	collector, ok := collectors[target]
 	if !ok {
