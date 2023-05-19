@@ -4,18 +4,18 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/mrlhansen/idrac_exporter/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"github.com/mrlhansen/idrac_exporter/internal/config"
-	"github.com/mrlhansen/idrac_exporter/internal/logging"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 const redfishRootPath = "/redfish/v1"
 
-type redfishClient struct {
+type Client struct {
 	hostname    string
 	basicAuth   string
 	httpClient  *http.Client
@@ -35,14 +35,14 @@ func newHttpClient() *http.Client {
 	}
 }
 
-func NewClient(hostConfig *config.HostConfig) (*redfishClient, error) {
-	client := &redfishClient{
+func NewClient(hostConfig *config.HostConfig) (*Client, error) {
+	client := &Client{
 		hostname:   hostConfig.Hostname,
 		basicAuth:  hostConfig.Token,
 		httpClient: newHttpClient(),
 	}
 
-	err := client.findAllEndpoints();
+	err := client.findAllEndpoints()
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func NewClient(hostConfig *config.HostConfig) (*redfishClient, error) {
 	return client, nil
 }
 
-func (client *redfishClient) findAllEndpoints() error {
+func (client *Client) findAllEndpoints() error {
 	var root V1Response
 	var group GroupResponse
 	var chassis ChassisResponse
@@ -58,13 +58,13 @@ func (client *redfishClient) findAllEndpoints() error {
 	var err error
 
 	// Root
-	err = client.redfishGet(redfishRootPath, &root);
+	err = client.redfishGet(redfishRootPath, &root)
 	if err != nil {
 		return err
 	}
 
 	// System
-	err = client.redfishGet(root.Systems.OdataId, &group);
+	err = client.redfishGet(root.Systems.OdataId, &group)
 	if err != nil {
 		return err
 	}
@@ -72,13 +72,13 @@ func (client *redfishClient) findAllEndpoints() error {
 	client.systemPath = group.Members[0].OdataId
 
 	// Chassis
-	err = client.redfishGet(root.Chassis.OdataId, &group);
+	err = client.redfishGet(root.Chassis.OdataId, &group)
 	if err != nil {
 		return err
 	}
 
 	// Thermal and Power
-	err = client.redfishGet(group.Members[0].OdataId, &chassis);
+	err = client.redfishGet(group.Members[0].OdataId, &chassis)
 	if err != nil {
 		return err
 	}
@@ -96,10 +96,10 @@ func (client *redfishClient) findAllEndpoints() error {
 	return nil
 }
 
-func (client *redfishClient) RefreshSensors(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) error {
 	var resp ThermalResponse
 
-	err := client.redfishGet(client.thermalPath, &resp);
+	err := client.redfishGet(client.thermalPath, &resp)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,11 @@ func (client *redfishClient) RefreshSensors(mc *metricsCollector, ch chan<- prom
 			continue
 		}
 
-		ch <- mc.NewSensorsTemperature(t.ReadingCelsius, t.Name, "celsius")
+		if t.ReadingCelsius < 0 {
+			continue
+		}
+
+		ch <- mc.NewSensorsTemperature(t.ReadingCelsius, t.MemberId, t.Name, "celsius")
 	}
 
 	for _, f := range resp.Fans {
@@ -127,16 +131,16 @@ func (client *redfishClient) RefreshSensors(mc *metricsCollector, ch chan<- prom
 			continue
 		}
 
-		ch <- mc.NewSensorsFanSpeed(f.GetReading(), name, strings.ToLower(units))
+		ch <- mc.NewSensorsFanSpeed(f.GetReading(), f.MemberId, name, strings.ToLower(units))
 	}
 
 	return nil
 }
 
-func (client *redfishClient) RefreshSystem(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) error {
 	var resp SystemResponse
 
-	err := client.redfishGet(client.systemPath, &resp);
+	err := client.redfishGet(client.systemPath, &resp)
 	if err != nil {
 		return err
 	}
@@ -152,10 +156,10 @@ func (client *redfishClient) RefreshSystem(mc *metricsCollector, ch chan<- prome
 	return nil
 }
 
-func (client *redfishClient) RefreshPower(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) error {
 	var resp PowerResponse
 
-	err := client.redfishGet(client.powerPath, &resp);
+	err := client.redfishGet(client.powerPath, &resp)
 	if err != nil {
 		return err
 	}
@@ -192,10 +196,10 @@ func (client *redfishClient) RefreshPower(mc *metricsCollector, ch chan<- promet
 	return nil
 }
 
-func (client *redfishClient) RefreshIdracSel(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshIdracSel(mc *Collector, ch chan<- prometheus.Metric) error {
 	var resp IdracSelResponse
 
-	err := client.redfishGet(redfishRootPath + "/Managers/iDRAC.Embedded.1/Logs/Sel", &resp);
+	err := client.redfishGet(redfishRootPath+"/Managers/iDRAC.Embedded.1/Logs/Sel", &resp)
 	if err != nil {
 		return err
 	}
@@ -211,7 +215,7 @@ func (client *redfishClient) RefreshIdracSel(mc *metricsCollector, ch chan<- pro
 	return nil
 }
 
-func (client *redfishClient) RefreshStorage(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric) error {
 	var group GroupResponse
 	var controller StorageController
 	var d Drive
@@ -242,7 +246,7 @@ func (client *redfishClient) RefreshStorage(mc *metricsCollector, ch chan<- prom
 	return nil
 }
 
-func (client *redfishClient) RefreshMemory(mc *metricsCollector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) error {
 	var group GroupResponse
 	var m Memory
 
@@ -257,7 +261,7 @@ func (client *redfishClient) RefreshMemory(mc *metricsCollector, ch chan<- prome
 			return err
 		}
 
-		if m.Status.State == "Absent" {
+		if m.Status.State == StateAbsent {
 			continue
 		}
 
@@ -270,7 +274,7 @@ func (client *redfishClient) RefreshMemory(mc *metricsCollector, ch chan<- prome
 	return nil
 }
 
-func (client *redfishClient) redfishGet(path string, res interface{}) error {
+func (client *Client) redfishGet(path string, res interface{}) error {
 	url := "https://" + client.hostname + path
 
 	req, err := http.NewRequest("GET", url, nil)
@@ -294,7 +298,7 @@ func (client *redfishClient) redfishGet(path string, res interface{}) error {
 		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(res);
+	err = json.NewDecoder(resp.Body).Decode(res)
 	if err != nil {
 		logging.Debugf("Error decoding response from url %q: %v", url, err)
 		return err

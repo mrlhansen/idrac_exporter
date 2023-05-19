@@ -69,30 +69,30 @@ The exporter can expose the metrics listed in the sections below. For all `<name
 ### System
 These metrics include power, health, and LED state, total memory size, number of physical processors, BIOS version and machine information.
 ```
-idrac_power_on 1
-idrac_health{status="OK"} 0
-idrac_indicator_led_on{state="Lit"} 1
-idrac_memory_size_bytes 137438953472
-idrac_cpu_count{model="Intel(R) Xeon(R) Gold 6130 CPU @ 2.10GHz"} 2
-idrac_bios_info{version="2.3.10"} 1
-idrac_machine_info{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc",sku="xyz"} 1
+idrac_system_power_on 1
+idrac_system_health{status="OK"} 0
+idrac_system_indicator_led_on{state="Lit"} 1
+idrac_system_memory_size_bytes 137438953472
+idrac_system_cpu_count{model="Intel(R) Xeon(R) Gold 6130 CPU @ 2.10GHz"} 2
+idrac_system_bios_info{version="2.3.10"} 1
+idrac_system_machine_info{manufacturer="Dell Inc.",model="PowerEdge C6420",serial="abc",sku="xyz"} 1
 ```
 
 ### Sensors
 These metrics include temperature and FAN speeds.
 ```
-idrac_sensors_temperature{name="Inlet Temp",units="celsius"} 19
-idrac_sensors_fan_speed{name="FAN1A",units="rpm"} 7912
+idrac_sensors_temperature{id="0",name="Inlet Temp",units="celsius"} 19
+idrac_sensors_fan_speed{id="0",name="FAN1A",units="rpm"} 7912
 ```
 
 ### Power
 These metrics include two sets of power readings. The first set is PSU power readings, such as power usage, total power capacity, input voltage and efficiency. Be aware that not all metrics are available on all systems.
 ```
-idrac_power_supply_output_watts{psu="0"} 74.5
-idrac_power_supply_input_watts{psu="0"} 89
-idrac_power_supply_capacity_watts{psu="0"} 750
-idrac_power_supply_input_voltage{psu="0"} 232
-idrac_power_supply_efficiency_percent{psu="0"} 91
+idrac_power_supply_output_watts{id="0"} 74.5
+idrac_power_supply_input_watts{id="0"} 89
+idrac_power_supply_capacity_watts{id="0"} 750
+idrac_power_supply_input_voltage{id="0"} 232
+idrac_power_supply_efficiency_percent{id="0"} 91
 ```
 
 The second set is the power consumption for the entire system (and sometimes also for certain subsystems, such as the CPUs). The first two metrics are instantaneous readings, while the last four metrics are the minimum, maximum and average power consumption as measure over the reported interval.

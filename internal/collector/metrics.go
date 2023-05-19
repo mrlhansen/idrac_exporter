@@ -2,8 +2,9 @@ package collector
 
 import (
 	"fmt"
-	"time"
+	"strings"
 	"github.com/prometheus/client_golang/prometheus"
+	"time"
 )
 
 func health2value(health string) float64 {
@@ -18,7 +19,7 @@ func health2value(health string) float64 {
 	return 10
 }
 
-func (mc *metricsCollector) NewSystemPowerOn(state string) prometheus.Metric {
+func (mc *Collector) NewSystemPowerOn(state string) prometheus.Metric {
 	var value float64
 	if state == "On" {
 		value = 1
@@ -30,7 +31,7 @@ func (mc *metricsCollector) NewSystemPowerOn(state string) prometheus.Metric {
 	)
 }
 
-func (mc *metricsCollector) NewSystemHealth(health string) prometheus.Metric {
+func (mc *Collector) NewSystemHealth(health string) prometheus.Metric {
 	value := health2value(health)
 	return prometheus.MustNewConstMetric(
 		mc.SystemHealth,
@@ -40,7 +41,7 @@ func (mc *metricsCollector) NewSystemHealth(health string) prometheus.Metric {
 	)
 }
 
-func (mc *metricsCollector) NewSystemIndicatorLED(state string) prometheus.Metric {
+func (mc *Collector) NewSystemIndicatorLED(state string) prometheus.Metric {
 	var value float64
 	if state != "Off" {
 		value = 1
@@ -53,7 +54,7 @@ func (mc *metricsCollector) NewSystemIndicatorLED(state string) prometheus.Metri
 	)
 }
 
-func (mc *metricsCollector) NewSystemMemorySize(memory float64) prometheus.Metric {
+func (mc *Collector) NewSystemMemorySize(memory float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemMemorySize,
 		prometheus.GaugeValue,
@@ -61,16 +62,16 @@ func (mc *metricsCollector) NewSystemMemorySize(memory float64) prometheus.Metri
 	)
 }
 
-func (mc *metricsCollector) NewSystemCpuCount(cpus int, model string) prometheus.Metric {
+func (mc *Collector) NewSystemCpuCount(cpus int, model string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemCpuCount,
 		prometheus.GaugeValue,
 		float64(cpus),
-		model,
+		strings.TrimSpace(model),
 	)
 }
 
-func (mc *metricsCollector) NewSystemBiosInfo(version string) prometheus.Metric {
+func (mc *Collector) NewSystemBiosInfo(version string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemBiosInfo,
 		prometheus.GaugeValue,
@@ -79,7 +80,7 @@ func (mc *metricsCollector) NewSystemBiosInfo(version string) prometheus.Metric 
 	)
 }
 
-func (mc *metricsCollector) NewSystemMachineInfo(manufacturer, model, serial, sku string) prometheus.Metric {
+func (mc *Collector) NewSystemMachineInfo(manufacturer, model, serial, sku string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemMachineInfo,
 		prometheus.GaugeValue,
@@ -90,28 +91,30 @@ func (mc *metricsCollector) NewSystemMachineInfo(manufacturer, model, serial, sk
 		sku,
 	)
 }
-// TODO: Should sensor metrics have an ID as well?
-func (mc *metricsCollector) NewSensorsTemperature(temperature float64, name, units string) prometheus.Metric {
+
+func (mc *Collector) NewSensorsTemperature(temperature float64, id, name, units string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SensorsTemperature,
 		prometheus.GaugeValue,
 		temperature,
+		id,
 		name,
 		units,
 	)
 }
 
-func (mc *metricsCollector) NewSensorsFanSpeed(speed float64, name, units string) prometheus.Metric {
+func (mc *Collector) NewSensorsFanSpeed(speed float64, id, name, units string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SensorsFanSpeed,
 		prometheus.GaugeValue,
 		speed,
+		id,
 		name,
 		units,
 	)
 }
 
-func (mc *metricsCollector) NewPowerSupplyInputWatts(value float64, id string) prometheus.Metric {
+func (mc *Collector) NewPowerSupplyInputWatts(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyInputWatts,
 		prometheus.GaugeValue,
@@ -120,7 +123,7 @@ func (mc *metricsCollector) NewPowerSupplyInputWatts(value float64, id string) p
 	)
 }
 
-func (mc *metricsCollector) NewPowerSupplyInputVoltage(value float64, id string) prometheus.Metric {
+func (mc *Collector) NewPowerSupplyInputVoltage(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyInputVoltage,
 		prometheus.GaugeValue,
@@ -129,7 +132,7 @@ func (mc *metricsCollector) NewPowerSupplyInputVoltage(value float64, id string)
 	)
 }
 
-func (mc *metricsCollector) NewPowerSupplyOutputWatts(value float64, id string) prometheus.Metric {
+func (mc *Collector) NewPowerSupplyOutputWatts(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyOutputWatts,
 		prometheus.GaugeValue,
@@ -138,7 +141,7 @@ func (mc *metricsCollector) NewPowerSupplyOutputWatts(value float64, id string) 
 	)
 }
 
-func (mc *metricsCollector) NewPowerSupplyCapacityWatts(value float64, id string) prometheus.Metric {
+func (mc *Collector) NewPowerSupplyCapacityWatts(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyCapacityWatts,
 		prometheus.GaugeValue,
@@ -147,7 +150,7 @@ func (mc *metricsCollector) NewPowerSupplyCapacityWatts(value float64, id string
 	)
 }
 
-func (mc *metricsCollector) NewPowerSupplyEfficiencyPercent(value float64, id string) prometheus.Metric {
+func (mc *Collector) NewPowerSupplyEfficiencyPercent(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyEfficiencyPercent,
 		prometheus.GaugeValue,
@@ -156,7 +159,7 @@ func (mc *metricsCollector) NewPowerSupplyEfficiencyPercent(value float64, id st
 	)
 }
 
-func (mc *metricsCollector) NewPowerControlConsumedWatts(value float64, id, name string) prometheus.Metric {
+func (mc *Collector) NewPowerControlConsumedWatts(value float64, id, name string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerControlConsumedWatts,
 		prometheus.GaugeValue,
@@ -166,7 +169,7 @@ func (mc *metricsCollector) NewPowerControlConsumedWatts(value float64, id, name
 	)
 }
 
-func (mc *metricsCollector) NewPowerControlCapacityWatts(value float64, id, name string) prometheus.Metric {
+func (mc *Collector) NewPowerControlCapacityWatts(value float64, id, name string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerControlCapacityWatts,
 		prometheus.GaugeValue,
@@ -176,7 +179,7 @@ func (mc *metricsCollector) NewPowerControlCapacityWatts(value float64, id, name
 	)
 }
 
-func (mc *metricsCollector) NewPowerControlMinConsumedWatts(value float64, id, name string) prometheus.Metric {
+func (mc *Collector) NewPowerControlMinConsumedWatts(value float64, id, name string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerControlMinConsumedWatts,
 		prometheus.GaugeValue,
@@ -186,7 +189,7 @@ func (mc *metricsCollector) NewPowerControlMinConsumedWatts(value float64, id, n
 	)
 }
 
-func (mc *metricsCollector) NewPowerControlMaxConsumedWatts(value float64, id, name string) prometheus.Metric {
+func (mc *Collector) NewPowerControlMaxConsumedWatts(value float64, id, name string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerControlMaxConsumedWatts,
 		prometheus.GaugeValue,
@@ -196,7 +199,7 @@ func (mc *metricsCollector) NewPowerControlMaxConsumedWatts(value float64, id, n
 	)
 }
 
-func (mc *metricsCollector) NewPowerControlAvgConsumedWatts(value float64, id, name string) prometheus.Metric {
+func (mc *Collector) NewPowerControlAvgConsumedWatts(value float64, id, name string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerControlAvgConsumedWatts,
 		prometheus.GaugeValue,
@@ -206,7 +209,7 @@ func (mc *metricsCollector) NewPowerControlAvgConsumedWatts(value float64, id, n
 	)
 }
 
-func (mc *metricsCollector) NewPowerControlInterval(interval int, id, name string) prometheus.Metric {
+func (mc *Collector) NewPowerControlInterval(interval int, id, name string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerControlInterval,
 		prometheus.GaugeValue,
@@ -216,7 +219,7 @@ func (mc *metricsCollector) NewPowerControlInterval(interval int, id, name strin
 	)
 }
 
-func (mc *metricsCollector) NewSelEntry(id string, message string, component string, severity string, created time.Time) prometheus.Metric {
+func (mc *Collector) NewSelEntry(id string, message string, component string, severity string, created time.Time) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SelEntry,
 		prometheus.CounterValue,
@@ -228,7 +231,7 @@ func (mc *metricsCollector) NewSelEntry(id string, message string, component str
 	)
 }
 
-func (mc *metricsCollector) NewDriveInfo(id, name, manufacturer, model, serial, mediatype, protocol string, slot int) prometheus.Metric {
+func (mc *Collector) NewDriveInfo(id, name, manufacturer, model, serial, mediatype, protocol string, slot int) prometheus.Metric {
 	var slotstr string
 
 	if slot < 0 {
@@ -252,7 +255,7 @@ func (mc *metricsCollector) NewDriveInfo(id, name, manufacturer, model, serial, 
 	)
 }
 
-func (mc *metricsCollector) NewDriveHealth(id, health string) prometheus.Metric {
+func (mc *Collector) NewDriveHealth(id, health string) prometheus.Metric {
 	value := health2value(health)
 	return prometheus.MustNewConstMetric(
 		mc.DriveHealth,
@@ -263,7 +266,7 @@ func (mc *metricsCollector) NewDriveHealth(id, health string) prometheus.Metric 
 	)
 }
 
-func (mc *metricsCollector) NewDriveCapacity(id string, capacity int) prometheus.Metric {
+func (mc *Collector) NewDriveCapacity(id string, capacity int) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.DriveCapacity,
 		prometheus.GaugeValue,
@@ -272,7 +275,7 @@ func (mc *metricsCollector) NewDriveCapacity(id string, capacity int) prometheus
 	)
 }
 
-func (mc *metricsCollector) NewMemoryModuleInfo(id, name, manufacturer, memtype, serial, ecc string, rank int) prometheus.Metric {
+func (mc *Collector) NewMemoryModuleInfo(id, name, manufacturer, memtype, serial, ecc string, rank int) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.MemoryModuleInfo,
 		prometheus.GaugeValue,
@@ -287,7 +290,7 @@ func (mc *metricsCollector) NewMemoryModuleInfo(id, name, manufacturer, memtype,
 	)
 }
 
-func (mc *metricsCollector) NewMemoryModuleHealth(id, health string) prometheus.Metric {
+func (mc *Collector) NewMemoryModuleHealth(id, health string) prometheus.Metric {
 	value := health2value(health)
 	return prometheus.MustNewConstMetric(
 		mc.MemoryModuleHealth,
@@ -298,7 +301,7 @@ func (mc *metricsCollector) NewMemoryModuleHealth(id, health string) prometheus.
 	)
 }
 
-func (mc *metricsCollector) NewMemoryModuleCapacity(id string, capacity int) prometheus.Metric {
+func (mc *Collector) NewMemoryModuleCapacity(id string, capacity int) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.MemoryModuleCapacity,
 		prometheus.GaugeValue,
@@ -307,7 +310,7 @@ func (mc *metricsCollector) NewMemoryModuleCapacity(id string, capacity int) pro
 	)
 }
 
-func (mc *metricsCollector) NewMemoryModuleSpeed(id string, speed int) prometheus.Metric {
+func (mc *Collector) NewMemoryModuleSpeed(id string, speed int) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.MemoryModuleSpeed,
 		prometheus.GaugeValue,

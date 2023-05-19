@@ -1,11 +1,11 @@
 package logging
 
 import (
-	"os"
 	"fmt"
-	"time"
-	"sync"
+	"os"
 	"strings"
+	"sync"
+	"time"
 )
 
 var mx sync.Mutex

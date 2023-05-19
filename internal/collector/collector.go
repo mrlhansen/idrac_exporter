@@ -1,21 +1,20 @@
 package collector
 
 import (
+	"fmt"
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
-	"sync"
-	"fmt"
 	"strings"
-	// "github.com/prometheus/client_golang/prometheus/promhttp"
+	"sync"
 )
 
 var mu sync.Mutex
-var collectors = map[string]*metricsCollector{}
+var collectors = map[string]*Collector{}
 
-type metricsCollector struct {
+type Collector struct {
 	// Internal variables
-	client     *redfishClient
+	client     *Client
 	registry   *prometheus.Registry
 	collected  *sync.Cond
 	collecting bool
@@ -66,10 +65,10 @@ type metricsCollector struct {
 	MemoryModuleSpeed    *prometheus.Desc
 }
 
-func newMetricsCollector() *metricsCollector {
+func NewCollector() *Collector {
 	prefix := config.Config.MetricsPrefix
 
-	collector := &metricsCollector{
+	collector := &Collector{
 		SystemPowerOn: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "power_on"),
 			"Power state of the system",
@@ -108,12 +107,12 @@ func newMetricsCollector() *metricsCollector {
 		SensorsTemperature: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "temperature"),
 			"Sensors reporting temperature measurements",
-			[]string{"name", "units"}, nil,
+			[]string{"id", "name", "units"}, nil,
 		),
 		SensorsFanSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "fan_speed"),
 			"Sensors reporting fan speed measurements",
-			[]string{"name", "units"}, nil,
+			[]string{"id", "name", "units"}, nil,
 		),
 		PowerSupplyOutputWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "output_watts"),
@@ -220,7 +219,7 @@ func newMetricsCollector() *metricsCollector {
 	return collector
 }
 
-func (collector *metricsCollector) Describe(ch chan<- *prometheus.Desc) {
+func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SystemPowerOn
 	ch <- collector.SystemHealth
 	ch <- collector.SystemIndicatorLED
@@ -251,29 +250,28 @@ func (collector *metricsCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.MemoryModuleSpeed
 }
 
-func (collector *metricsCollector) Collect(ch chan<- prometheus.Metric) {
-	// TODO: Errors are not handled at the moment
+func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if config.Config.Collect.System {
-		collector.client.RefreshSystem(collector, ch);
+		collector.client.RefreshSystem(collector, ch)
 	}
 	if config.Config.Collect.Sensors {
-		collector.client.RefreshSensors(collector, ch);
+		collector.client.RefreshSensors(collector, ch)
 	}
 	if config.Config.Collect.Power {
-		collector.client.RefreshPower(collector, ch);
+		collector.client.RefreshPower(collector, ch)
 	}
 	if config.Config.Collect.SEL {
-		collector.client.RefreshIdracSel(collector, ch);
+		collector.client.RefreshIdracSel(collector, ch)
 	}
 	if config.Config.Collect.Storage {
-		collector.client.RefreshStorage(collector, ch);
+		collector.client.RefreshStorage(collector, ch)
 	}
 	if config.Config.Collect.Memory {
-		collector.client.RefreshMemory(collector, ch);
+		collector.client.RefreshMemory(collector, ch)
 	}
 }
 
-func (collector *metricsCollector) Gather() (string, error) {
+func (collector *Collector) Gather() (string, error) {
 	collector.collected.L.Lock()
 
 	// If a collection is already in progress wait for it to complete and return the cached data
@@ -284,11 +282,11 @@ func (collector *metricsCollector) Gather() (string, error) {
 		return metrics, nil
 	}
 
-	// Set collecting to true and let other go routines enter in critical section
+	// Set collecting to true and let other goroutines enter in critical section
 	collector.collecting = true
 	collector.collected.L.Unlock()
 
-	// Defer set c.collecting to false and wake waiting goroutines
+	// Defer set collecting to false and wake waiting goroutines
 	defer func() {
 		collector.collected.L.Lock()
 		collector.collected.Broadcast()
@@ -311,11 +309,11 @@ func (collector *metricsCollector) Gather() (string, error) {
 	return collector.builder.String(), nil
 }
 
-func GetCollector(target string) (*metricsCollector, error) {
+func GetCollector(target string) (*Collector, error) {
 	mu.Lock()
 	collector, ok := collectors[target]
 	if !ok {
-		collector = newMetricsCollector()
+		collector = NewCollector()
 		collectors[target] = collector
 	}
 	mu.Unlock()
