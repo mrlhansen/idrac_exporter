@@ -6,6 +6,8 @@ http://localhost:9348/metrics?target=123.45.6.78
 
 Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the target will eventually be flagged as invalid, and any subsequent call to that target will simply be ignored and a status code 500 is returned.
 
+**_In late May 2023 the project was rewritten to use the official Prometheus golang client library. This rewrite also included a number of breaking changes (configuration file format and metrics names). If you are upgrading from an older version, make sure to the read the information in this README again and make the necessary adjustments._**
+
 ## Supported Systems
 The program supports several different systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
 
@@ -59,6 +61,8 @@ metrics:
 ```
 
 As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
+
+Because the metrics are collected on-demand it can take several minutes to scrape the metrics endpoint, depending on how many metrics groups are selected in the configuration file. For this reason you should carefully select the metrics of interest and make sure Prometheus is configured with a sufficiently high scrape timeout value.
 
 ## List of Metrics
 The exporter can expose the metrics listed in the sections below. For all `<name>_health` metrics the value has the following mapping.
