@@ -1,4 +1,4 @@
-package redfish
+package collector
 
 import (
 	"time"
@@ -6,6 +6,7 @@ import (
 
 const (
 	StateEnabled = "Enabled"
+	StateAbsent  = "Absent"
 )
 
 // Odata is a common structure to unmarshal Open Data Protocol metadata
@@ -127,6 +128,7 @@ type Fan struct {
 	ReadingUnits              string        `json:"ReadingUnits"`
 	Redundancy                []interface{} `json:"Redundancy"`
 	SensorNumber              int           `json:"SensorNumber"`
+	MemberId                  string        `json:"MemberId"`
 	Status                    Status        `json:"Status"`
 	UpperThresholdCritical    interface{}   `json:"UpperThresholdCritical"`
 	UpperThresholdFatal       interface{}   `json:"UpperThresholdFatal"`
@@ -157,6 +159,7 @@ func (f *Fan) GetUnits() string {
 type Temperature struct {
 	Name                      string  `json:"Name"`
 	SensorNumber              int     `json:"SensorNumber"`
+	MemberId                  string  `json:"MemberId"`
 	ReadingCelsius            float64 `json:"ReadingCelsius"`
 	MaxReadingRangeTemp       float64 `json:"MaxReadingRangeTemp"`
 	MinReadingRangeTemp       float64 `json:"MinReadingRangeTemp"`
@@ -220,22 +223,22 @@ func (d *Drive) GetSlot() int {
 }
 
 type Memory struct {
-	Id                string  `json:"Id"`
-	Name              string  `json:"Name"`
-	Description       string  `json:"Description"`
-	Manufacturer      string  `json:"Manufacturer"`
-	ErrorCorrection   string  `json:"ErrorCorrection"`
-	MemoryDeviceType  string  `json:"MemoryDeviceType"`
-	AllowedSpeedsMHz  []int   `json:"AllowedSpeedsMHz"`
-	OperatingSpeedMhz int     `json:"OperatingSpeedMhz"`
-	CapacityMiB       int     `json:"CapacityMiB"`
-	PartNumber        string  `json:"PartNumber"`
-	SerialNumber      string  `json:"SerialNumber"`
-	DeviceLocator     string  `json:"DeviceLocator"`
-	RankCount         int     `json:"RankCount"`
-	BusWidthBits      int     `json:"BusWidthBits"`
-	DataWidthBits     int     `json:"DataWidthBits"`
-	Status            Status  `json:"Status"`
+	Id                string `json:"Id"`
+	Name              string `json:"Name"`
+	Description       string `json:"Description"`
+	Manufacturer      string `json:"Manufacturer"`
+	ErrorCorrection   string `json:"ErrorCorrection"`
+	MemoryDeviceType  string `json:"MemoryDeviceType"`
+	AllowedSpeedsMHz  []int  `json:"AllowedSpeedsMHz"`
+	OperatingSpeedMhz int    `json:"OperatingSpeedMhz"`
+	CapacityMiB       int    `json:"CapacityMiB"`
+	PartNumber        string `json:"PartNumber"`
+	SerialNumber      string `json:"SerialNumber"`
+	DeviceLocator     string `json:"DeviceLocator"`
+	RankCount         int    `json:"RankCount"`
+	BusWidthBits      int    `json:"BusWidthBits"`
+	DataWidthBits     int    `json:"DataWidthBits"`
+	Status            Status `json:"Status"`
 }
 
 type SystemResponse struct {

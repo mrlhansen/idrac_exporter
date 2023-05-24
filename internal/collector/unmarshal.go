@@ -1,4 +1,4 @@
-package redfish
+package collector
 
 import (
 	"encoding/json"
