@@ -74,7 +74,7 @@ func (mc *Collector) NewSystemCpuCount(cpus int, model string) prometheus.Metric
 func (mc *Collector) NewSystemBiosInfo(version string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemBiosInfo,
-		prometheus.GaugeValue,
+		prometheus.UntypedValue,
 		1.0,
 		version,
 	)
@@ -83,7 +83,7 @@ func (mc *Collector) NewSystemBiosInfo(version string) prometheus.Metric {
 func (mc *Collector) NewSystemMachineInfo(manufacturer, model, serial, sku string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemMachineInfo,
-		prometheus.GaugeValue,
+		prometheus.UntypedValue,
 		1.0,
 		manufacturer,
 		model,
@@ -242,7 +242,7 @@ func (mc *Collector) NewDriveInfo(id, name, manufacturer, model, serial, mediaty
 
 	return prometheus.MustNewConstMetric(
 		mc.DriveInfo,
-		prometheus.GaugeValue,
+		prometheus.UntypedValue,
 		1.0,
 		id,
 		manufacturer,
@@ -278,7 +278,7 @@ func (mc *Collector) NewDriveCapacity(id string, capacity int) prometheus.Metric
 func (mc *Collector) NewMemoryModuleInfo(id, name, manufacturer, memtype, serial, ecc string, rank int) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.MemoryModuleInfo,
-		prometheus.GaugeValue,
+		prometheus.UntypedValue,
 		1.0,
 		id,
 		ecc,
