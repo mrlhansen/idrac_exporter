@@ -6,7 +6,7 @@ COPY go.* ./
 COPY cmd/ ./cmd/
 COPY internal/ ./internal/
 
-RUN go build -o /app/bin/idrac_exporter cmd/idrac_exporter/main.go
+RUN go build -o /app/bin/idrac_exporter ./cmd/idrac_exporter
 
 FROM alpine:3.16
 
