@@ -2,7 +2,7 @@ groups:
   - name: 'idrac-alerts'
     rules:
       - alert: ServerNotHealthy
-        expr: idrac_health_ok{status!="OK"}
+        expr: idrac_system_health{status!="OK"}
         for: 3m
         labels:
           severity: critical

@@ -143,7 +143,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_machine_info{instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_machine_info{instance=\"$instance\", job=\"$job\"}",
           "format": "table",
           "instant": true,
           "legendFormat": "{{manufacturer}}",
@@ -298,7 +298,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_memory_size_bytes{instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_memory_size_bytes{instance=\"$instance\", job=\"$job\"}",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -345,12 +345,16 @@
                 "value": null
               },
               {
-                "color": "red",
+                "color": "green",
                 "value": 0
               },
               {
-                "color": "green",
+                "color": "yellow",
                 "value": 1
+              },
+              {
+                "color": "red",
+                "value": 2
               }
             ]
           },
@@ -404,7 +408,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_health_ok{instance=~\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"}",
           "instant": true,
           "legendFormat": "{{status}}",
           "metrics": [
@@ -506,7 +510,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_power_on{instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_power_on{instance=\"$instance\", job=\"$job\"}",
           "instant": true,
           "legendFormat": "",
           "metrics": [
@@ -602,7 +606,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_indicator_led_on{instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_indicator_led_on{instance=\"$instance\", job=\"$job\"}",
           "instant": true,
           "legendFormat": "{{state}}",
           "metrics": [
@@ -826,7 +830,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_cpu_count{instance=\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_cpu_count{instance=\"$instance\", job=\"$job\"}",
           "format": "time_series",
           "instant": true,
           "interval": "",

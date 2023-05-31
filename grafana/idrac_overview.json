@@ -159,7 +159,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_health_ok{instance=~\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"}",
           "format": "table",
           "instant": false,
           "legendFormat": "{{instance}}",
@@ -304,7 +304,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_power_on{instance=~\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_power_on{instance=~\"$instance\", job=\"$job\"}",
           "format": "time_series",
           "instant": false,
           "legendFormat": "{{instance}}",
@@ -1020,7 +1020,7 @@
           "editorMode": "code",
           "expr": "max_over_time(idrac_power_supply_output_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "hide": false,
-          "legendFormat": "{{instance}}: Output PSU-{{psu}}",
+          "legendFormat": "{{instance}}: Output PSU-{{id}}",
           "metrics": [
             {
               "id": "1",
@@ -1040,7 +1040,7 @@
           "editorMode": "code",
           "expr": "avg_over_time(idrac_power_supply_input_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "hide": true,
-          "legendFormat": "{{instance}}: Input PSU-{{psu}}",
+          "legendFormat": "{{instance}}: Input PSU-{{id}}",
           "range": true,
           "refId": "B"
         }
