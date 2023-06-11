@@ -32,8 +32,12 @@ func (w *xstring) UnmarshalJSON(data []byte) (err error) {
 
 	list := x.([]interface{})
 	dict := list[0].(map[string]interface{})
-	s = dict["Member"].(string)
+	s, ok = dict["Member"].(string)
+	if ok {
+		*w = xstring(s)
+		return nil
+	}
 
-	*w = xstring(s)
+	*w = xstring("")
 	return nil
 }

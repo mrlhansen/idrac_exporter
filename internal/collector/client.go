@@ -288,6 +288,9 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 	logging.Debugf("Querying url %q", url)
 
 	resp, err := client.httpClient.Do(req)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
 	if err != nil {
 		logging.Debugf("Failed to query url %q: %v", url, err)
 		return err

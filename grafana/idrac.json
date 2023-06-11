@@ -1210,7 +1210,7 @@
           },
           "editorMode": "code",
           "expr": "avg_over_time(idrac_power_supply_output_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
-          "legendFormat": "Output PSU-{{psu}}",
+          "legendFormat": "Output PSU-{{id}}",
           "metrics": [
             {
               "id": "1",
@@ -1230,7 +1230,7 @@
           "editorMode": "code",
           "expr": "avg_over_time(idrac_power_supply_input_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
           "hide": false,
-          "legendFormat": "Input PSU-{{psu}}",
+          "legendFormat": "Input PSU-{{id}}",
           "range": true,
           "refId": "B"
         }
