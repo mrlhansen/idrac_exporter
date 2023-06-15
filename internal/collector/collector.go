@@ -18,6 +18,7 @@ type Collector struct {
 	registry   *prometheus.Registry
 	collected  *sync.Cond
 	collecting bool
+	error      error
 	reachable  bool
 	retries    uint
 	builder    *strings.Builder
@@ -251,23 +252,48 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
+	collector.error = nil
 	if config.Config.Collect.System {
-		collector.client.RefreshSystem(collector, ch)
+		err := collector.client.RefreshSystem(collector, ch)
+		if err != nil {
+			collector.error = err
+			return
+		}
 	}
 	if config.Config.Collect.Sensors {
-		collector.client.RefreshSensors(collector, ch)
+		err := collector.client.RefreshSensors(collector, ch)
+		if err != nil {
+			collector.error = err
+			return
+		}
 	}
 	if config.Config.Collect.Power {
-		collector.client.RefreshPower(collector, ch)
+		err := collector.client.RefreshPower(collector, ch)
+		if err != nil {
+			collector.error = err
+			return
+		}
 	}
 	if config.Config.Collect.SEL {
-		collector.client.RefreshIdracSel(collector, ch)
+		err := collector.client.RefreshIdracSel(collector, ch)
+		if err != nil {
+			collector.error = err
+			return
+		}
 	}
 	if config.Config.Collect.Storage {
-		collector.client.RefreshStorage(collector, ch)
+		err := collector.client.RefreshStorage(collector, ch)
+		if err != nil {
+			collector.error = err
+			return
+		}
 	}
 	if config.Config.Collect.Memory {
-		collector.client.RefreshMemory(collector, ch)
+		err := collector.client.RefreshMemory(collector, ch)
+		if err != nil {
+			collector.error = err
+			return
+		}
 	}
 }
 
@@ -278,8 +304,13 @@ func (collector *Collector) Gather() (string, error) {
 	if collector.collecting {
 		collector.collected.Wait()
 		metrics := collector.builder.String()
+		err := collector.error
 		collector.collected.L.Unlock()
-		return metrics, nil
+		if err != nil {
+			return "", err
+		} else {
+			return metrics, nil
+		}
 	}
 
 	// Set collecting to true and let other goroutines enter in critical section
@@ -300,6 +331,9 @@ func (collector *Collector) Gather() (string, error) {
 	m, err := collector.registry.Gather()
 	if err != nil {
 		return "", err
+	}
+	if collector.error != nil {
+		return "", collector.error
 	}
 
 	for i := range m {
