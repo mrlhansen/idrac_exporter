@@ -22,6 +22,9 @@ The exporter is written in [Go](https://golang.org) and it can be downloaded and
 go install github.com/mrlhansen/idrac_exporter/cmd/idrac_exporter@latest
 ```
 
+## Dashboards
+There are Grafana dashboards available [here](/grafana). Please feel free to modify them as you wish and be sure to modify queries as needed!
+
 ## Docker
 There is a `Dockerfile` in the repository for building a container image. To build it locally use:
 
