@@ -23,7 +23,7 @@ go install github.com/mrlhansen/idrac_exporter/cmd/idrac_exporter@latest
 ```
 
 ## Dashboards
-There are Grafana dashboards available [here](/grafana). Please feel free to modify them as you wish and be sure to modify queries as needed!
+There are Grafana dashboards available [here](/grafana). The [another_idrac_dashboard.json](/grafana/another_idrac_dashboard.json) dashboard assumes that you have each iDRAC/Redfish device separated by Prometheus scrape job (but that of course can be changed). Please feel free to modify them as you wish and be sure to modify queries as needed!
 
 ## Docker
 There is a `Dockerfile` in the repository for building a container image. To build it locally use:
