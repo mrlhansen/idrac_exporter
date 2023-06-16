@@ -1,4 +1,5 @@
-FROM golang:1.19-alpine3.16 as builder
+ARG ARCH=
+FROM ${ARCH}golang:1.19-alpine3.16 as builder
 
 WORKDIR /app/src
 
@@ -8,10 +9,11 @@ COPY internal/ ./internal/
 
 RUN go build -o /app/bin/idrac_exporter ./cmd/idrac_exporter
 
-FROM alpine:3.16
+FROM ${ARCH}alpine:3.16 as container
 
 WORKDIR /app
-
 COPY --from=builder /app/bin /app/bin
-
-ENTRYPOINT ["bin/idrac_exporter"]
+RUN apk add -U bash gettext
+COPY idrac.yml.template /etc/prometheus/
+COPY entrypoint.sh /app
+ENTRYPOINT /app/entrypoint.sh
