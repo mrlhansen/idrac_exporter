@@ -180,12 +180,12 @@ type StorageController struct {
 	Drives             []Odata `json:"Drives"`
 	Status             Status  `json:"Status"`
 	StorageControllers []struct {
-		FirmwareVersion string `json:"FirmwareVersion"`
-		Manufacturer    string `json:"Manufacturer"`
-		Model           string `json:"Model"`
-		Name            string `json:"Name"`
-		SpeedGbps       int    `json:"SpeedGbps"`
-		Status          Status `json:"Status"`
+		FirmwareVersion string  `json:"FirmwareVersion"`
+		Manufacturer    string  `json:"Manufacturer"`
+		Model           string  `json:"Model"`
+		Name            string  `json:"Name"`
+		SpeedGbps       float64 `json:"SpeedGbps"`
+		Status          Status  `json:"Status"`
 	}
 }
 
