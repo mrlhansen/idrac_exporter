@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 )
@@ -24,11 +25,12 @@ func main() {
 
 	http.HandleFunc("/metrics", MetricsHandler)
 	http.HandleFunc("/health", HealthHandler)
+	http.HandleFunc("/reset", ResetHandler)
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
 	logging.Infof("Server listening on %s", bind)
 
-	err := http.ListenAndServe(bind, nil);
+	err := http.ListenAndServe(bind, nil)
 	if err != nil {
 		logging.Fatal(err)
 	}

@@ -2,11 +2,12 @@ package collector
 
 import (
 	"fmt"
+	"strings"
+	"sync"
+
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
-	"strings"
-	"sync"
 )
 
 var mu sync.Mutex
@@ -341,6 +342,16 @@ func (collector *Collector) Gather() (string, error) {
 	}
 
 	return collector.builder.String(), nil
+}
+
+// Resets an existing collector of the given target
+func Reset(target string) {
+	mu.Lock()
+	_, ok := collectors[target]
+	if ok {
+		collectors[target] = NewCollector()
+	}
+	mu.Unlock()
 }
 
 func GetCollector(target string) (*Collector, error) {

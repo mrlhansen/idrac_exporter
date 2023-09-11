@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-	"github.com/mrlhansen/idrac_exporter/internal/logging"
+
 	"github.com/mrlhansen/idrac_exporter/internal/collector"
+	"github.com/mrlhansen/idrac_exporter/internal/logging"
 )
 
 const (
@@ -25,6 +26,19 @@ var gzipPool = sync.Pool{
 
 func HealthHandler(rsp http.ResponseWriter, req *http.Request) {
 	// just return a simple 200 for now
+}
+
+func ResetHandler(rsp http.ResponseWriter, req *http.Request) {
+	target := req.URL.Query().Get("target")
+	if target == "" {
+		logging.Errorf("Received request from %s without 'target' parameter", req.Host)
+		http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
+		return
+	}
+
+	logging.Debugf("Handling reset-request from %s for host %s", req.Host, target)
+
+	collector.Reset(target)
 }
 
 func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
