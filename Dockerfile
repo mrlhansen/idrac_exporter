@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}golang:1.19-alpine3.16 as builder
+FROM ${ARCH}golang:1.21-alpine3.18 as builder
 
 WORKDIR /app/src
 
@@ -9,7 +9,7 @@ COPY internal/ ./internal/
 
 RUN go build -o /app/bin/idrac_exporter ./cmd/idrac_exporter
 
-FROM ${ARCH}alpine:3.16 as container
+FROM ${ARCH}alpine:3.18 as container
 
 WORKDIR /app
 COPY --from=builder /app/bin /app/bin

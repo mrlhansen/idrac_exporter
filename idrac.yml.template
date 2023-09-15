@@ -1,7 +1,7 @@
 address: 0.0.0.0   # Running in a container, this makes sense
 port: 9348         # Listen port
 timeout: 60        # HTTP timeout (in seconds) for Redfish API calls
-retries: 10         # Number of retries before a target is marked as unreachable
+retries: 10        # Number of retries before a target is marked as unreachable
 hosts:
   default:
     username: $IDRAC_USERNAME
@@ -10,6 +10,6 @@ metrics:
   system: true
   sensors: true
   power: true
-  sel: true       # iDRAC only
+  sel: true        # iDRAC only
   storage: true
   memory: true

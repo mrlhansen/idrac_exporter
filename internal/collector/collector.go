@@ -20,7 +20,6 @@ type Collector struct {
 	collected  *sync.Cond
 	collecting bool
 	error      error
-	reachable  bool
 	retries    uint
 	builder    *strings.Builder
 
@@ -349,7 +348,7 @@ func Reset(target string) {
 	mu.Lock()
 	_, ok := collectors[target]
 	if ok {
-		collectors[target] = NewCollector()
+		delete(collectors, target)
 	}
 	mu.Unlock()
 }
@@ -377,7 +376,6 @@ func GetCollector(target string) (*Collector, error) {
 				return nil, err
 			} else {
 				collector.client = c
-				collector.reachable = true
 			}
 		} else {
 			return nil, fmt.Errorf("host unreachable after %d retries", collector.retries)

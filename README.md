@@ -1,5 +1,5 @@
 # iDRAC Exporter
-This is a simple iDRAC (and iLO and XClarity) exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL addresse.
+This is a simple iDRAC (and iLO and XClarity) exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL address.
 ```
 http://localhost:9348/metrics?target=123.45.6.78
 ```
@@ -131,6 +131,15 @@ idrac_memory_module_health{id="DIMM.Socket.A2",status="OK"} 0
 idrac_memory_module_capacity_bytes{id="DIMM.Socket.A2"} 34359738368
 idrac_memory_module_speed_mhz{id="DIMM.Socket.A2"} 2400
 ```
+
+## Endpoints
+The exporter currently has three different endpoints.
+
+| Endpoint   | Parameters | Description                                         |
+| ---------- | ---------- | --------------------------------------------------- |
+| `/metrics` | `target`   | Metrics for the specified target                    |
+| `/reset`   | `target`   | Reset internal state for the specified target       |
+| `/health`  |            | Returns http status 200 and nothing else            |
 
 ## Prometheus Configuration
 For the situation where you have a single `idrac_exporter` and multiple iDRACs to query, the following `prometheus.yml` snippet can be used.
