@@ -1786,14 +1786,14 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(idrac_machine_info,job)",
+        "definition": "label_values(idrac_system_machine_info,job)",
         "hide": 0,
         "includeAll": false,
         "multi": true,
         "name": "job",
         "options": [],
         "query": {
-          "query": "label_values(idrac_machine_info,job)",
+          "query": "label_values(idrac_system_machine_info,job)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1808,7 +1808,7 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(idrac_machine_info{job=\"$job\"}, instance)",
+        "definition": "label_values(idrac_system_machine_info{job=\"$job\"}, instance)",
         "hide": 0,
         "includeAll": false,
         "label": "",
@@ -1816,7 +1816,7 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(idrac_machine_info{job=\"$job\"}, instance)",
+          "query": "label_values(idrac_system_machine_info{job=\"$job\"}, instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
