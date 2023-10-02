@@ -1646,7 +1646,7 @@
               {
                 "id": "custom.displayMode",
                 "value": "color-text"
-                              }
+              }
             ]
           },
           {
@@ -1683,8 +1683,8 @@
       },
       "id": 27,
       "options": {
-                "footer": {
-                    "fields": "",
+      "footer": {
+          "fields": "",
           "reducer": [
             "sum"
           ],
