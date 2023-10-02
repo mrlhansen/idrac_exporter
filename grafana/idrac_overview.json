@@ -86,6 +86,10 @@
                 "OK": {
                   "color": "light-green",
                   "index": 2
+                },
+                "Warning": {
+                  "color": "light-yellow",
+                  "index": 3
                 }
               },
               "type": "value"

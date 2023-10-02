@@ -329,8 +329,26 @@
           "mappings": [
             {
               "options": {
+                "Critical": {
+                  "color": "light-red",
+                  "index": 2
+                },
+                "OK": {
+                  "color": "light-green",
+                  "index": 3
+                },
+                "Warning": {
+                  "color": "light-yellow",
+                  "index": 1
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
                 "match": "null",
                 "result": {
+                  "index": 0,
                   "text": "N/A"
                 }
               },
@@ -343,18 +361,6 @@
               {
                 "color": "green",
                 "value": null
-              },
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 2
               }
             ]
           },
@@ -382,11 +388,11 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^status$/",
           "values": false
         },
         "text": {},
-        "textMode": "name"
+        "textMode": "value"
       },
       "pluginVersion": "9.3.2",
       "targets": [
@@ -409,6 +415,7 @@
           "editorMode": "code",
           "exemplar": false,
           "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"}",
+          "format": "table",
           "instant": true,
           "legendFormat": "{{status}}",
           "metrics": [
@@ -1639,7 +1646,7 @@
               {
                 "id": "custom.displayMode",
                 "value": "color-text"
-              }
+                              }
             ]
           },
           {
@@ -1676,8 +1683,8 @@
       },
       "id": 27,
       "options": {
-        "footer": {
-          "fields": "",
+                "footer": {
+                    "fields": "",
           "reducer": [
             "sum"
           ],
