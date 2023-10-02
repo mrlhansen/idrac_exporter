@@ -1683,7 +1683,7 @@
       },
       "id": 27,
       "options": {
-      "footer": {
+        "footer": {
           "fields": "",
           "reducer": [
             "sum"
