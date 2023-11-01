@@ -7,6 +7,7 @@ import (
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/version"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 	http.HandleFunc("/reset", ResetHandler)
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
+	logging.Infof("Build information: version=%s revision=%s", version.Version, version.Revision)
 	logging.Infof("Server listening on %s", bind)
 
 	err := http.ListenAndServe(bind, nil)

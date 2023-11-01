@@ -2,10 +2,12 @@ package collector
 
 import (
 	"fmt"
+	"runtime"
 	"strings"
 	"sync"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/version"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/expfmt"
 )
@@ -19,9 +21,13 @@ type Collector struct {
 	registry   *prometheus.Registry
 	collected  *sync.Cond
 	collecting bool
-	error      error
 	retries    uint
+	errors     uint
 	builder    *strings.Builder
+
+	// Exporter
+	ExporterBuildInfo         *prometheus.Desc
+	ExporterScrapeErrorsTotal *prometheus.Desc
 
 	// System
 	SystemPowerOn      *prometheus.Desc
@@ -70,6 +76,20 @@ func NewCollector() *Collector {
 	prefix := config.Config.MetricsPrefix
 
 	collector := &Collector{
+		ExporterBuildInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "exporter", "build_info"),
+			"Constant metric with build information for the exporter",
+			nil, prometheus.Labels{
+				"version":   version.Version,
+				"revision":  version.Revision,
+				"goversion": runtime.Version(),
+			},
+		),
+		ExporterScrapeErrorsTotal: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "exporter", "scrape_errors_total"),
+			"Total number of errors encountered while scraping target",
+			nil, nil,
+		),
 		SystemPowerOn: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "power_on"),
 			"Power state of the system",
@@ -221,6 +241,8 @@ func NewCollector() *Collector {
 }
 
 func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
+	ch <- collector.ExporterBuildInfo
+	ch <- collector.ExporterScrapeErrorsTotal
 	ch <- collector.SystemPowerOn
 	ch <- collector.SystemHealth
 	ch <- collector.SystemIndicatorLED
@@ -252,49 +274,44 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
-	collector.error = nil
 	if config.Config.Collect.System {
 		err := collector.client.RefreshSystem(collector, ch)
 		if err != nil {
-			collector.error = err
-			return
+			collector.errors++
 		}
 	}
 	if config.Config.Collect.Sensors {
 		err := collector.client.RefreshSensors(collector, ch)
 		if err != nil {
-			collector.error = err
-			return
+			collector.errors++
 		}
 	}
 	if config.Config.Collect.Power {
 		err := collector.client.RefreshPower(collector, ch)
 		if err != nil {
-			collector.error = err
-			return
+			collector.errors++
 		}
 	}
 	if config.Config.Collect.SEL {
 		err := collector.client.RefreshIdracSel(collector, ch)
 		if err != nil {
-			collector.error = err
-			return
+			collector.errors++
 		}
 	}
 	if config.Config.Collect.Storage {
 		err := collector.client.RefreshStorage(collector, ch)
 		if err != nil {
-			collector.error = err
-			return
+			collector.errors++
 		}
 	}
 	if config.Config.Collect.Memory {
 		err := collector.client.RefreshMemory(collector, ch)
 		if err != nil {
-			collector.error = err
-			return
+			collector.errors++
 		}
 	}
+	ch <- prometheus.MustNewConstMetric(collector.ExporterBuildInfo, prometheus.UntypedValue, 1)
+	ch <- prometheus.MustNewConstMetric(collector.ExporterScrapeErrorsTotal, prometheus.GaugeValue, float64(collector.errors))
 }
 
 func (collector *Collector) Gather() (string, error) {
@@ -304,13 +321,8 @@ func (collector *Collector) Gather() (string, error) {
 	if collector.collecting {
 		collector.collected.Wait()
 		metrics := collector.builder.String()
-		err := collector.error
 		collector.collected.L.Unlock()
-		if err != nil {
-			return "", err
-		} else {
-			return metrics, nil
-		}
+		return metrics, nil
 	}
 
 	// Set collecting to true and let other goroutines enter in critical section
@@ -331,9 +343,6 @@ func (collector *Collector) Gather() (string, error) {
 	m, err := collector.registry.Gather()
 	if err != nil {
 		return "", err
-	}
-	if collector.error != nil {
-		return "", collector.error
 	}
 
 	for i := range m {
