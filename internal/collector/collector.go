@@ -40,6 +40,7 @@ type Collector struct {
 
 	// Sensors
 	SensorsTemperature *prometheus.Desc
+	SensorsFanHealth   *prometheus.Desc
 	SensorsFanSpeed    *prometheus.Desc
 
 	// Power supply
@@ -129,6 +130,11 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "sensors", "temperature"),
 			"Sensors reporting temperature measurements",
 			[]string{"id", "name", "units"}, nil,
+		),
+		SensorsFanHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensors", "fan_health"),
+			"Health status for fans",
+			[]string{"id", "name", "status"}, nil,
 		),
 		SensorsFanSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "fan_speed"),
@@ -251,6 +257,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SystemBiosInfo
 	ch <- collector.SystemMachineInfo
 	ch <- collector.SensorsTemperature
+	ch <- collector.SensorsFanHealth
 	ch <- collector.SensorsFanSpeed
 	ch <- collector.PowerSupplyOutputWatts
 	ch <- collector.PowerSupplyInputWatts

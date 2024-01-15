@@ -131,6 +131,7 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 			continue
 		}
 
+		ch <- mc.NewSensorsFanHealth(f.MemberId, name, f.Status.Health)
 		ch <- mc.NewSensorsFanSpeed(f.GetReading(), f.MemberId, name, strings.ToLower(units))
 	}
 
@@ -267,7 +268,7 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 
 		ch <- mc.NewMemoryModuleInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)
 		ch <- mc.NewMemoryModuleHealth(m.Id, m.Status.Health)
-		ch <- mc.NewMemoryModuleCapacity(m.Id, m.CapacityMiB * 1048576)
+		ch <- mc.NewMemoryModuleCapacity(m.Id, m.CapacityMiB*1048576)
 		ch <- mc.NewMemoryModuleSpeed(m.Id, m.OperatingSpeedMhz)
 	}
 
@@ -282,7 +283,7 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Basic " + client.basicAuth)
+	req.Header.Add("Authorization", "Basic "+client.basicAuth)
 	req.Header.Add("Accept", "application/json")
 
 	logging.Debugf("Querying url %q", url)
