@@ -125,6 +125,16 @@ func (mc *Collector) NewSensorsFanSpeed(speed float64, id, name, units string) p
 	)
 }
 
+func (mc *Collector) NewPowerSupplyHealth(health, id string) prometheus.Metric {
+	value := health2value(health)
+	return prometheus.MustNewConstMetric(
+		mc.PowerSupplyHealth,
+		prometheus.GaugeValue,
+		value,
+		id,
+		health,
+	)
+}
 func (mc *Collector) NewPowerSupplyInputWatts(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyInputWatts,

@@ -171,6 +171,7 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 		}
 
 		id := strconv.Itoa(i)
+		ch <- mc.NewPowerSupplyHealth(psu.Status.Health, id)
 		ch <- mc.NewPowerSupplyInputWatts(psu.PowerInputWatts, id)
 		ch <- mc.NewPowerSupplyInputVoltage(psu.LineInputVoltage, id)
 		ch <- mc.NewPowerSupplyOutputWatts(psu.GetOutputPower(), id)

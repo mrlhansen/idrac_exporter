@@ -95,6 +95,7 @@ idrac_sensors_fan_speed{id="0",name="FAN1A",units="rpm"} 7912
 These metrics include two sets of power readings. The first set is PSU power readings, such as power usage, total power capacity, input voltage and efficiency. Be aware that not all metrics are available on all systems.
 
 ```text
+idrac_power_supply_health{id="0",status="OK"} 0
 idrac_power_supply_output_watts{id="0"} 74.5
 idrac_power_supply_input_watts{id="0"} 89
 idrac_power_supply_capacity_watts{id="0"} 750
