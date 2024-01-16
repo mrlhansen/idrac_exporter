@@ -27,6 +27,7 @@ type RootConfig struct {
 		Power   bool `yaml:"power"`
 		Storage bool `yaml:"storage"`
 		Memory  bool `yaml:"memory"`
+		Network bool `yaml:"network"`
 	} `yaml:"metrics"`
 	Timeout       uint                   `yaml:"timeout"`
 	Retries       uint                   `yaml:"retries"`

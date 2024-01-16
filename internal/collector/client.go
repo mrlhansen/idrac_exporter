@@ -24,6 +24,7 @@ type Client struct {
 	powerPath   string
 	storagePath string
 	memoryPath  string
+	networkPath string
 }
 
 func newHttpClient() *http.Client {
@@ -90,6 +91,7 @@ func (client *Client) findAllEndpoints() error {
 
 	client.storagePath = system.Storage.OdataId
 	client.memoryPath = system.Memory.OdataId
+	client.networkPath = system.NetworkInterfaces.OdataId
 	client.thermalPath = chassis.Thermal.OdataId
 	client.powerPath = chassis.Power.OdataId
 
@@ -152,6 +154,49 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	ch <- mc.NewSystemCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
 	ch <- mc.NewSystemBiosInfo(resp.BiosVersion)
 	ch <- mc.NewSystemMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
+
+	return nil
+}
+
+func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric) error {
+	var group GroupResponse
+	var ni NetworkInterface
+	var ports GroupResponse
+	var port NetworkPort
+
+	err := client.redfishGet(client.networkPath, &group)
+	if err != nil {
+		return err
+	}
+
+	for _, c := range group.Members {
+		err = client.redfishGet(c.OdataId, &ni)
+		if err != nil {
+			return err
+		}
+
+		if ni.Status.State != StateEnabled {
+			continue
+		}
+
+		ch <- mc.NewNetworkInterfaceHealth(ni.Id, ni.Status.Health)
+
+		err = client.redfishGet(ni.NetworkPorts.OdataId, &ports)
+		if err != nil {
+			return err
+		}
+
+		for _, c := range ports.Members {
+			err = client.redfishGet(c.OdataId, &port)
+			if err != nil {
+				return err
+			}
+
+			ch <- mc.NewNetworkPortHealth(port.Id, port.Status.Health)
+			ch <- mc.NewNetworkPortSpeed(port.Id, port.CurrentSpeed)
+			ch <- mc.NewNetworkPortLinkUp(port.Id, port.LinkStatus)
+		}
+	}
 
 	return nil
 }

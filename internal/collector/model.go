@@ -241,6 +241,23 @@ type Memory struct {
 	Status            Status `json:"Status"`
 }
 
+type NetworkInterface struct {
+	Id           string `json:"Id"`
+	Name         string `json:"Name"`
+	Description  string `json:"Description"`
+	Status       Status `json:"Status"`
+	NetworkPorts Odata  `json:"NetworkPorts"`
+}
+
+type NetworkPort struct {
+	Id           string `json:"Id"`
+	Name         string `json:"Name"`
+	Description  string `json:"Description"`
+	LinkStatus   string `json:"LinkStatus"`
+	CurrentSpeed int    `json:"CurrentLinkSpeedMbps"`
+	Status       Status `json:"Status"`
+}
+
 type SystemResponse struct {
 	IndicatorLED string `json:"IndicatorLED"`
 	Manufacturer string `json:"Manufacturer"`
