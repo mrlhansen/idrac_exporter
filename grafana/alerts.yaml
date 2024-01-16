@@ -1,11 +1,20 @@
 groups:
-  - name: 'idrac-alerts'
+  - name: "idrac-alerts"
     rules:
       - alert: ServerNotHealthy
         expr: idrac_system_health{status!="OK"}
         for: 3m
         labels:
-          severity: critical
+          severity: >
+            {{- if $labels.status -}}
+            {{- if eq $labels.status "Warning" -}}
+            warning
+            {{- else if eq $labels.status "Critical" -}}
+            critical
+            {{- end -}}
+            {{- else -}}
+            critical
+            {{- end -}}
         annotations:
           description: Server {{ $labels.instance }} is not healthy, current status is {{ $labels.status }}.
           summary: Hardware server status is not healthy.
