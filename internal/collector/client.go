@@ -242,6 +242,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			ch <- mc.NewDriveInfo(d.Id, d.Name, d.Manufacturer, d.Model, d.SerialNumber, d.MediaType, d.Protocol, d.GetSlot())
 			ch <- mc.NewDriveHealth(d.Id, d.Status.Health)
 			ch <- mc.NewDriveCapacity(d.Id, d.CapacityBytes)
+			ch <- mc.NewDriveLifeLeft(d.Id, d.PredictedLifeLeft)
 		}
 	}
 

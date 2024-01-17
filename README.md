@@ -128,6 +128,7 @@ These metrics include information about disk drives in the machine.
 idrac_drive_info{id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
 idrac_drive_health{id="Disk.Direct.1-1:AHCI.Slot.5-1",status="OK"} 0
 idrac_drive_capacity_bytes{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
+idrac_drive_life_left_percent{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 100
 ```
 
 ### Memory

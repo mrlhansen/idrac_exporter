@@ -66,6 +66,7 @@ type Collector struct {
 	DriveInfo     *prometheus.Desc
 	DriveHealth   *prometheus.Desc
 	DriveCapacity *prometheus.Desc
+	DriveLifeLeft *prometheus.Desc
 
 	// Memory modules
 	MemoryModuleInfo     *prometheus.Desc
@@ -222,6 +223,11 @@ func NewCollector() *Collector {
 			"Capacity of disk drives in bytes",
 			[]string{"id"}, nil,
 		),
+		DriveLifeLeft: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "drive", "life_left_percent"),
+			"Predicted life left in percent",
+			[]string{"id"}, nil,
+		),
 		MemoryModuleInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "info"),
 			"Information about memory modules",
@@ -281,6 +287,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.DriveInfo
 	ch <- collector.DriveHealth
 	ch <- collector.DriveCapacity
+	ch <- collector.DriveLifeLeft
 	ch <- collector.MemoryModuleInfo
 	ch <- collector.MemoryModuleHealth
 	ch <- collector.MemoryModuleCapacity

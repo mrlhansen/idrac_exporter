@@ -296,6 +296,15 @@ func (mc *Collector) NewDriveCapacity(id string, capacity int) prometheus.Metric
 	)
 }
 
+func (mc *Collector) NewDriveLifeLeft(id string, lifeLeft int) prometheus.Metric {
+	return prometheus.MustNewConstMetric(
+		mc.DriveLifeLeft,
+		prometheus.GaugeValue,
+		float64(lifeLeft),
+		id,
+	)
+}
+
 func (mc *Collector) NewMemoryModuleInfo(id, name, manufacturer, memtype, serial, ecc string, rank int) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.MemoryModuleInfo,
