@@ -40,9 +40,11 @@ type Collector struct {
 
 	// Sensors
 	SensorsTemperature *prometheus.Desc
+	SensorsFanHealth   *prometheus.Desc
 	SensorsFanSpeed    *prometheus.Desc
 
 	// Power supply
+	PowerSupplyHealth            *prometheus.Desc
 	PowerSupplyOutputWatts       *prometheus.Desc
 	PowerSupplyInputWatts        *prometheus.Desc
 	PowerSupplyCapacityWatts     *prometheus.Desc
@@ -64,6 +66,7 @@ type Collector struct {
 	DriveInfo     *prometheus.Desc
 	DriveHealth   *prometheus.Desc
 	DriveCapacity *prometheus.Desc
+	DriveLifeLeft *prometheus.Desc
 
 	// Memory modules
 	MemoryModuleInfo     *prometheus.Desc
@@ -130,10 +133,20 @@ func NewCollector() *Collector {
 			"Sensors reporting temperature measurements",
 			[]string{"id", "name", "units"}, nil,
 		),
+		SensorsFanHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensors", "fan_health"),
+			"Health status for fans",
+			[]string{"id", "name", "status"}, nil,
+		),
 		SensorsFanSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "fan_speed"),
 			"Sensors reporting fan speed measurements",
 			[]string{"id", "name", "units"}, nil,
+		),
+		PowerSupplyHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "power_supply", "health"),
+			"Power supply health status",
+			[]string{"id", "status"}, nil,
 		),
 		PowerSupplyOutputWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "output_watts"),
@@ -210,6 +223,11 @@ func NewCollector() *Collector {
 			"Capacity of disk drives in bytes",
 			[]string{"id"}, nil,
 		),
+		DriveLifeLeft: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "drive", "life_left_percent"),
+			"Predicted life left in percent",
+			[]string{"id"}, nil,
+		),
 		MemoryModuleInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "info"),
 			"Information about memory modules",
@@ -251,7 +269,9 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SystemBiosInfo
 	ch <- collector.SystemMachineInfo
 	ch <- collector.SensorsTemperature
+	ch <- collector.SensorsFanHealth
 	ch <- collector.SensorsFanSpeed
+	ch <- collector.PowerSupplyHealth
 	ch <- collector.PowerSupplyOutputWatts
 	ch <- collector.PowerSupplyInputWatts
 	ch <- collector.PowerSupplyCapacityWatts
@@ -267,6 +287,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.DriveInfo
 	ch <- collector.DriveHealth
 	ch <- collector.DriveCapacity
+	ch <- collector.DriveLifeLeft
 	ch <- collector.MemoryModuleInfo
 	ch <- collector.MemoryModuleHealth
 	ch <- collector.MemoryModuleCapacity

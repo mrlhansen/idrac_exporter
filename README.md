@@ -83,10 +83,11 @@ idrac_system_machine_info{manufacturer="Dell Inc.",model="PowerEdge C6420",seria
 ```
 
 ### Sensors
-These metrics include temperature and FAN speeds.
+These metrics include temperature and FAN health and speeds.
 
 ```text
 idrac_sensors_temperature{id="0",name="Inlet Temp",units="celsius"} 19
+idrac_sensors_fan_health{id="0",name="FAN1A",status="OK"} 0
 idrac_sensors_fan_speed{id="0",name="FAN1A",units="rpm"} 7912
 ```
 
@@ -94,6 +95,7 @@ idrac_sensors_fan_speed{id="0",name="FAN1A",units="rpm"} 7912
 These metrics include two sets of power readings. The first set is PSU power readings, such as power usage, total power capacity, input voltage and efficiency. Be aware that not all metrics are available on all systems.
 
 ```text
+idrac_power_supply_health{id="0",status="OK"} 0
 idrac_power_supply_output_watts{id="0"} 74.5
 idrac_power_supply_input_watts{id="0"} 89
 idrac_power_supply_capacity_watts{id="0"} 750
@@ -126,6 +128,7 @@ These metrics include information about disk drives in the machine.
 idrac_drive_info{id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
 idrac_drive_health{id="Disk.Direct.1-1:AHCI.Slot.5-1",status="OK"} 0
 idrac_drive_capacity_bytes{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
+idrac_drive_life_left_percent{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 100
 ```
 
 ### Memory

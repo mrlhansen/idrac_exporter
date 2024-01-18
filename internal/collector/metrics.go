@@ -2,8 +2,8 @@ package collector
 
 import (
 	"fmt"
-	"strings"
 	"github.com/prometheus/client_golang/prometheus"
+	"strings"
 	"time"
 )
 
@@ -103,6 +103,17 @@ func (mc *Collector) NewSensorsTemperature(temperature float64, id, name, units 
 	)
 }
 
+func (mc *Collector) NewSensorsFanHealth(id, name, health string) prometheus.Metric {
+	value := health2value(health)
+	return prometheus.MustNewConstMetric(
+		mc.SensorsFanHealth,
+		prometheus.GaugeValue,
+		value,
+		id,
+		name,
+		health,
+	)
+}
 func (mc *Collector) NewSensorsFanSpeed(speed float64, id, name, units string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SensorsFanSpeed,
@@ -114,6 +125,16 @@ func (mc *Collector) NewSensorsFanSpeed(speed float64, id, name, units string) p
 	)
 }
 
+func (mc *Collector) NewPowerSupplyHealth(health, id string) prometheus.Metric {
+	value := health2value(health)
+	return prometheus.MustNewConstMetric(
+		mc.PowerSupplyHealth,
+		prometheus.GaugeValue,
+		value,
+		id,
+		health,
+	)
+}
 func (mc *Collector) NewPowerSupplyInputWatts(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyInputWatts,
@@ -271,6 +292,15 @@ func (mc *Collector) NewDriveCapacity(id string, capacity int) prometheus.Metric
 		mc.DriveCapacity,
 		prometheus.GaugeValue,
 		float64(capacity),
+		id,
+	)
+}
+
+func (mc *Collector) NewDriveLifeLeft(id string, lifeLeft int) prometheus.Metric {
+	return prometheus.MustNewConstMetric(
+		mc.DriveLifeLeft,
+		prometheus.GaugeValue,
+		float64(lifeLeft),
 		id,
 	)
 }
