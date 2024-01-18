@@ -13,3 +13,4 @@ metrics:
   sel: true        # iDRAC only
   storage: true
   memory: true
+  network: true

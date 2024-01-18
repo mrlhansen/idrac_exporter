@@ -73,6 +73,12 @@ type Collector struct {
 	MemoryModuleHealth   *prometheus.Desc
 	MemoryModuleCapacity *prometheus.Desc
 	MemoryModuleSpeed    *prometheus.Desc
+
+	// Network
+	NetworkInterfaceHealth *prometheus.Desc
+	NetworkPortHealth      *prometheus.Desc
+	NetworkPortSpeed       *prometheus.Desc
+	NetworkPortLinkUp      *prometheus.Desc
 }
 
 func NewCollector() *Collector {
@@ -248,6 +254,26 @@ func NewCollector() *Collector {
 			"Speed of memory modules in Mhz",
 			[]string{"id"}, nil,
 		),
+		NetworkInterfaceHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_interface", "health"),
+			"Health status for network interfaces",
+			[]string{"id", "status"}, nil,
+		),
+		NetworkPortHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_port", "health"),
+			"Health status for network ports",
+			[]string{"id", "status"}, nil,
+		),
+		NetworkPortSpeed: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_port", "speed_mbps"),
+			"Link speed of ports in Mbps",
+			[]string{"id"}, nil,
+		),
+		NetworkPortLinkUp: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_port", "link_up"),
+			"Status of network ports, Up or Down",
+			[]string{"id", "status"}, nil,
+		),
 	}
 
 	collector.builder = new(strings.Builder)
@@ -292,6 +318,10 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.MemoryModuleHealth
 	ch <- collector.MemoryModuleCapacity
 	ch <- collector.MemoryModuleSpeed
+	ch <- collector.NetworkInterfaceHealth
+	ch <- collector.NetworkPortHealth
+	ch <- collector.NetworkPortSpeed
+	ch <- collector.NetworkPortLinkUp
 }
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
@@ -309,6 +339,12 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	}
 	if config.Config.Collect.Power {
 		err := collector.client.RefreshPower(collector, ch)
+		if err != nil {
+			collector.errors++
+		}
+	}
+	if config.Config.Collect.Network {
+		err := collector.client.RefreshNetwork(collector, ch)
 		if err != nil {
 			collector.errors++
 		}

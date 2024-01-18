@@ -19,6 +19,16 @@ func health2value(health string) float64 {
 	return 10
 }
 
+func linkstatus2value(status string) float64 {
+	switch status {
+	case "Down":
+		return 0
+	case "Up":
+		return 1
+	}
+	return 10
+}
+
 func (mc *Collector) NewSystemPowerOn(state string) prometheus.Metric {
 	var value float64
 	if state == "On" {
@@ -346,5 +356,47 @@ func (mc *Collector) NewMemoryModuleSpeed(id string, speed int) prometheus.Metri
 		prometheus.GaugeValue,
 		float64(speed),
 		id,
+	)
+}
+
+func (mc *Collector) NewNetworkInterfaceHealth(id, health string) prometheus.Metric {
+	value := health2value(health)
+	return prometheus.MustNewConstMetric(
+		mc.NetworkInterfaceHealth,
+		prometheus.GaugeValue,
+		value,
+		id,
+		health,
+	)
+}
+
+func (mc *Collector) NewNetworkPortHealth(id, health string) prometheus.Metric {
+	value := health2value(health)
+	return prometheus.MustNewConstMetric(
+		mc.NetworkPortHealth,
+		prometheus.GaugeValue,
+		value,
+		id,
+		health,
+	)
+}
+
+func (mc *Collector) NewNetworkPortSpeed(id string, speed int) prometheus.Metric {
+	return prometheus.MustNewConstMetric(
+		mc.NetworkPortSpeed,
+		prometheus.GaugeValue,
+		float64(speed),
+		id,
+	)
+}
+
+func (mc *Collector) NewNetworkPortLinkUp(id, status string) prometheus.Metric {
+	value := linkstatus2value(status)
+	return prometheus.MustNewConstMetric(
+		mc.NetworkPortLinkUp,
+		prometheus.GaugeValue,
+		value,
+		id,
+		status,
 	)
 }

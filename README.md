@@ -57,6 +57,7 @@ metrics:
   sel: false       # iDRAC only
   storage: false
   memory: false
+  network: false
 ```
 
 As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
@@ -139,6 +140,16 @@ idrac_memory_module_info{ecc="MultiBitECC",id="DIMM.Socket.A2",manufacturer="Mic
 idrac_memory_module_health{id="DIMM.Socket.A2",status="OK"} 0
 idrac_memory_module_capacity_bytes{id="DIMM.Socket.A2"} 34359738368
 idrac_memory_module_speed_mhz{id="DIMM.Socket.A2"} 2400
+```
+
+### Network
+These metrics include health of network interfaces, as well as health, link speed, and link status for each of the network ports.
+
+```text
+idrac_network_interface_health{id="NIC.Embedded.1",status="OK"} 0
+idrac_network_port_health{id="NIC.Embedded.1-1",status="OK"} 0
+idrac_network_port_link_up{id="NIC.Embedded.1-1",status="Up"} 1
+idrac_network_port_speed_mbps{id="NIC.Embedded.1-1"} 1000
 ```
 
 ### Exporter
