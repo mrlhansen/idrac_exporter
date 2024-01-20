@@ -4,13 +4,14 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/mrlhansen/idrac_exporter/internal/config"
-	"github.com/mrlhansen/idrac_exporter/internal/logging"
-	"github.com/prometheus/client_golang/prometheus"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mrlhansen/idrac_exporter/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 const redfishRootPath = "/redfish/v1"
@@ -323,8 +324,11 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 }
 
 func (client *Client) redfishGet(path string, res interface{}) error {
-	url := "https://" + client.hostname + path
+	if !strings.HasPrefix(path, redfishRootPath) {
+		return fmt.Errorf("invalid url for redfish request")
+	}
 
+	url := "https://" + client.hostname + path
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err

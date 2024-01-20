@@ -2,9 +2,10 @@ package collector
 
 import (
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
 	"strings"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 func health2value(health string) float64 {
@@ -21,8 +22,7 @@ func health2value(health string) float64 {
 
 func linkstatus2value(status string) float64 {
 	switch status {
-	case "LinkUp":
-	case "Up":
+	case "Up", "LinkUp":
 		return 1
 	}
 	return 0
