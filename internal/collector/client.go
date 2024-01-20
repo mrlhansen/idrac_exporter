@@ -182,7 +182,7 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 
 		ch <- mc.NewNetworkInterfaceHealth(ni.Id, ni.Status.Health)
 
-		err = client.redfishGet(ni.NetworkPorts.OdataId, &ports)
+		err = client.redfishGet(ni.GetPorts(), &ports)
 		if err != nil {
 			return err
 		}
@@ -193,9 +193,9 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 				return err
 			}
 
-			ch <- mc.NewNetworkPortHealth(port.Id, port.Status.Health)
-			ch <- mc.NewNetworkPortSpeed(port.Id, port.CurrentSpeed)
-			ch <- mc.NewNetworkPortLinkUp(port.Id, port.LinkStatus)
+			ch <- mc.NewNetworkPortHealth(ni.Id, port.Id, port.Status.Health)
+			ch <- mc.NewNetworkPortSpeed(ni.Id, port.Id, port.GetSpeed())
+			ch <- mc.NewNetworkPortLinkUp(ni.Id, port.Id, port.LinkStatus)
 		}
 	}
 

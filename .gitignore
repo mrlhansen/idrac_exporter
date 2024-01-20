@@ -1,2 +1,3 @@
 # Jetbrains IDE local configs
 /.idea/
+.DS_Store

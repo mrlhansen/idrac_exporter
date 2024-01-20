@@ -248,15 +248,33 @@ type NetworkInterface struct {
 	Description  string `json:"Description"`
 	Status       Status `json:"Status"`
 	NetworkPorts Odata  `json:"NetworkPorts"`
+	Ports        Odata  `json:"Ports"`
+}
+
+func (n *NetworkInterface) GetPorts() string {
+	if n.NetworkPorts.OdataId != "" {
+		return n.NetworkPorts.OdataId
+	} else {
+		return n.Ports.OdataId
+	}
 }
 
 type NetworkPort struct {
-	Id           string `json:"Id"`
-	Name         string `json:"Name"`
-	Description  string `json:"Description"`
-	LinkStatus   string `json:"LinkStatus"`
-	CurrentSpeed int    `json:"CurrentLinkSpeedMbps"`
-	Status       Status `json:"Status"`
+	Id                   string `json:"Id"`
+	Name                 string `json:"Name"`
+	Description          string `json:"Description"`
+	LinkStatus           string `json:"LinkStatus"`
+	CurrentLinkSpeedMbps int    `json:"CurrentLinkSpeedMbps"`
+	CurrentSpeedGbps     int    `json:"CurrentSpeedGbps"`
+	Status               Status `json:"Status"`
+}
+
+func (n *NetworkPort) GetSpeed() int {
+	if n.CurrentLinkSpeedMbps > 0 {
+		return n.CurrentLinkSpeedMbps
+	} else {
+		return 1000 * n.CurrentSpeedGbps
+	}
 }
 
 type SystemResponse struct {

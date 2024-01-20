@@ -147,9 +147,9 @@ These metrics include health of network interfaces, as well as health, link spee
 
 ```text
 idrac_network_interface_health{id="NIC.Embedded.1",status="OK"} 0
-idrac_network_port_health{id="NIC.Embedded.1-1",status="OK"} 0
-idrac_network_port_link_up{id="NIC.Embedded.1-1",status="Up"} 1
-idrac_network_port_speed_mbps{id="NIC.Embedded.1-1"} 1000
+idrac_network_port_health{id="NIC.Embedded.1-1",interface="NIC.Embedded.1",status="OK"} 0
+idrac_network_port_link_up{id="NIC.Embedded.1-1",interface="NIC.Embedded.1",status="Up"} 1
+idrac_network_port_speed_mbps{id="NIC.Embedded.1-1",interface="NIC.Embedded.1"} 1000
 ```
 
 ### Exporter
