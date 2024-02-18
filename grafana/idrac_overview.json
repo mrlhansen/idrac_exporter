@@ -38,7 +38,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 44,
+  "id": 288,
   "links": [
     {
       "asDropdown": false,
@@ -55,6 +55,168 @@
   ],
   "liveNow": false,
   "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Servers with health problems",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "Drill down to instance",
+              "url": "d/YVz226S4z?var-instance=${__field.labels.instance}&${__url_time_range}"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "light-green",
+                  "index": 2,
+                  "text": "OK"
+                },
+                "1": {
+                  "color": "light-yellow",
+                  "index": 3,
+                  "text": "Warning"
+                },
+                "2": {
+                  "color": "light-red",
+                  "index": 1,
+                  "text": "Critical"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "text",
+                  "index": 0,
+                  "text": "N/A"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "noValue": "No issues found.",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "hideTimeOverride": true,
+      "id": 32,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 300,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.3",
+      "targets": [
+        {
+          "alias": "",
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto"
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"} > 0",
+          "format": "time_series",
+          "instant": true,
+          "legendFormat": "{{instance}}",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "",
+          "range": false,
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "title": "Health",
+      "transformations": [
+        {
+          "disabled": true,
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "pattern": "Time|instance|status"
+            }
+          }
+        },
+        {
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "instance",
+            "emptyValue": "null",
+            "rowField": "Time",
+            "valueField": "status"
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "time",
+                "targetField": "Time\\instance"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "stat"
+    },
     {
       "datasource": {
         "type": "prometheus",
@@ -123,10 +285,11 @@
         "h": 14,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 9
       },
       "hideTimeOverride": true,
       "id": 8,
+      "interval": "1m",
       "links": [],
       "maxDataPoints": 300,
       "options": {
@@ -215,80 +378,183 @@
       "type": "status-history"
     },
     {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 23
+      },
+      "id": 12,
+      "panels": [],
+      "title": "Sensors",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
+      "description": "Top 10",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "mode": "palette-classic"
           },
           "custom": {
-            "fillOpacity": 70,
-            "lineWidth": 1
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "line"
+            }
           },
+          "decimals": 0,
           "links": [
             {
               "title": "Drill down to instance",
-              "url": "d/YVz226S4z?var-instance=${__field.name}&${__url_time_range}"
+              "url": "d/YVz226S4z?var-instance=${__field.labels.instance}&${__url_time_range}"
             }
           ],
-          "mappings": [
-            {
-              "options": {
-                "0": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "Off"
-                },
-                "1": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "On"
-                }
-              },
-              "type": "value"
-            }
-          ],
+          "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": null
+              },
+              {
+                "color": "red",
+                "value": 27
               }
             ]
           },
-          "unit": "none"
+          "unit": "celsius"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/Mean.*/"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "inlet_top"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-blue",
+                  "mode": "continuous-blues"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "inlet_avg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "outlet_top"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "continuous-reds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "outlet_avg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
-        "h": 14,
-        "w": 24,
+        "h": 9,
+        "w": 12,
         "x": 0,
-        "y": 14
+        "y": 24
       },
-      "hideTimeOverride": true,
-      "id": 30,
-      "links": [],
-      "maxDataPoints": 300,
+      "id": 33,
+      "interval": "1m",
       "options": {
-        "colWidth": 0.9,
         "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
         },
-        "rowHeight": 0.9,
-        "showValue": "never",
         "tooltip": {
-          "mode": "single",
-          "sort": "none"
+          "mode": "multi",
+          "sort": "desc"
         }
       },
-      "pluginVersion": "9.2.7",
       "targets": [
         {
           "alias": "",
@@ -308,10 +574,384 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_system_power_on{instance=~\"$instance\", job=\"$job\"}",
-          "format": "time_series",
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
           "instant": false,
-          "legendFormat": "{{instance}}",
+          "interval": "",
+          "legendFormat": "{{instance}}: {{name}}",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "",
+          "range": true,
+          "refId": "inlet_top",
+          "timeField": "@timestamp"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "avg (avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "Mean: Inlet",
+          "range": true,
+          "refId": "inlet_avg"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "bottomk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\".*Inlet.*|.*Ambient.*\"}[$__rate_interval])) < 19",
+          "hide": true,
+          "instant": false,
+          "legendFormat": "{{instance}}: {{name}}",
+          "range": true,
+          "refId": "inlet_cold"
+        }
+      ],
+      "title": "Temperature Inlet",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Top 10",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 4,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "links": [
+            {
+              "title": "Drill down to instance",
+              "url": "d/YVz226S4z?var-instance=${__field.labels.instance}&${__url_time_range}"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "/Mean.*/"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "inlet_top"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "super-light-blue",
+                  "mode": "continuous-blues"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "inlet_avg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "light-blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "outlet_top"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "continuous-reds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "outlet_avg"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 24
+      },
+      "id": 34,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "Mean: Outlet",
+          "range": true,
+          "refId": "outlet_avg"
+        },
+        {
+          "alias": "",
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto"
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "hide": false,
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{instance}}: {{name}}",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "",
+          "range": true,
+          "refId": "outlet_top",
+          "timeField": "@timestamp"
+        }
+      ],
+      "title": "Temperature Outlet",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Top 10",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "points",
+            "fillOpacity": 10,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "pointSize": 3,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "links": [
+            {
+              "title": "Drill down to instance",
+              "url": "d/YVz226S4z?var-instance=${__field.labels.instance}&${__url_time_range}"
+            }
+          ],
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "celsius"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 33
+      },
+      "id": 31,
+      "interval": "1m",
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull",
+            "max"
+          ],
+          "displayMode": "table",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "alias": "",
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto"
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name!~\"CPU.+|.*Inlet.*|.*Ambient.*|Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "{{instance}}: {{name}}",
           "metrics": [
             {
               "id": "1",
@@ -322,24 +962,22 @@
           "range": true,
           "refId": "A",
           "timeField": "@timestamp"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name!~\"CPU.+|.*Inlet.+|Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "Mean: {{name}}",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "Power",
-      "transformations": [],
-      "type": "status-history"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 28
-      },
-      "id": 12,
-      "panels": [],
-      "title": "Sensors",
-      "type": "row"
+      "title": "Temperature other",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -421,16 +1059,19 @@
         ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 29
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 33
       },
       "id": 14,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [
-            "mean"
+            "mean",
+            "lastNotNull",
+            "max"
           ],
           "displayMode": "table",
           "placement": "right",
@@ -460,7 +1101,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(5, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"CPU.+\"}[$__rate_interval]))",
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"CPU.+\"}[$__rate_interval]))",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}: {{name}}",
@@ -496,151 +1137,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "points",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "smooth",
-            "lineWidth": 1,
-            "pointSize": 3,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 0,
-          "links": [
-            {
-              "title": "Drill down to instance",
-              "url": "d/YVz226S4z?var-instance=${__field.labels.instance}&${__url_time_range}"
-            }
-          ],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "celsius"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byFrameRefID",
-              "options": "B"
-            },
-            "properties": [
-              {
-                "id": "custom.drawStyle",
-                "value": "line"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 37
-      },
-      "id": 31,
-      "interval": "5m",
-      "options": {
-        "legend": {
-          "calcs": [
-            "mean"
-          ],
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "multi",
-          "sort": "desc"
-        }
-      },
-      "targets": [
-        {
-          "alias": "",
-          "bucketAggs": [
-            {
-              "field": "@timestamp",
-              "id": "2",
-              "settings": {
-                "interval": "auto"
-              },
-              "type": "date_histogram"
-            }
-          ],
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "exemplar": false,
-          "expr": "topk(5, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name!~\"CPU.+\"}[$__rate_interval]))",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "{{instance}}: {{name}}",
-          "metrics": [
-            {
-              "id": "1",
-              "type": "count"
-            }
-          ],
-          "query": "",
-          "range": true,
-          "refId": "A",
-          "timeField": "@timestamp"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "expr": "avg by (name) (avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name!~\"CPU.+\"}[$__rate_interval]))",
-          "hide": false,
-          "legendFormat": "Mean: {{name}}",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Temperature other",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${datasource}"
-      },
+      "description": "Fastest/Slowest",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -688,7 +1185,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -700,9 +1198,10 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 45
+        "y": 43
       },
       "id": 15,
+      "interval": "1m",
       "options": {
         "legend": {
           "calcs": [
@@ -736,7 +1235,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
+          "expr": "bottomk(10,avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=\"$job\"}[$__rate_interval]))",
           "instant": false,
           "legendFormat": "{{instance}}: {{name}}",
           "metrics": [
@@ -749,6 +1248,39 @@
           "range": true,
           "refId": "A",
           "timeField": "@timestamp"
+        },
+        {
+          "alias": "",
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto"
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "topk(10,avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=\"$job\"}[$__rate_interval]))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "{{instance}}: {{name}}",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "",
+          "range": true,
+          "refId": "B",
+          "timeField": "@timestamp"
         }
       ],
       "title": "Fans",
@@ -760,12 +1292,149 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 54
+        "y": 52
       },
       "id": 17,
       "panels": [],
       "title": "Power",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 70,
+            "lineWidth": 1
+          },
+          "links": [
+            {
+              "title": "Drill down to instance",
+              "url": "d/YVz226S4z?var-instance=${__field.name}&${__url_time_range}"
+            }
+          ],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "Off"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "On"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 53
+      },
+      "hideTimeOverride": true,
+      "id": 30,
+      "interval": "1m",
+      "links": [],
+      "maxDataPoints": 300,
+      "options": {
+        "colWidth": 0.9,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "rowHeight": 0.9,
+        "showValue": "never",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "9.2.7",
+      "targets": [
+        {
+          "alias": "",
+          "bucketAggs": [
+            {
+              "field": "@timestamp",
+              "id": "2",
+              "settings": {
+                "interval": "auto"
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "idrac_system_power_on{instance=~\"$instance\", job=\"$job\"}",
+          "format": "table",
+          "instant": false,
+          "legendFormat": "{{instance}}",
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "",
+          "range": true,
+          "refId": "A",
+          "timeField": "@timestamp"
+        }
+      ],
+      "title": "Power",
+      "transformations": [
+        {
+          "id": "groupingToMatrix",
+          "options": {
+            "columnField": "instance",
+            "emptyValue": "null",
+            "rowField": "Time",
+            "valueField": "Value"
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "time",
+                "targetField": "Time\\instance"
+              }
+            ],
+            "fields": {}
+          }
+        }
+      ],
+      "type": "status-history"
     },
     {
       "datasource": {
@@ -855,7 +1524,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 67
       },
       "id": 22,
       "interval": "5m",
@@ -984,7 +1653,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 78
       },
       "id": 19,
       "interval": "5m",
@@ -1058,7 +1727,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 77
+        "y": 89
       },
       "id": 29,
       "panels": [
@@ -1290,7 +1959,7 @@
       "type": "row"
     }
   ],
-  "refresh": "false",
+  "refresh": "30s",
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
@@ -1301,6 +1970,11 @@
   "templating": {
     "list": [
       {
+        "current": {
+          "selected": false,
+          "text": "Victoria",
+          "value": "Victoria"
+        },
         "hide": 0,
         "includeAll": false,
         "label": "Datasource",
@@ -1315,6 +1989,11 @@
         "type": "datasource"
       },
       {
+        "current": {
+          "selected": false,
+          "text": "idrac-exporter",
+          "value": "idrac-exporter"
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "${datasource}"
