@@ -16,10 +16,20 @@ import (
 
 const redfishRootPath = "/redfish/v1"
 
+const (
+	UNKNOWN = iota
+	DELL
+	HPE
+	LENOVO
+	INSPUR
+	H3C
+)
+
 type Client struct {
 	hostname    string
 	basicAuth   string
 	httpClient  *http.Client
+	vendor      int
 	systemPath  string
 	thermalPath string
 	powerPath   string
@@ -95,6 +105,27 @@ func (client *Client) findAllEndpoints() error {
 	client.networkPath = system.NetworkInterfaces.OdataId
 	client.thermalPath = chassis.Thermal.OdataId
 	client.powerPath = chassis.Power.OdataId
+
+	// Vendor
+	v := strings.ToLower(root.Vendor)
+	m := strings.ToLower(system.Manufacturer)
+
+	if strings.Contains(v, "dell") {
+		client.vendor = DELL
+	} else if strings.Contains(v, "hpe") {
+		client.vendor = HPE
+	} else if strings.Contains(v, "lenovo") {
+		client.vendor = LENOVO
+	} else if strings.Contains(m, "inspur") {
+		client.vendor = INSPUR
+	} else if strings.Contains(m, "h3c") {
+		client.vendor = H3C
+	}
+
+	// Fix for Inspur bug
+	if client.vendor == INSPUR {
+		client.storagePath = strings.ReplaceAll(client.storagePath, "Storages", "Storage")
+	}
 
 	return nil
 }
@@ -246,6 +277,10 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 
 func (client *Client) RefreshIdracSel(mc *Collector, ch chan<- prometheus.Metric) error {
 	var resp IdracSelResponse
+
+	if client.vendor != DELL {
+		return nil
+	}
 
 	err := client.redfishGet(redfishRootPath+"/Managers/iDRAC.Embedded.1/Logs/Sel", &resp)
 	if err != nil {
