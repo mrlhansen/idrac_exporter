@@ -25,13 +25,13 @@ type Status struct {
 
 // Redundancy is a common structure used in any entity with redundancy
 type Redundancy struct {
-	Name              string        `json:"Name"`
-	MaxNumSupported   int           `json:"MaxNumSupported"`
-	MinNumNeeded      int           `json:"MinNumNeeded"`
-	Mode              xstring       `json:"Mode"`
-	RedundancyEnabled bool          `json:"RedundancyEnabled"`
-	RedundancySet     []interface{} `json:"RedundancySet"`
-	Status            Status        `json:"Status"`
+	Name              string  `json:"Name"`
+	MaxNumSupported   int     `json:"MaxNumSupported"`
+	MinNumNeeded      int     `json:"MinNumNeeded"`
+	Mode              xstring `json:"Mode"`
+	RedundancyEnabled bool    `json:"RedundancyEnabled"`
+	RedundancySet     []any   `json:"RedundancySet"`
+	Status            Status  `json:"Status"`
 }
 
 // V1Response represents structure of the response body from /redfish/v1
@@ -112,27 +112,27 @@ type ThermalResponse struct {
 }
 
 type Fan struct {
-	Name                      string        `json:"Name"`
-	FanName                   string        `json:"FanName"`
-	Assembly                  Odata         `json:"Assembly"`
-	HotPluggable              bool          `json:"HotPluggable"`
-	LowerThresholdCritical    int           `json:"LowerThresholdCritical"`
-	LowerThresholdFatal       interface{}   `json:"LowerThresholdFatal"`
-	LowerThresholdNonCritical int           `json:"LowerThresholdNonCritical"`
-	MaxReadingRange           interface{}   `json:"MaxReadingRange"`
-	MinReadingRange           interface{}   `json:"MinReadingRange"`
-	PhysicalContext           string        `json:"PhysicalContext"`
-	Reading                   float64       `json:"Reading"`
-	CurrentReading            float64       `json:"CurrentReading"`
-	Units                     string        `json:"Units"`
-	ReadingUnits              string        `json:"ReadingUnits"`
-	Redundancy                []interface{} `json:"Redundancy"`
-	SensorNumber              int           `json:"SensorNumber"`
-	MemberId                  string        `json:"MemberId"`
-	Status                    Status        `json:"Status"`
-	UpperThresholdCritical    interface{}   `json:"UpperThresholdCritical"`
-	UpperThresholdFatal       interface{}   `json:"UpperThresholdFatal"`
-	UpperThresholdNonCritical interface{}   `json:"UpperThresholdNonCritical"`
+	Name                      string       `json:"Name"`
+	FanName                   string       `json:"FanName"`
+	Assembly                  Odata        `json:"Assembly"`
+	HotPluggable              bool         `json:"HotPluggable"`
+	MaxReadingRange           any          `json:"MaxReadingRange"`
+	MinReadingRange           any          `json:"MinReadingRange"`
+	PhysicalContext           string       `json:"PhysicalContext"`
+	Reading                   float64      `json:"Reading"`
+	CurrentReading            float64      `json:"CurrentReading"`
+	Units                     string       `json:"Units"`
+	ReadingUnits              string       `json:"ReadingUnits"`
+	Redundancy                []Redundancy `json:"Redundancy"`
+	SensorNumber              int          `json:"SensorNumber"`
+	MemberId                  string       `json:"MemberId"`
+	Status                    Status       `json:"Status"`
+	LowerThresholdCritical    any          `json:"LowerThresholdCritical"`
+	LowerThresholdFatal       any          `json:"LowerThresholdFatal"`
+	LowerThresholdNonCritical any          `json:"LowerThresholdNonCritical"`
+	UpperThresholdCritical    any          `json:"UpperThresholdCritical"`
+	UpperThresholdFatal       any          `json:"UpperThresholdFatal"`
+	UpperThresholdNonCritical any          `json:"UpperThresholdNonCritical"`
 }
 
 func (f *Fan) GetName() string {
@@ -288,14 +288,14 @@ type SystemResponse struct {
 	Bios         Odata  `json:"Bios"`
 	BiosVersion  string `json:"BiosVersion"`
 	Boot         *struct {
-		BootOptions                                    Odata       `json:"BootOptions"`
-		Certificates                                   Odata       `json:"Certificates"`
-		BootOrder                                      []string    `json:"BootOrder"`
-		BootSourceOverrideEnabled                      string      `json:"BootSourceOverrideEnabled"`
-		BootSourceOverrideMode                         string      `json:"BootSourceOverrideMode"`
-		BootSourceOverrideTarget                       string      `json:"BootSourceOverrideTarget"`
-		UefiTargetBootSourceOverride                   interface{} `json:"UefiTargetBootSourceOverride"`
-		BootSourceOverrideTargetRedfishAllowableValues []string    `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
+		BootOptions                                    Odata    `json:"BootOptions"`
+		Certificates                                   Odata    `json:"Certificates"`
+		BootOrder                                      []string `json:"BootOrder"`
+		BootSourceOverrideEnabled                      string   `json:"BootSourceOverrideEnabled"`
+		BootSourceOverrideMode                         string   `json:"BootSourceOverrideMode"`
+		BootSourceOverrideTarget                       string   `json:"BootSourceOverrideTarget"`
+		UefiTargetBootSourceOverride                   any      `json:"UefiTargetBootSourceOverride"`
+		BootSourceOverrideTargetRedfishAllowableValues []string `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
 	} `json:"Boot"`
 	EthernetInterfaces Odata `json:"EthernetInterfaces"`
 	HostWatchdogTimer  *struct {
@@ -303,8 +303,8 @@ type SystemResponse struct {
 		Status          Status `json:"Status"`
 		TimeoutAction   string `json:"TimeoutAction"`
 	} `json:"HostWatchdogTimer"`
-	HostingRoles  []interface{} `json:"HostingRoles"`
-	Memory        Odata         `json:"Memory"`
+	HostingRoles  []any `json:"HostingRoles"`
+	Memory        Odata `json:"Memory"`
 	MemorySummary *struct {
 		MemoryMirroring      string  `json:"MemoryMirroring"`
 		Status               Status  `json:"Status"`
@@ -343,17 +343,18 @@ type PowerResponse struct {
 	PowerSupplies []PowerSupplyUnit  `json:"PowerSupplies"`
 	Redundancy    []Redundancy       `json:"Redundancy"`
 	Voltages      []struct {
-		Name                      string  `json:"Name"`
-		ReadingVolts              float64 `json:"ReadingVolts"`
-		SensorNumber              int     `json:"SensorNumber"`
-		PhysicalContext           string  `json:"PhysicalContext"`
-		LowerThresholdCritical    float64 `json:"LowerThresholdCritical"`
-		LowerThresholdFatal       float64 `json:"LowerThresholdFatal"`
-		LowerThresholdNonCritical float64 `json:"LowerThresholdNonCritical"`
-		UpperThresholdCritical    float64 `json:"UpperThresholdCritical"`
-		UpperThresholdFatal       float64 `json:"UpperThresholdFatal"`
-		UpperThresholdNonCritical float64 `json:"UpperThresholdNonCritical"`
-		Status                    Status  `json:"Status"`
+		Name            string `json:"Name"`
+		SensorNumber    int    `json:"SensorNumber"`
+		PhysicalContext string `json:"PhysicalContext"`
+		Status          Status `json:"Status"`
+		// These should be float64, but they have been seen reported as "N/A" so we use the any type
+		ReadingVolts              any `json:"ReadingVolts"`
+		LowerThresholdCritical    any `json:"LowerThresholdCritical"`
+		LowerThresholdFatal       any `json:"LowerThresholdFatal"`
+		LowerThresholdNonCritical any `json:"LowerThresholdNonCritical"`
+		UpperThresholdCritical    any `json:"UpperThresholdCritical"`
+		UpperThresholdFatal       any `json:"UpperThresholdFatal"`
+		UpperThresholdNonCritical any `json:"UpperThresholdNonCritical"`
 	} `json:"Voltages"`
 }
 
@@ -419,17 +420,17 @@ type IdracSelResponse struct {
 	Name        string `json:"Name"`
 	Description string `json:"Description"`
 	Members     []struct {
-		Id           string        `json:"Id"`
-		Name         string        `json:"Name"`
-		Created      time.Time     `json:"Created"`
-		Description  string        `json:"Description"`
-		EntryCode    xstring       `json:"EntryCode"`
-		EntryType    string        `json:"EntryType"`
-		Message      string        `json:"Message"`
-		MessageArgs  []interface{} `json:"MessageArgs"`
-		MessageId    string        `json:"MessageId"`
-		SensorNumber int           `json:"SensorNumber"`
-		SensorType   xstring       `json:"SensorType"`
-		Severity     string        `json:"Severity"`
+		Id           string    `json:"Id"`
+		Name         string    `json:"Name"`
+		Created      time.Time `json:"Created"`
+		Description  string    `json:"Description"`
+		EntryCode    xstring   `json:"EntryCode"`
+		EntryType    string    `json:"EntryType"`
+		Message      string    `json:"Message"`
+		MessageArgs  []any     `json:"MessageArgs"`
+		MessageId    string    `json:"MessageId"`
+		SensorNumber int       `json:"SensorNumber"`
+		SensorType   xstring   `json:"SensorType"`
+		Severity     string    `json:"Severity"`
 	} `json:"Members"`
 }
