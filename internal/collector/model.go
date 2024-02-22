@@ -260,21 +260,32 @@ func (n *NetworkInterface) GetPorts() string {
 }
 
 type NetworkPort struct {
-	Id                   string `json:"Id"`
-	Name                 string `json:"Name"`
-	Description          string `json:"Description"`
-	LinkStatus           string `json:"LinkStatus"`
-	CurrentLinkSpeedMbps int    `json:"CurrentLinkSpeedMbps"`
-	CurrentSpeedGbps     int    `json:"CurrentSpeedGbps"`
-	Status               Status `json:"Status"`
+	Id                        string `json:"Id"`
+	Name                      string `json:"Name"`
+	Description               string `json:"Description"`
+	LinkStatus                string `json:"LinkStatus"`
+	CurrentLinkSpeedMbps      int    `json:"CurrentLinkSpeedMbps"`
+	CurrentSpeedGbps          int    `json:"CurrentSpeedGbps"`
+	Status                    Status `json:"Status"`
+	SupportedLinkCapabilities []struct {
+		LinkNetworkTechnology string `json:"LinkNetworkTechnology"`
+		LinkSpeedMbps         int    `json:"LinkSpeedMbps"`
+	} `json:"SupportedLinkCapabilities"`
 }
 
 func (n *NetworkPort) GetSpeed() int {
 	if n.CurrentLinkSpeedMbps > 0 {
 		return n.CurrentLinkSpeedMbps
-	} else {
+	}
+	if n.CurrentSpeedGbps > 0 {
 		return 1000 * n.CurrentSpeedGbps
 	}
+	if len(n.SupportedLinkCapabilities) > 0 {
+		if s := n.SupportedLinkCapabilities[0].LinkSpeedMbps; s > 0 {
+			return s
+		}
+	}
+	return 0
 }
 
 type SystemResponse struct {

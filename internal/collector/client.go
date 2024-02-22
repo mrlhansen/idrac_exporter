@@ -192,17 +192,14 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 }
 
 func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric) error {
-	var group GroupResponse
-	var ni NetworkInterface
-	var ports GroupResponse
-	var port NetworkPort
-
+	group := GroupResponse{}
 	err := client.redfishGet(client.networkPath, &group)
 	if err != nil {
 		return err
 	}
 
 	for _, c := range group.Members {
+		ni := NetworkInterface{}
 		err = client.redfishGet(c.OdataId, &ni)
 		if err != nil {
 			return err
@@ -214,12 +211,14 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 
 		ch <- mc.NewNetworkInterfaceHealth(ni.Id, ni.Status.Health)
 
+		ports := GroupResponse{}
 		err = client.redfishGet(ni.GetPorts(), &ports)
 		if err != nil {
 			return err
 		}
 
 		for _, c := range ports.Members {
+			port := NetworkPort{}
 			err = client.redfishGet(c.OdataId, &port)
 			if err != nil {
 				return err
@@ -299,31 +298,30 @@ func (client *Client) RefreshIdracSel(mc *Collector, ch chan<- prometheus.Metric
 }
 
 func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric) error {
-	var group GroupResponse
-	var controller StorageController
-	var d Drive
-
+	group := GroupResponse{}
 	err := client.redfishGet(client.storagePath, &group)
 	if err != nil {
 		return err
 	}
 
 	for _, c := range group.Members {
-		err = client.redfishGet(c.OdataId, &controller)
+		ctlr := StorageController{}
+		err = client.redfishGet(c.OdataId, &ctlr)
 		if err != nil {
 			return err
 		}
 
-		for _, drive := range controller.Drives {
-			err = client.redfishGet(drive.OdataId, &d)
+		for _, c := range ctlr.Drives {
+			drive := Drive{}
+			err = client.redfishGet(c.OdataId, &drive)
 			if err != nil {
 				return err
 			}
 
-			ch <- mc.NewDriveInfo(d.Id, d.Name, d.Manufacturer, d.Model, d.SerialNumber, d.MediaType, d.Protocol, d.GetSlot())
-			ch <- mc.NewDriveHealth(d.Id, d.Status.Health)
-			ch <- mc.NewDriveCapacity(d.Id, d.CapacityBytes)
-			ch <- mc.NewDriveLifeLeft(d.Id, d.PredictedLifeLeft)
+			ch <- mc.NewDriveInfo(drive.Id, drive.Name, drive.Manufacturer, drive.Model, drive.SerialNumber, drive.MediaType, drive.Protocol, drive.GetSlot())
+			ch <- mc.NewDriveHealth(drive.Id, drive.Status.Health)
+			ch <- mc.NewDriveCapacity(drive.Id, drive.CapacityBytes)
+			ch <- mc.NewDriveLifeLeft(drive.Id, drive.PredictedLifeLeft)
 		}
 	}
 
