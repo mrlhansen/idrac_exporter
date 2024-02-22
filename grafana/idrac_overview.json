@@ -38,7 +38,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 288,
+  "id": 603,
   "links": [
     {
       "asDropdown": false,
@@ -574,7 +574,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"System Board Inlet Temp|Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}: {{name}}",
@@ -595,24 +595,11 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "avg (avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
+          "expr": "avg (avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"System Board Inlet Temp|Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "Mean: Inlet",
           "range": true,
           "refId": "inlet_avg"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "editorMode": "code",
-          "expr": "bottomk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\".*Inlet.*|.*Ambient.*\"}[$__rate_interval])) < 19",
-          "hide": true,
-          "instant": false,
-          "legendFormat": "{{instance}}: {{name}}",
-          "range": true,
-          "refId": "inlet_cold"
         }
       ],
       "title": "Temperature Inlet",
@@ -2056,6 +2043,6 @@
   "timezone": "",
   "title": "BMC overview",
   "uid": "3faidY24k",
-  "version": 23,
+  "version": 12,
   "weekStart": ""
 }
