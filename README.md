@@ -9,8 +9,8 @@ Every time the exporter is called with a new target, it tries to establish a con
 ## Supported Systems
 The program supports several different systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
 
-* HPE iLO 4/5
-* Dell iDRAC 9
+* HPE iLO
+* Dell iDRAC
 * Lenovo XClarity
 
 ## Download
@@ -187,3 +187,10 @@ scrape_configs:
 ```
 
 Here `123.45.6.78` and `123.45.6.79` are the iDRACs to query, and `exporter:9348` is the address and port where `idrac_exporter` is running.
+
+## Grafana Dashboard
+There are two Grafana Dashboards in the `grafana` folder, one that shows an overview of all systems and one that shows information for a specific machine. Thanks to [@7840vz](https://www.github.com/7840vz)  for creating these!
+
+![bmc1.png](grafana/bmc1.png)
+
+![bmc2.png](grafana/bmc2.png)
