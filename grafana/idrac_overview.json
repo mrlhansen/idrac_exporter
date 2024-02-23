@@ -166,7 +166,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"} > 0",
+          "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"}",
           "format": "time_series",
           "instant": true,
           "legendFormat": "{{instance}}",
