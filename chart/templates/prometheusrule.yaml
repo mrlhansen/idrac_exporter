@@ -1,0 +1,23 @@
+# Source https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-rabbitmq-exporter/templates/prometheusrule.yaml
+{{- if .Values.prometheus.rules.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ template "idrac-exporter.fullname" . }}
+{{- with .Values.prometheus.rules.namespace }}
+  namespace: {{ . }}
+{{- end }}
+  labels:
+    app: {{ template "idrac-exporter.name" . }}
+    chart: {{ template "idrac-exporter.chart" . }}
+    heritage: {{ .Release.Service }}
+  {{- if .Values.prometheus.rules.additionalLabels }}
+{{ toYaml .Values.prometheus.rules.additionalLabels | indent 4 }}
+  {{- end }}
+spec:
+{{- with .Values.prometheus.rules.additionalRules }}
+  groups:
+    - name: {{ template "idrac-exporter.fullname" $ }}
+      rules: {{ tpl (toYaml .) $ | nindent 8 }}
+{{- end }}
+{{- end }}
