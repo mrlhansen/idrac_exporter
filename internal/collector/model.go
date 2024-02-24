@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"strconv"
 	"time"
 )
 
@@ -114,6 +115,7 @@ type ThermalResponse struct {
 type Fan struct {
 	Name                      string       `json:"Name"`
 	FanName                   string       `json:"FanName"`
+	MemberId                  string       `json:"MemberId"`
 	Assembly                  Odata        `json:"Assembly"`
 	HotPluggable              bool         `json:"HotPluggable"`
 	MaxReadingRange           any          `json:"MaxReadingRange"`
@@ -124,8 +126,6 @@ type Fan struct {
 	Units                     string       `json:"Units"`
 	ReadingUnits              string       `json:"ReadingUnits"`
 	Redundancy                []Redundancy `json:"Redundancy"`
-	SensorNumber              int          `json:"SensorNumber"`
-	MemberId                  string       `json:"MemberId"`
 	Status                    Status       `json:"Status"`
 	LowerThresholdCritical    any          `json:"LowerThresholdCritical"`
 	LowerThresholdFatal       any          `json:"LowerThresholdFatal"`
@@ -156,9 +156,16 @@ func (f *Fan) GetUnits() string {
 	return f.Units
 }
 
+func (f *Fan) GetId(fallback int) string {
+	if len(f.MemberId) > 0 {
+		return f.MemberId
+	}
+	return strconv.Itoa(fallback)
+}
+
 type Temperature struct {
 	Name                      string  `json:"Name"`
-	SensorNumber              int     `json:"SensorNumber"`
+	Number                    int     `json:"Number"`
 	MemberId                  string  `json:"MemberId"`
 	ReadingCelsius            float64 `json:"ReadingCelsius"`
 	MaxReadingRangeTemp       float64 `json:"MaxReadingRangeTemp"`
@@ -171,6 +178,16 @@ type Temperature struct {
 	UpperThresholdFatal       float64 `json:"UpperThresholdFatal"`
 	UpperThresholdNonCritical float64 `json:"UpperThresholdNonCritical"`
 	Status                    Status  `json:"Status"`
+}
+
+func (t *Temperature) GetId(fallback int) string {
+	if len(t.MemberId) > 0 {
+		return t.MemberId
+	}
+	if t.Number > 0 {
+		return strconv.Itoa(t.Number)
+	}
+	return strconv.Itoa(fallback)
 }
 
 type StorageController struct {
@@ -240,6 +257,13 @@ type Memory struct {
 	BusWidthBits      int    `json:"BusWidthBits"`
 	DataWidthBits     int    `json:"DataWidthBits"`
 	Status            Status `json:"Status"`
+	// iLO 4
+	HPMemoryType        string `json:"HPMemoryType"`
+	DIMMStatus          string `json:"DIMMStatus"`
+	DIMMType            string `json:"DIMMType"`
+	MaximumFrequencyMHz int    `json:"MaximumFrequencyMHz"`
+	Rank                int    `json:"Rank"`
+	SizeMB              int    `json:"SizeMB"`
 }
 
 type NetworkInterface struct {

@@ -107,14 +107,12 @@ func (client *Client) findAllEndpoints() error {
 	client.powerPath = chassis.Power.OdataId
 
 	// Vendor
-	v := strings.ToLower(root.Vendor)
 	m := strings.ToLower(system.Manufacturer)
-
-	if strings.Contains(v, "dell") {
+	if strings.Contains(m, "dell") {
 		client.vendor = DELL
-	} else if strings.Contains(v, "hpe") {
+	} else if strings.Contains(m, "hpe") {
 		client.vendor = HPE
-	} else if strings.Contains(v, "lenovo") {
+	} else if strings.Contains(m, "lenovo") {
 		client.vendor = LENOVO
 	} else if strings.Contains(m, "inspur") {
 		client.vendor = INSPUR
@@ -125,6 +123,13 @@ func (client *Client) findAllEndpoints() error {
 	// Fix for Inspur bug
 	if client.vendor == INSPUR {
 		client.storagePath = strings.ReplaceAll(client.storagePath, "Storages", "Storage")
+	}
+
+	// Fix for iLO 4 machines
+	if client.vendor == HPE {
+		if strings.Contains(root.Name, "HP RESTful") {
+			client.memoryPath = "/redfish/v1/Systems/1/Memory/"
+		}
 	}
 
 	return nil
@@ -138,7 +143,7 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 		return err
 	}
 
-	for _, t := range resp.Temperatures {
+	for n, t := range resp.Temperatures {
 		if t.Status.State != StateEnabled {
 			continue
 		}
@@ -147,10 +152,11 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 			continue
 		}
 
-		ch <- mc.NewSensorsTemperature(t.ReadingCelsius, t.MemberId, t.Name, "celsius")
+		id := t.GetId(n)
+		ch <- mc.NewSensorsTemperature(t.ReadingCelsius, id, t.Name, "celsius")
 	}
 
-	for _, f := range resp.Fans {
+	for n, f := range resp.Fans {
 		if f.Status.State != StateEnabled {
 			continue
 		}
@@ -165,8 +171,9 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 			continue
 		}
 
-		ch <- mc.NewSensorsFanHealth(f.MemberId, name, f.Status.Health)
-		ch <- mc.NewSensorsFanSpeed(f.GetReading(), f.MemberId, name, strings.ToLower(units))
+		id := f.GetId(n)
+		ch <- mc.NewSensorsFanHealth(id, name, f.Status.Health)
+		ch <- mc.NewSensorsFanSpeed(f.GetReading(), id, name, strings.ToLower(units))
 	}
 
 	return nil
@@ -345,6 +352,17 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 
 		if m.Status.State == StateAbsent {
 			continue
+		}
+
+		// iLO 4
+		if client.vendor == HPE {
+			if len(m.HPMemoryType) > 0 {
+				m.Manufacturer = strings.TrimSpace(m.Manufacturer)
+				m.RankCount = m.Rank
+				m.MemoryDeviceType = m.DIMMType
+				m.Status.Health = m.DIMMStatus
+				m.CapacityMiB = m.SizeMB
+			}
 		}
 
 		ch <- mc.NewMemoryModuleInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)
