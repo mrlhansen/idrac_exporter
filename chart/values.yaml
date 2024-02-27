@@ -49,11 +49,11 @@ resources: {}
 
 livenessProbe:
   httpGet:
-    path: /
+    path: /health
     port: http
 readinessProbe:
   httpGet:
-    path: /
+    path: /health
     port: http
 
 volumes: []
@@ -94,7 +94,7 @@ idracConfig: |
 podAnnotations:
  prometheus.io/scrape: "true"
  prometheus.io/path: "/metrics"
- prometheus.io/port: 9348
+ prometheus.io/port: "9348"
 
 prometheus:
   monitor:

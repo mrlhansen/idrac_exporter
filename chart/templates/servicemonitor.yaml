@@ -17,7 +17,7 @@ spec:
       app: {{ template "idrac-exporter.name" . }}
       release: {{ .Release.Name }}
   endpoints:
-    - port: http-metrics
+    - port: http
   {{- if .Values.prometheus.monitor.interval }}
       interval: {{ .Values.prometheus.monitor.interval }}
   {{- end }}

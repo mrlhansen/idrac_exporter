@@ -35,7 +35,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http-metrics
+            - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           livenessProbe:
@@ -49,14 +49,14 @@ spec:
               name: config
               readOnly: true
           {{- range .Values.volumeMounts }}
-            {{- toYaml . | nindent 12 }}
+            - {{ toYaml . | indent 14 | trim }}
           {{- end }}
       volumes:
         - name: config
           secret:
             secretName: {{ include "idrac-exporter.fullname" . }}-config
       {{- range .Values.volumes }}
-        {{- toYaml . | nindent 8 }}
+        - {{ toYaml . | indent 10 | trim }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

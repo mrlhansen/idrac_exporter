@@ -5,4 +5,4 @@ metadata:
   labels:
     {{- include "idrac-exporter.labels" . | nindent 4 }}
 stringData:
-  idrac.yml: {{- .Values.idracConfig }}
+  idrac.yml: {{ tpl .Values.idracConfig . | quote }}
