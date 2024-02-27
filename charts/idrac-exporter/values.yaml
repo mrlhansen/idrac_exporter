@@ -92,9 +92,13 @@ idracConfig: |
     network: true
 
 podAnnotations:
- prometheus.io/scrape: "true"
- prometheus.io/path: "/metrics"
- prometheus.io/port: "9348"
+  prometheus.io/scrape: "false"
+  prometheus.io/path: "/metrics"
+  prometheus.io/port: "9348"
+
+# TODO: Create defaults using relabel configs mentioned in README.
+# https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#relabelconfig
+# Use {{ tpl "{{ include \"idrac-exporter.fullname\" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}" . }} for the service endpoint
 
 prometheus:
   monitor:
