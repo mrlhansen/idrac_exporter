@@ -30,6 +30,7 @@ type Client struct {
 	basicAuth   string
 	httpClient  *http.Client
 	vendor      int
+	version     int
 	systemPath  string
 	thermalPath string
 	powerPath   string
@@ -129,6 +130,8 @@ func (client *Client) findAllEndpoints() error {
 	if client.vendor == HPE {
 		if strings.Contains(root.Name, "HP RESTful") {
 			client.memoryPath = "/redfish/v1/Systems/1/Memory/"
+			client.storagePath = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
+			client.version = 4
 		}
 	}
 
@@ -318,11 +321,28 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			return err
 		}
 
-		for _, c := range ctlr.Drives {
-			drive := Drive{}
-			err = client.redfishGet(c.OdataId, &drive)
+		// iLO 4
+		if (client.vendor == HPE) && (client.version == 4) {
+			grp := GroupResponse{}
+			err = client.redfishGet(c.OdataId+"DiskDrives/", &grp)
 			if err != nil {
 				return err
+			}
+			ctlr.Drives = grp.Members
+		}
+
+		for _, d := range ctlr.Drives {
+			drive := Drive{}
+			err = client.redfishGet(d.OdataId, &drive)
+			if err != nil {
+				return err
+			}
+
+			// iLO 4
+			if (client.vendor == HPE) && (client.version == 4) {
+				drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
+				drive.Protocol = drive.InterfaceType
+				drive.PredictedLifeLeft = 100 - drive.SSDEnduranceUtilizationPercentage
 			}
 
 			ch <- mc.NewDriveInfo(drive.Id, drive.Name, drive.Manufacturer, drive.Model, drive.SerialNumber, drive.MediaType, drive.Protocol, drive.GetSlot())
@@ -355,14 +375,12 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 		}
 
 		// iLO 4
-		if client.vendor == HPE {
-			if len(m.HPMemoryType) > 0 {
-				m.Manufacturer = strings.TrimSpace(m.Manufacturer)
-				m.RankCount = m.Rank
-				m.MemoryDeviceType = m.DIMMType
-				m.Status.Health = m.DIMMStatus
-				m.CapacityMiB = m.SizeMB
-			}
+		if (client.vendor == HPE) && (client.version == 4) {
+			m.Manufacturer = strings.TrimSpace(m.Manufacturer)
+			m.RankCount = m.Rank
+			m.MemoryDeviceType = m.DIMMType
+			m.Status.Health = m.DIMMStatus
+			m.CapacityMiB = m.SizeMB
 		}
 
 		ch <- mc.NewMemoryModuleInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)

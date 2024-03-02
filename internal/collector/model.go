@@ -228,6 +228,10 @@ type Drive struct {
 			LocationOrdinalValue int `json:"LocationOrdinalValue"`
 		} `json:"PartLocation"`
 	} `json:"PhysicalLocation"`
+	// iLO 4
+	CapacityMiB                       int    `json:"CapacityMiB"`
+	InterfaceType                     string `json:"InterfaceType"`
+	SSDEnduranceUtilizationPercentage int    `json:"SSDEnduranceUtilizationPercentage"`
 }
 
 func (d *Drive) GetSlot() int {
