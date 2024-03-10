@@ -25,7 +25,7 @@
           "uid": "${datasource}"
         },
         "enable": true,
-        "expr": "idrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
+        "expr": "idrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
         "iconColor": "purple",
         "name": "SEL",
         "tagKeys": "instance,component,severity",
@@ -166,7 +166,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"} > 0",
+          "expr": "idrac_system_health{instance=~\"$instance\", job=~\"$job\"} > 0",
           "format": "time_series",
           "instant": true,
           "legendFormat": "{{instance}}",
@@ -326,7 +326,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_system_health{instance=~\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_health{instance=~\"$instance\", job=~\"$job\"}",
           "format": "table",
           "instant": false,
           "legendFormat": "{{instance}}",
@@ -574,7 +574,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"System Board Inlet Temp|Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name=~\"System Board Inlet Temp|Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}: {{name}}",
@@ -595,7 +595,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "avg (avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"System Board Inlet Temp|Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
+          "expr": "avg (avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name=~\"System Board Inlet Temp|Inlet.*|.*Ambient.*\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "Mean: Inlet",
           "range": true,
@@ -773,7 +773,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name=~\"Out.+|.*Exhaust.*\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "Mean: Outlet",
           "range": true,
@@ -797,7 +797,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name=~\"Out.+|.*Exhaust.*\"}[$__rate_interval]))",
           "hide": false,
           "instant": false,
           "interval": "",
@@ -935,7 +935,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name!~\"CPU.+|.*Inlet.*|.*Ambient.*|Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name!~\"CPU.+|.*Inlet.*|.*Ambient.*|Out.+|.*Exhaust.*\"}[$__rate_interval]))",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}: {{name}}",
@@ -956,7 +956,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name!~\"CPU.+|.*Inlet.+|Out.+|.*Exhaust.*\"}[$__rate_interval]))",
+          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name!~\"CPU.+|.*Inlet.+|Out.+|.*Exhaust.*\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "Mean: {{name}}",
           "range": true,
@@ -1088,7 +1088,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"CPU.+\"}[$__rate_interval]))",
+          "expr": "topk(10, avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name=~\"CPU.+\"}[$__rate_interval]))",
           "instant": false,
           "interval": "",
           "legendFormat": "{{instance}}: {{name}}",
@@ -1109,7 +1109,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=\"$job\", name=~\"CPU.+\"}[$__rate_interval]))",
+          "expr": "avg(avg_over_time(idrac_sensors_temperature{instance=~\"$instance\",job=~\"$job\", name=~\"CPU.+\"}[$__rate_interval]))",
           "hide": false,
           "legendFormat": "Mean: CPU temp",
           "range": true,
@@ -1222,7 +1222,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "bottomk(10,avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=\"$job\"}[$__rate_interval]))",
+          "expr": "bottomk(10,avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=~\"$job\"}[$__rate_interval]))",
           "instant": false,
           "legendFormat": "{{instance}}: {{name}}",
           "metrics": [
@@ -1254,7 +1254,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "topk(10,avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=\"$job\"}[$__rate_interval]))",
+          "expr": "topk(10,avg_over_time(idrac_sensors_fan_speed{instance=~\"$instance\",job=~\"$job\"}[$__rate_interval]))",
           "hide": false,
           "instant": false,
           "legendFormat": "{{instance}}: {{name}}",
@@ -1381,7 +1381,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "idrac_system_power_on{instance=~\"$instance\", job=\"$job\"}",
+          "expr": "idrac_system_power_on{instance=~\"$instance\", job=~\"$job\"}",
           "format": "table",
           "instant": false,
           "legendFormat": "{{instance}}",
@@ -1468,7 +1468,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1547,7 +1548,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "sum(avg_over_time(idrac_power_control_avg_consumed_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval]))",
+          "expr": "sum(avg_over_time(idrac_power_control_avg_consumed_watts{instance=~\"$instance\",job=~\"$job\"}[$__rate_interval]))",
           "legendFormat": "Total power",
           "metrics": [
             {
@@ -1615,7 +1616,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": null
               }
             ]
           },
@@ -1678,7 +1680,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "max_over_time(idrac_power_supply_output_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
+          "expr": "max_over_time(idrac_power_supply_output_watts{instance=~\"$instance\",job=~\"$job\"}[$__rate_interval])",
           "hide": false,
           "legendFormat": "{{instance}}: Output PSU-{{id}}",
           "metrics": [
@@ -1698,7 +1700,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "avg_over_time(idrac_power_supply_input_watts{instance=~\"$instance\",job=\"$job\"}[$__rate_interval])",
+          "expr": "avg_over_time(idrac_power_supply_input_watts{instance=~\"$instance\",job=~\"$job\"}[$__rate_interval])",
           "hide": true,
           "legendFormat": "{{instance}}: Input PSU-{{id}}",
           "range": true,
@@ -1879,7 +1881,7 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "idrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
+              "expr": "idrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
               "format": "table",
               "instant": true,
               "legendFormat": "{{id}} {{component}}:  {{message}}",
@@ -1946,7 +1948,7 @@
       "type": "row"
     }
   ],
-  "refresh": "30s",
+  "refresh": "",
   "revision": 1,
   "schemaVersion": 38,
   "style": "dark",
@@ -1977,9 +1979,13 @@
       },
       {
         "current": {
-          "selected": false,
-          "text": "idrac-exporter",
-          "value": "idrac-exporter"
+          "selected": true,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": {
           "type": "prometheus",
@@ -1987,7 +1993,7 @@
         },
         "definition": "label_values(idrac_system_machine_info,job)",
         "hide": 0,
-        "includeAll": false,
+        "includeAll": true,
         "multi": true,
         "name": "job",
         "options": [],
@@ -2016,7 +2022,7 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(idrac_system_machine_info{job=\"$job\"}, instance)",
+        "definition": "label_values(idrac_system_machine_info{job=~\"$job\"}, instance)",
         "hide": 0,
         "includeAll": true,
         "label": "",
@@ -2024,7 +2030,7 @@
         "name": "instance",
         "options": [],
         "query": {
-          "query": "label_values(idrac_system_machine_info{job=\"$job\"}, instance)",
+          "query": "label_values(idrac_system_machine_info{job=~\"$job\"}, instance)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -2043,6 +2049,6 @@
   "timezone": "",
   "title": "BMC overview",
   "uid": "3faidY24k",
-  "version": 12,
+  "version": 23,
   "weekStart": ""
 }
