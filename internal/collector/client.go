@@ -193,8 +193,12 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	ch <- mc.NewSystemPowerOn(resp.PowerState)
 	ch <- mc.NewSystemHealth(resp.Status.Health)
 	ch <- mc.NewSystemIndicatorLED(resp.IndicatorLED)
-	ch <- mc.NewSystemMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
-	ch <- mc.NewSystemCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
+	if resp.MemorySummary != nil {
+		ch <- mc.NewSystemMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
+	}
+	if resp.ProcessorSummary != nil {
+		ch <- mc.NewSystemCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
+	}
 	ch <- mc.NewSystemBiosInfo(resp.BiosVersion)
 	ch <- mc.NewSystemMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
 

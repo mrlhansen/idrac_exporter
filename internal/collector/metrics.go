@@ -94,10 +94,10 @@ func (mc *Collector) NewSystemMachineInfo(manufacturer, model, serial, sku strin
 		mc.SystemMachineInfo,
 		prometheus.UntypedValue,
 		1.0,
-		manufacturer,
-		model,
-		serial,
-		sku,
+		strings.TrimSpace(manufacturer),
+		strings.TrimSpace(model),
+		strings.TrimSpace(serial),
+		strings.TrimSpace(sku),
 	)
 }
 
@@ -123,6 +123,7 @@ func (mc *Collector) NewSensorsFanHealth(id, name, health string) prometheus.Met
 		health,
 	)
 }
+
 func (mc *Collector) NewSensorsFanSpeed(speed float64, id, name, units string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SensorsFanSpeed,
@@ -144,6 +145,7 @@ func (mc *Collector) NewPowerSupplyHealth(health, id string) prometheus.Metric {
 		health,
 	)
 }
+
 func (mc *Collector) NewPowerSupplyInputWatts(value float64, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyInputWatts,
