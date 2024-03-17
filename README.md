@@ -194,3 +194,10 @@ There are two Grafana Dashboards in the `grafana` folder, one that shows an over
 ![bmc1.png](grafana/bmc1.png)
 
 ![bmc2.png](grafana/bmc2.png)
+
+## Helm Chart
+To install the [Helm](https://helm.sh/docs/) chart into a Kubernetes cluster run:
+```sh
+helm repo add idrac-exporter https://mrlhansen.github.io/idrac_exporter
+helm install idrac-exporter/idrac-exporter idrac-exporter
+```

@@ -1,0 +1,43 @@
+# Source https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus-rabbitmq-exporter/templates/servicemonitor.yaml
+{{- if .Values.prometheus.monitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ template "idrac-exporter.fullname" . }}
+  labels:
+    app: {{ template "idrac-exporter.name" . }}
+    chart: {{ template "idrac-exporter.chart" . }}
+    heritage: {{ .Release.Service }}
+  {{- if .Values.prometheus.monitor.additionalLabels }}
+{{ toYaml .Values.prometheus.monitor.additionalLabels | indent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "idrac-exporter.name" . }}
+      release: {{ .Release.Name }}
+  endpoints:
+    - port: http
+  {{- if .Values.prometheus.monitor.interval }}
+      interval: {{ .Values.prometheus.monitor.interval }}
+  {{- end }}
+  {{- with .Values.prometheus.monitor.metricRelabelings }}
+      metricRelabelings:
+        {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.prometheus.monitor.relabelings }}
+      relabelings:
+        {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- if .Values.prometheus.monitor.namespace }}
+  namespaceSelector:
+    matchNames:
+    {{- range .Values.prometheus.monitor.namespace }}
+    - {{ . }}
+    {{- end }}
+  {{- with .Values.prometheus.monitor.targetLabels }}
+  targetLabels:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+{{- end }}
