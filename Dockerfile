@@ -2,7 +2,7 @@ ARG ARCH=
 FROM ${ARCH}golang:1.21-alpine3.18 as builder
 
 WORKDIR /app/src
-RUN apk add -U make git
+RUN apk add -U make git grep
 COPY . .
 RUN make build
 
