@@ -4,8 +4,8 @@ timeout: 60        # HTTP timeout (in seconds) for Redfish API calls
 retries: 10        # Number of retries before a target is marked as unreachable
 hosts:
   default:
-    username: $IDRAC_USERNAME
-    password: $IDRAC_PASSWORD
+    username: "$IDRAC_USERNAME"
+    password: "$IDRAC_PASSWORD"
 metrics:
   system: true
   sensors: true
