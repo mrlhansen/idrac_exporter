@@ -13,14 +13,14 @@ The program supports several different systems, because they all follow the Redf
 * Dell iDRAC
 * Lenovo XClarity
 
-## Download
+## Installation
 The exporter is written in [Go](https://golang.org) and it can be downloaded and compiled using:
 
 ```sh
 go install github.com/mrlhansen/idrac_exporter/cmd/idrac_exporter@latest
 ```
 
-## Docker
+### Docker
 There is a `Dockerfile` in the repository for building a container image. To build it locally use:
 
 ```sh
@@ -34,6 +34,14 @@ docker run -v /host-path/config.yml:/etc/prometheus/idrac.yml -p 9348:9348 mrlha
 ```
 
 Remember to set the listen address to `0.0.0.0` when running inside a container.
+
+### Helm Chart
+There is also an official [Helm](https://helm.sh/docs/) chart for installating the expoter in a Kubernetes cluster.
+
+```sh
+helm repo add idrac-exporter https://mrlhansen.github.io/idrac_exporter
+helm install idrac-exporter/idrac-exporter idrac-exporter
+```
 
 ## Configuration
 In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
@@ -194,10 +202,3 @@ There are two Grafana Dashboards in the `grafana` folder, one that shows an over
 ![bmc1.png](grafana/bmc1.png)
 
 ![bmc2.png](grafana/bmc2.png)
-
-## Helm Chart
-To install the [Helm](https://helm.sh/docs/) chart into a Kubernetes cluster run:
-```sh
-helm repo add idrac-exporter https://mrlhansen.github.io/idrac_exporter
-helm install idrac-exporter/idrac-exporter idrac-exporter
-```

@@ -10,7 +10,7 @@ metrics:
   system: true
   sensors: true
   power: true
-  sel: true        # iDRAC only
+  sel: true
   storage: true
   memory: true
   network: true
