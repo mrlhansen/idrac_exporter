@@ -57,12 +57,17 @@ readinessProbe:
     port: http
 
 volumes: []
+# - name: config-templated
+#   emptyDir:
+#     sizeLimit: 16Mi
 # - name: foo
 #   secret:
 #     secretName: mysecret
 #     optional: false
 
 volumeMounts: []
+# - mountPath: /app/config
+#   name: config-templated
 # - name: foo
 #   mountPath: "/etc/foo"
 #   readOnly: true
@@ -72,6 +77,10 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# If true idracConfig mounts as "idrac.yml.template" to be used with environment
+# variables in entrypoint.sh for container deployments.
+idracConfigIsTemplate: false
 
 idracConfig: |
   address: 0.0.0.0   # Running in a container, this makes sense
@@ -90,6 +99,15 @@ idracConfig: |
     storage: true
     memory: true
     network: true
+
+env: []
+# - name: IDRAC_USERNAME
+#   value: root
+# - name: IDRAC_PASSWORD
+#   valueFrom:
+#     secretKeyRef:
+#        name: my-external-idrac-secret
+#        key: idrac-password
 
 podAnnotations:
   prometheus.io/scrape: "false"
