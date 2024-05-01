@@ -36,7 +36,7 @@ docker run -v /host-path/config.yml:/etc/prometheus/idrac.yml -p 9348:9348 mrlha
 Remember to set the listen address to `0.0.0.0` when running inside a container.
 
 ### Helm Chart
-There is also an official [Helm](https://helm.sh/docs/) chart for installating the expoter in a Kubernetes cluster.
+There is also an official [Helm](https://helm.sh/docs/) chart for installating the exporter in a Kubernetes cluster.
 
 ```sh
 helm repo add idrac-exporter https://mrlhansen.github.io/idrac_exporter

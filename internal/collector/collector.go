@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/version"
@@ -22,7 +23,7 @@ type Collector struct {
 	collected  *sync.Cond
 	collecting bool
 	retries    uint
-	errors     uint
+	errors     atomic.Uint64
 	builder    *strings.Builder
 
 	// Exporter
@@ -325,50 +326,88 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
+	var wg sync.WaitGroup
+
 	if config.Config.Collect.System {
-		err := collector.client.RefreshSystem(collector, ch)
-		if err != nil {
-			collector.errors++
-		}
+		wg.Add(1)
+		go func() {
+			err := collector.client.RefreshSystem(collector, ch)
+			if err != nil {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
 	}
+
 	if config.Config.Collect.Sensors {
-		err := collector.client.RefreshSensors(collector, ch)
-		if err != nil {
-			collector.errors++
-		}
+		wg.Add(1)
+		go func() {
+			err := collector.client.RefreshSensors(collector, ch)
+			if err != nil {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
 	}
+
 	if config.Config.Collect.Power {
-		err := collector.client.RefreshPower(collector, ch)
-		if err != nil {
-			collector.errors++
-		}
+		wg.Add(1)
+		go func() {
+			err := collector.client.RefreshPower(collector, ch)
+			if err != nil {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
 	}
+
 	if config.Config.Collect.Network {
-		err := collector.client.RefreshNetwork(collector, ch)
-		if err != nil {
-			collector.errors++
-		}
+		wg.Add(1)
+		go func() {
+			err := collector.client.RefreshNetwork(collector, ch)
+			if err != nil {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
 	}
+
 	if config.Config.Collect.SEL {
-		err := collector.client.RefreshIdracSel(collector, ch)
-		if err != nil {
-			collector.errors++
-		}
+		wg.Add(1)
+		go func() {
+			err := collector.client.RefreshIdracSel(collector, ch)
+			if err != nil {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
 	}
+
 	if config.Config.Collect.Storage {
-		err := collector.client.RefreshStorage(collector, ch)
-		if err != nil {
-			collector.errors++
-		}
+		wg.Add(1)
+		go func() {
+			err := collector.client.RefreshStorage(collector, ch)
+			if err != nil {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
 	}
+
 	if config.Config.Collect.Memory {
-		err := collector.client.RefreshMemory(collector, ch)
-		if err != nil {
-			collector.errors++
-		}
+		wg.Add(1)
+		go func() {
+			err := collector.client.RefreshMemory(collector, ch)
+			if err != nil {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
 	}
+
+	wg.Wait()
 	ch <- prometheus.MustNewConstMetric(collector.ExporterBuildInfo, prometheus.UntypedValue, 1)
-	ch <- prometheus.MustNewConstMetric(collector.ExporterScrapeErrorsTotal, prometheus.GaugeValue, float64(collector.errors))
+	ch <- prometheus.MustNewConstMetric(collector.ExporterScrapeErrorsTotal, prometheus.CounterValue, float64(collector.errors.Load()))
 }
 
 func (collector *Collector) Gather() (string, error) {
