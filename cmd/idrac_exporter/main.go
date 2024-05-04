@@ -18,7 +18,7 @@ func main() {
 	flag.StringVar(&configFile, "config", "/etc/prometheus/idrac.yml", "Path to idrac exporter configuration file")
 	flag.Parse()
 
-	config.ReadConfigFile(configFile)
+	config.ReadConfig(configFile)
 
 	if verbose {
 		logging.SetVerbose(true)

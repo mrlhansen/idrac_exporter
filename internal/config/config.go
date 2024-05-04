@@ -1,74 +1,52 @@
 package config
 
 import (
-	"encoding/base64"
 	"os"
-	"sync"
+
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 	"gopkg.in/yaml.v2"
 )
 
-type HostConfig struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Hostname string
-	Token    string
+var Config RootConfig = RootConfig{
+	Hosts: make(map[string]*HostConfig),
 }
 
-type RootConfig struct {
-	mutex         sync.Mutex
-	Address       string                 `yaml:"address"`
-	Port          uint                   `yaml:"port"`
-	MetricsPrefix string                 `yaml:"metrics_prefix"`
-	Collect       struct {
-		System  bool `yaml:"system"`
-		Sensors bool `yaml:"sensors"`
-		SEL     bool `yaml:"sel"`
-		Power   bool `yaml:"power"`
-		Storage bool `yaml:"storage"`
-		Memory  bool `yaml:"memory"`
-		Network bool `yaml:"network"`
-	} `yaml:"metrics"`
-	Timeout       uint                   `yaml:"timeout"`
-	Retries       uint                   `yaml:"retries"`
-	Hosts         map[string]*HostConfig `yaml:"hosts"`
-}
+func (c *RootConfig) GetHostCfg(target string) *HostConfig {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
-func (config *RootConfig) GetHostCfg(target string) *HostConfig {
-	config.mutex.Lock()
-	defer config.mutex.Unlock()
-
-	hostCfg, ok := config.Hosts[target]
+	hostCfg, ok := c.Hosts[target]
 	if !ok {
 		hostCfg = &HostConfig{
 			Hostname: target,
-			Username: config.Hosts["default"].Username,
-			Password: config.Hosts["default"].Password,
-			Token:    config.Hosts["default"].Token,
+			Username: c.Hosts["default"].Username,
+			Password: c.Hosts["default"].Password,
 		}
-		config.Hosts[target] = hostCfg
+		c.Hosts[target] = hostCfg
 	}
 
 	return hostCfg
 }
 
-var Config RootConfig
-
-func parseError(s0, s1 string) {
-	logging.Fatalf("Error parsing configuration file: %s: %s", s0, s1)
-}
-
-func ReadConfigFile(fileName string) {
-	yamlFile, err := os.Open(fileName)
+func readConfigFile(filename string) {
+	yamlFile, err := os.Open(filename)
 	if err != nil {
-		logging.Fatalf("Error opening configuration file %s: %s", fileName, err)
+		logging.Fatalf("failed to open configuration file: %s: %s", filename, err)
 	}
 
 	err = yaml.NewDecoder(yamlFile).Decode(&Config)
 	yamlFile.Close()
 	if err != nil {
-		parseError(fileName, err.Error())
+		logging.Fatalf("invalid configuration file: %s: %s", filename, err.Error())
 	}
+}
+
+func ReadConfig(filename string) {
+	if len(filename) > 0 {
+		readConfigFile(filename)
+	}
+
+	readConfigEnv()
 
 	if Config.Address == "" {
 		Config.Address = "0.0.0.0"
@@ -86,24 +64,21 @@ func ReadConfigFile(fileName string) {
 		Config.Retries = 1
 	}
 
-	if len(Config.Hosts) == 0 {
-		parseError("missing section", "hosts")
-	}
-
 	if Config.MetricsPrefix == "" {
 		Config.MetricsPrefix = "idrac"
 	}
 
+	if len(Config.Hosts) == 0 {
+		logging.Fatalf("invalid configuration: empty section: hosts")
+	}
+
 	for k, v := range Config.Hosts {
 		if v.Username == "" {
-			parseError("missing username for host", k)
+			logging.Fatalf("invalid configuration: missing username for host: %s", k)
 		}
 		if v.Password == "" {
-			parseError("missing password for host", k)
+			logging.Fatalf("invalid configuration: missing password for host: %s", k)
 		}
-
-		data := []byte(v.Username + ":" + v.Password)
-		v.Token = base64.StdEncoding.EncodeToString(data)
 		v.Hostname = k
 	}
 }

@@ -27,7 +27,8 @@ const (
 
 type Client struct {
 	hostname    string
-	basicAuth   string
+	username    string
+	password    string
 	httpClient  *http.Client
 	vendor      int
 	version     int
@@ -51,7 +52,8 @@ func newHttpClient() *http.Client {
 func NewClient(hostConfig *config.HostConfig) (*Client, error) {
 	client := &Client{
 		hostname:   hostConfig.Hostname,
-		basicAuth:  hostConfig.Token,
+		username:   hostConfig.Username,
+		password:   hostConfig.Password,
 		httpClient: newHttpClient(),
 	}
 
@@ -407,8 +409,8 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Basic "+client.basicAuth)
 	req.Header.Add("Accept", "application/json")
+	req.SetBasicAuth(client.username, client.password)
 
 	logging.Debugf("Querying url %q", url)
 
