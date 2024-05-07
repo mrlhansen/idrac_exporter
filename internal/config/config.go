@@ -1,6 +1,7 @@
 package config
 
 import (
+	"math"
 	"os"
 
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
@@ -61,7 +62,7 @@ func ReadConfig(filename string) {
 	}
 
 	if Config.Retries == 0 {
-		Config.Retries = 1
+		Config.Retries = math.MaxUint
 	}
 
 	if Config.MetricsPrefix == "" {
