@@ -1,0 +1,64 @@
+# This is a sample configuration file for the iDRAC exporter,
+# including default values and equivalent environment variables.
+# The environment variables takes precedence over the values in
+# the configuration file.
+
+# Listen address
+# Default value: 0.0.0.0
+# Environment variable CONFIG_ADDRESS=127.0.0.1
+address: 127.0.0.1
+
+# Listen port
+# Default value: 9348
+# Environment variable CONFIG_PORT=9348
+port: 9348
+
+# HTTP timeout in seconds for Redfish API calls
+# Default value: 10
+# Environment variable CONFIG_TIMEOUT=10
+timeout: 10
+
+# Retries before a target is marked as invalid (use 0 to disable invalidation)
+# Default value: 0
+# Environment variable CONFIG_RETRIES=0
+retries: 0
+
+# Prefix for the exported metrics
+# Default value: idrac
+# Environment variable CONFIG_METRICS_PREFIX=idrac
+metrics_prefix: idrac
+
+# The hosts section is used to define login information for the different targets.
+# Hosts can be referenced either via their IP address or their hostname, as long
+# as it matches the "target" parameter when scraping metrics.
+#
+# When the "target" does not match any host, the exporter will attempt to use the
+# login information under "default".
+#
+# The default username and password can be configured using the two environment
+# variables CONFIG_DEFAULT_USERNAME and CONFIG_DEFAULT_PASSWORD
+hosts:
+  default:
+    username: user
+    password: pass
+  192.168.1.1:
+    username: user
+    password: pass
+  host01.example.com:
+    username: user
+    password: pass
+
+# The metrics section is used to select different groups of metrics.
+# See the README file for a detailed list of metrics in each group.
+# Each section can also be enabled using an environment variable.
+#
+# The "sel" section (System Event Log) only works on iDRAC, but
+# the remaining sections work for all supported machine types.
+metrics:
+  system: false   # CONFIG_METRICS_SYSTEM=true
+  sensors: false  # CONFIG_METRICS_SENSORS=true
+  power: false    # CONFIG_METRICS_POWER=true
+  sel: false      # CONFIG_METRICS_SEL=true
+  storage: false  # CONFIG_METRICS_STORAGE=true
+  memory: false   # CONFIG_METRICS_MEMORY=true
+  network: false  # CONFIG_METRICS_NETWORK=true
