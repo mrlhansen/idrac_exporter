@@ -40,6 +40,21 @@ func (mc *Collector) NewSystemPowerOn(state string) prometheus.Metric {
 	)
 }
 
+func (mc *Collector) NewSystemOSInfo(hostname, installcompletedtime, oemosversion, osname, osversion, productkey, serverpoweredontime string) prometheus.Metric {
+	return prometheus.MustNewConstMetric(
+		mc.SystemOSInfo,
+		prometheus.UntypedValue,
+		1.0,
+		strings.TrimSpace(hostname),
+		strings.TrimSpace(installcompletedtime),
+		strings.TrimSpace(oemosversion),
+		strings.TrimSpace(osname),
+		strings.TrimSpace(osversion),
+		strings.TrimSpace(productkey),
+		strings.TrimSpace(serverpoweredontime),
+	)
+}
+
 func (mc *Collector) NewSystemHealth(health string) prometheus.Metric {
 	value := health2value(health)
 	return prometheus.MustNewConstMetric(

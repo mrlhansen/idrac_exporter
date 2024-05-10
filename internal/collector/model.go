@@ -375,6 +375,19 @@ type SystemResponse struct {
 	} `json:"TrustedModules"`
 }
 
+type ServerOS struct {
+	HostName             string `json:"ServerOS.1.HostName"`
+	InstallCompletedTime string `json:"ServerOS.1.InstallCompletedTime"`
+	OEMOSVersion         string `json:"ServerOS.1.OEMOSVersion"`
+	OSName               string `json:"ServerOS.1.OSName"`
+	OSVersion            string `json:"ServerOS.1.OSVersion"`
+	ProductKey           string `json:"ServerOS.1.ProductKey"`
+	ServerPoweredOnTime  int    `json:"ServerOS.1.ServerPoweredOnTime"`
+}
+
+type SystemOSResponse struct {
+	RedfishSettings map[string]interface{} `json:""@Redfish.Settings"`
+}
 type PowerResponse struct {
 	Name          string             `json:"Name"`
 	Description   string             `json:"Description"`

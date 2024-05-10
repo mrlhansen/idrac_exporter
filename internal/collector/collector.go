@@ -31,7 +31,9 @@ type Collector struct {
 	ExporterScrapeErrorsTotal *prometheus.Desc
 
 	// System
-	SystemPowerOn      *prometheus.Desc
+	SystemPowerOn *prometheus.Desc
+	// System OS info
+	SystemOSInfo       *prometheus.Desc
 	SystemHealth       *prometheus.Desc
 	SystemIndicatorLED *prometheus.Desc
 	SystemMemorySize   *prometheus.Desc
@@ -104,6 +106,11 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "system", "power_on"),
 			"Power state of the system",
 			nil, nil,
+		),
+		SystemOSInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "system", "os_info"),
+			"Information of OS running on the system",
+			[]string{"hostname", "installcompletedtime", "oemosversion", "osname", "osversion", "productkey", "serverpoweredontime"}, nil,
 		),
 		SystemHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "health"),
@@ -289,6 +296,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.ExporterBuildInfo
 	ch <- collector.ExporterScrapeErrorsTotal
 	ch <- collector.SystemPowerOn
+	ch <- collector.SystemOSInfo
 	ch <- collector.SystemHealth
 	ch <- collector.SystemIndicatorLED
 	ch <- collector.SystemMemorySize

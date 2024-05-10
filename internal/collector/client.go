@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mitchellh/mapstructure"
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/logging"
 	"github.com/prometheus/client_golang/prometheus"
@@ -184,6 +185,31 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 	return nil
 }
 
+func (client *Client) GetOSAttributes() (ServerOS, error) {
+	osAttrPath := "/redfish/v1/Managers/System.Embedded.1/Attributes?$select=ServerOS.*"
+	var osAttrData map[string]interface{}
+	err := client.redfishGet(osAttrPath, &osAttrData)
+	if err != nil {
+		return ServerOS{}, err
+	}
+	var serverOS ServerOS
+	config := &mapstructure.DecoderConfig{
+		Metadata: nil,
+		Result:   &serverOS,
+		TagName:  "json",
+	}
+	decoder, err := mapstructure.NewDecoder(config)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return ServerOS{}, err
+	}
+	if err = decoder.Decode(osAttrData["Attributes"]); err != nil {
+		fmt.Println("Error:", err)
+		return ServerOS{}, err
+	}
+	return serverOS, nil
+}
+
 func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) error {
 	var resp SystemResponse
 
@@ -204,6 +230,18 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	ch <- mc.NewSystemBiosInfo(resp.BiosVersion)
 	ch <- mc.NewSystemMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
 
+	var serverOS ServerOS
+	serverOS, err = client.GetOSAttributes()
+	if err == nil {
+		ch <- mc.NewSystemOSInfo(
+			serverOS.HostName,
+			serverOS.InstallCompletedTime,
+			serverOS.OEMOSVersion,
+			serverOS.OSName,
+			serverOS.OSVersion,
+			serverOS.ProductKey,
+			strconv.Itoa(serverOS.ServerPoweredOnTime))
+	}
 	return nil
 }
 
