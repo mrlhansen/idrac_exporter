@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -233,7 +234,7 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 			return err
 		}
 
-		for _, c := range ports.Members {
+		for _, c := range slices.Compact(ports.Members) {
 			port := NetworkPort{}
 			err = client.redfishGet(c.OdataId, &port)
 			if err != nil {
