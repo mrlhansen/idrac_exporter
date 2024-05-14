@@ -65,6 +65,17 @@ func NewClient(hostConfig *config.HostConfig) (*Client, error) {
 	return client, nil
 }
 
+func existed(seen map[string]bool, id string) bool {
+	if seen[id] {
+		// duplicated entry? print a warning
+		logging.Error("Ignoring duplicated entry: ", id)
+		return true
+	} else {
+		seen[id] = true
+	}
+	return false
+}
+
 func (client *Client) findAllEndpoints() error {
 	var root V1Response
 	var group GroupResponse
@@ -142,11 +153,11 @@ func (client *Client) findAllEndpoints() error {
 
 func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) error {
 	var resp ThermalResponse
-
 	err := client.redfishGet(client.thermalPath, &resp)
 	if err != nil {
 		return err
 	}
+	seen := map[string]bool{}
 
 	for n, t := range resp.Temperatures {
 		if t.Status.State != StateEnabled {
@@ -158,9 +169,13 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 		}
 
 		id := t.GetId(n)
+		if existed(seen, id) {
+			continue
+		}
 		ch <- mc.NewSensorsTemperature(t.ReadingCelsius, id, t.Name, "celsius")
 	}
 
+	seen = map[string]bool{}
 	for n, f := range resp.Fans {
 		if f.Status.State != StateEnabled {
 			continue
@@ -177,6 +192,9 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 		}
 
 		id := f.GetId(n)
+		if existed(seen, id) {
+			continue
+		}
 		ch <- mc.NewSensorsFanHealth(id, name, f.Status.Health)
 		ch <- mc.NewSensorsFanSpeed(f.GetReading(), id, name, strings.ToLower(units))
 	}
@@ -214,6 +232,7 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 		return err
 	}
 
+	seen := map[string]bool{}
 	for _, c := range group.Members {
 		ni := NetworkInterface{}
 		err = client.redfishGet(c.OdataId, &ni)
@@ -221,6 +240,9 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 			return err
 		}
 
+		if existed(seen, ni.Id) {
+			continue
+		}
 		if ni.Status.State != StateEnabled {
 			continue
 		}
@@ -233,6 +255,7 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 			return err
 		}
 
+		portSeen := map[string]bool{}
 		for _, c := range ports.Members {
 			port := NetworkPort{}
 			err = client.redfishGet(c.OdataId, &port)
@@ -240,6 +263,9 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 				return err
 			}
 
+			if existed(portSeen, ni.Id) {
+				continue
+			}
 			ch <- mc.NewNetworkPortHealth(ni.Id, port.Id, port.Status.Health)
 			ch <- mc.NewNetworkPortSpeed(ni.Id, port.Id, port.GetSpeed())
 			ch <- mc.NewNetworkPortLinkUp(ni.Id, port.Id, port.LinkStatus)
@@ -257,12 +283,16 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 		return err
 	}
 
+	seen := make(map[string]bool)
 	for i, psu := range resp.PowerSupplies {
 		if psu.Status.State != StateEnabled {
 			continue
 		}
 
 		id := strconv.Itoa(i)
+		if existed(seen, id) {
+			continue
+		}
 		ch <- mc.NewPowerSupplyHealth(psu.Status.Health, id)
 		ch <- mc.NewPowerSupplyInputWatts(psu.PowerInputWatts, id)
 		ch <- mc.NewPowerSupplyInputVoltage(psu.LineInputVoltage, id)
@@ -271,8 +301,12 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 		ch <- mc.NewPowerSupplyEfficiencyPercent(psu.EfficiencyPercent, id)
 	}
 
+	seen = make(map[string]bool)
 	for i, pc := range resp.PowerControl {
 		id := strconv.Itoa(i)
+		if existed(seen, id) {
+			continue
+		}
 		ch <- mc.NewPowerControlConsumedWatts(pc.PowerConsumedWatts, id, pc.Name)
 		ch <- mc.NewPowerControlCapacityWatts(pc.PowerCapacityWatts, id, pc.Name)
 
@@ -302,7 +336,11 @@ func (client *Client) RefreshIdracSel(mc *Collector, ch chan<- prometheus.Metric
 		return err
 	}
 
+	seen := make(map[string]bool)
 	for _, e := range resp.Members {
+		if existed(seen, e.Id) {
+			continue
+		}
 		st := string(e.SensorType)
 		if st == "" {
 			st = "Unknown"
@@ -320,6 +358,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 		return err
 	}
 
+	var seen map[string]bool
 	for _, c := range group.Members {
 		ctlr := StorageController{}
 		err = client.redfishGet(c.OdataId, &ctlr)
@@ -337,11 +376,15 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			ctlr.Drives = grp.Members
 		}
 
+		seen = make(map[string]bool)
 		for _, d := range ctlr.Drives {
 			drive := Drive{}
 			err = client.redfishGet(d.OdataId, &drive)
 			if err != nil {
 				return err
+			}
+			if existed(seen, drive.Id) {
+				continue
 			}
 
 			// iLO 4
@@ -370,12 +413,15 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 		return err
 	}
 
+	seen := make(map[string]bool)
 	for _, c := range group.Members {
 		err = client.redfishGet(c.OdataId, &m)
 		if err != nil {
 			return err
 		}
-
+		if existed(seen, m.Id) {
+			continue
+		}
 		if m.Status.State == StateAbsent {
 			continue
 		}
