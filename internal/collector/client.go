@@ -141,8 +141,7 @@ func (client *Client) findAllEndpoints() error {
 }
 
 func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) error {
-	var resp ThermalResponse
-
+	resp := ThermalResponse{}
 	err := client.redfishGet(client.thermalPath, &resp)
 	if err != nil {
 		return err
@@ -185,8 +184,7 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 }
 
 func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) error {
-	var resp SystemResponse
-
+	resp := SystemResponse{}
 	err := client.redfishGet(client.systemPath, &resp)
 	if err != nil {
 		return err
@@ -250,8 +248,7 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 }
 
 func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) error {
-	var resp PowerResponse
-
+	resp := PowerResponse{}
 	err := client.redfishGet(client.powerPath, &resp)
 	if err != nil {
 		return err
@@ -291,12 +288,11 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 }
 
 func (client *Client) RefreshIdracSel(mc *Collector, ch chan<- prometheus.Metric) error {
-	var resp IdracSelResponse
-
 	if client.vendor != DELL {
 		return nil
 	}
 
+	resp := IdracSelResponse{}
 	err := client.redfishGet(redfishRootPath+"/Managers/iDRAC.Embedded.1/Logs/Sel", &resp)
 	if err != nil {
 		return err
@@ -362,21 +358,20 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 }
 
 func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) error {
-	var group GroupResponse
-	var m Memory
-
+	group := GroupResponse{}
 	err := client.redfishGet(client.memoryPath, &group)
 	if err != nil {
 		return err
 	}
 
 	for _, c := range group.Members {
+		m := Memory{}
 		err = client.redfishGet(c.OdataId, &m)
 		if err != nil {
 			return err
 		}
 
-		if m.Status.State == StateAbsent {
+		if (m.Status.State == StateAbsent) || (m.Id == "") {
 			continue
 		}
 
