@@ -17,6 +17,23 @@ type Odata struct {
 	OdataType    string `json:"@odata.type"`
 }
 
+type OdataSlice []Odata
+
+func (m *OdataSlice) GetLinks() []string {
+	list := []string{}
+	seen := map[string]bool{}
+
+	for _, c := range *m {
+		s := c.OdataId
+		if ok := seen[s]; !ok {
+			seen[s] = true
+			list = append(list, s)
+		}
+	}
+
+	return list
+}
+
 // Status is a common structure used in any entity with a status
 type Status struct {
 	Health       string `json:"Health"`
@@ -59,9 +76,9 @@ type V1Response struct {
 }
 
 type GroupResponse struct {
-	Name        string  `json:"Name"`
-	Description string  `json:"Description"`
-	Members     []Odata `json:"Members"`
+	Name        string     `json:"Name"`
+	Description string     `json:"Description"`
+	Members     OdataSlice `json:"Members"`
 }
 
 type ChassisResponse struct {
@@ -191,11 +208,11 @@ func (t *Temperature) GetId(fallback int) string {
 }
 
 type StorageController struct {
-	Id                 string  `json:"Id"`
-	Name               string  `json:"Name"`
-	Description        string  `json:"Description"`
-	Drives             []Odata `json:"Drives"`
-	Status             Status  `json:"Status"`
+	Id                 string     `json:"Id"`
+	Name               string     `json:"Name"`
+	Description        string     `json:"Description"`
+	Drives             OdataSlice `json:"Drives"`
+	Status             Status     `json:"Status"`
 	StorageControllers []struct {
 		FirmwareVersion string  `json:"FirmwareVersion"`
 		Manufacturer    string  `json:"Manufacturer"`
@@ -349,11 +366,11 @@ type SystemResponse struct {
 		Status               Status  `json:"Status"`
 		TotalSystemMemoryGiB float64 `json:"TotalSystemMemoryGiB"`
 	} `json:"MemorySummary"`
-	Model             string  `json:"Model"`
-	Name              string  `json:"Name"`
-	NetworkInterfaces Odata   `json:"NetworkInterfaces"`
-	PCIeDevices       []Odata `json:"PCIeDevices"`
-	PCIeFunctions     []Odata `json:"PCIeFunctions"`
+	Model             string     `json:"Model"`
+	Name              string     `json:"Name"`
+	NetworkInterfaces Odata      `json:"NetworkInterfaces"`
+	PCIeDevices       OdataSlice `json:"PCIeDevices"`
+	PCIeFunctions     OdataSlice `json:"PCIeFunctions"`
 	ProcessorSummary  *struct {
 		Count                 int    `json:"Count"`
 		LogicalProcessorCount int    `json:"LogicalProcessorCount"`

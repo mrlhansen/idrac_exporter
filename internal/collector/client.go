@@ -212,9 +212,9 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 		return err
 	}
 
-	for _, c := range group.Members {
+	for _, c := range group.Members.GetLinks() {
 		ni := NetworkInterface{}
-		err = client.redfishGet(c.OdataId, &ni)
+		err = client.redfishGet(c, &ni)
 		if err != nil {
 			return err
 		}
@@ -231,9 +231,9 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 			return err
 		}
 
-		for _, c := range ports.Members {
+		for _, c := range ports.Members.GetLinks() {
 			port := NetworkPort{}
-			err = client.redfishGet(c.OdataId, &port)
+			err = client.redfishGet(c, &port)
 			if err != nil {
 				return err
 			}
@@ -316,9 +316,9 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 		return err
 	}
 
-	for _, c := range group.Members {
+	for _, c := range group.Members.GetLinks() {
 		ctlr := StorageController{}
-		err = client.redfishGet(c.OdataId, &ctlr)
+		err = client.redfishGet(c, &ctlr)
 		if err != nil {
 			return err
 		}
@@ -326,16 +326,16 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 		// iLO 4
 		if (client.vendor == HPE) && (client.version == 4) {
 			grp := GroupResponse{}
-			err = client.redfishGet(c.OdataId+"DiskDrives/", &grp)
+			err = client.redfishGet(c+"DiskDrives/", &grp)
 			if err != nil {
 				return err
 			}
 			ctlr.Drives = grp.Members
 		}
 
-		for _, d := range ctlr.Drives {
+		for _, c := range ctlr.Drives.GetLinks() {
 			drive := Drive{}
-			err = client.redfishGet(d.OdataId, &drive)
+			err = client.redfishGet(c, &drive)
 			if err != nil {
 				return err
 			}
@@ -364,9 +364,9 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 		return err
 	}
 
-	for _, c := range group.Members {
+	for _, c := range group.Members.GetLinks() {
 		m := Memory{}
-		err = client.redfishGet(c.OdataId, &m)
+		err = client.redfishGet(c, &m)
 		if err != nil {
 			return err
 		}
