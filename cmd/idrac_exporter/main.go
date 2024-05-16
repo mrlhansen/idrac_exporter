@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
-	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"github.com/mrlhansen/idrac_exporter/internal/version"
 )
 
@@ -21,7 +21,7 @@ func main() {
 	config.ReadConfig(configFile)
 
 	if verbose {
-		logging.SetVerbose(true)
+		log.SetLevel(log.LevelDebug)
 	}
 
 	http.HandleFunc("/metrics", MetricsHandler)
@@ -29,11 +29,11 @@ func main() {
 	http.HandleFunc("/reset", ResetHandler)
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
-	logging.Infof("Build information: version=%s revision=%s", version.Version, version.Revision)
-	logging.Infof("Server listening on %s", bind)
+	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
+	log.Info("Server listening on %s", bind)
 
 	err := http.ListenAndServe(bind, nil)
 	if err != nil {
-		logging.Fatal(err)
+		log.Fatal("%v", err)
 	}
 }

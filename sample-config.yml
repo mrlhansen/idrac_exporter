@@ -1,12 +1,12 @@
 # This is a sample configuration file for the iDRAC exporter,
 # including default values and equivalent environment variables.
-# The environment variables takes precedence over the values in
+# The environment variables take precedence over the values in
 # the configuration file.
 
 # Listen address
 # Default value: 0.0.0.0
-# Environment variable CONFIG_ADDRESS=127.0.0.1
-address: 127.0.0.1
+# Environment variable CONFIG_ADDRESS=0.0.0.0
+address: 0.0.0.0
 
 # Listen port
 # Default value: 9348

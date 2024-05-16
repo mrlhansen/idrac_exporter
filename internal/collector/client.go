@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
-	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -407,25 +407,25 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 	req.Header.Add("Accept", "application/json")
 	req.SetBasicAuth(client.username, client.password)
 
-	logging.Debugf("Querying url %q", url)
+	log.Debug("Querying url %q", url)
 
 	resp, err := client.httpClient.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		logging.Debugf("Failed to query url %q: %v", url, err)
+		log.Debug("Failed to query url %q: %v", url, err)
 		return err
 	}
 
 	if resp.StatusCode != 200 {
-		logging.Debugf("Query to url %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
+		log.Debug("Query to url %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
 		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(res)
 	if err != nil {
-		logging.Debugf("Error decoding response from url %q: %v", url, err)
+		log.Debug("Error decoding response from url %q: %v", url, err)
 		return err
 	}
 

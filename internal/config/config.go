@@ -4,7 +4,7 @@ import (
 	"math"
 	"os"
 
-	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -32,13 +32,13 @@ func (c *RootConfig) GetHostCfg(target string) *HostConfig {
 func readConfigFile(filename string) {
 	yamlFile, err := os.Open(filename)
 	if err != nil {
-		logging.Fatalf("failed to open configuration file: %s: %s", filename, err)
+		log.Fatal("failed to open configuration file: %s: %s", filename, err)
 	}
 
 	err = yaml.NewDecoder(yamlFile).Decode(&Config)
 	yamlFile.Close()
 	if err != nil {
-		logging.Fatalf("invalid configuration file: %s: %s", filename, err.Error())
+		log.Fatal("invalid configuration file: %s: %s", filename, err.Error())
 	}
 }
 
@@ -70,15 +70,15 @@ func ReadConfig(filename string) {
 	}
 
 	if len(Config.Hosts) == 0 {
-		logging.Fatalf("invalid configuration: empty section: hosts")
+		log.Fatal("invalid configuration: empty section: hosts")
 	}
 
 	for k, v := range Config.Hosts {
 		if v.Username == "" {
-			logging.Fatalf("invalid configuration: missing username for host: %s", k)
+			log.Fatal("invalid configuration: missing username for host: %s", k)
 		}
 		if v.Password == "" {
-			logging.Fatalf("invalid configuration: missing password for host: %s", k)
+			log.Fatal("invalid configuration: missing password for host: %s", k)
 		}
 		v.Hostname = k
 	}

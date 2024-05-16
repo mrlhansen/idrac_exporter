@@ -11,10 +11,10 @@ import (
 // - [{"Member": "VALUE"}]
 type xstring string
 
-func (w *xstring) UnmarshalJSON(data []byte) (err error) {
-	var x interface{}
+func (w *xstring) UnmarshalJSON(data []byte) error {
+	var x any
 
-	err = json.Unmarshal(data, &x)
+	err := json.Unmarshal(data, &x)
 	if err != nil {
 		return err
 	}
@@ -30,8 +30,8 @@ func (w *xstring) UnmarshalJSON(data []byte) (err error) {
 		return nil
 	}
 
-	list := x.([]interface{})
-	dict := list[0].(map[string]interface{})
+	list := x.([]any)
+	dict := list[0].(map[string]any)
 	s, ok = dict["Member"].(string)
 	if ok {
 		*w = xstring(s)

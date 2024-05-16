@@ -9,7 +9,7 @@ import (
 	"sync"
 
 	"github.com/mrlhansen/idrac_exporter/internal/collector"
-	"github.com/mrlhansen/idrac_exporter/internal/logging"
+	"github.com/mrlhansen/idrac_exporter/internal/log"
 )
 
 const (
@@ -31,12 +31,12 @@ func HealthHandler(rsp http.ResponseWriter, req *http.Request) {
 func ResetHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {
-		logging.Errorf("Received request from %s without 'target' parameter", req.Host)
+		log.Error("Received request from %s without 'target' parameter", req.Host)
 		http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
 		return
 	}
 
-	logging.Debugf("Handling reset-request from %s for host %s", req.Host, target)
+	log.Debug("Handling reset-request from %s for host %s", req.Host, target)
 
 	collector.Reset(target)
 }
@@ -44,32 +44,32 @@ func ResetHandler(rsp http.ResponseWriter, req *http.Request) {
 func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {
-		logging.Errorf("Received request from %s without 'target' parameter", req.Host)
+		log.Error("Received request from %s without 'target' parameter", req.Host)
 		http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
 		return
 	}
 
-	logging.Debugf("Handling request from %s for host %s", req.Host, target)
+	log.Debug("Handling request from %s for host %s", req.Host, target)
 
 	c, err := collector.GetCollector(target)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error instantiating metrics collector for host %s: %v\n", target, err)
-		logging.Error(errorMsg)
+		log.Error(errorMsg)
 		http.Error(rsp, errorMsg, http.StatusInternalServerError)
 		return
 	}
 
-	logging.Debugf("Collecting metrics for host %s", target)
+	log.Debug("Collecting metrics for host %s", target)
 
 	metrics, err := c.Gather()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error collecting metrics for host %s: %v\n", target, err)
-		logging.Error(errorMsg)
+		log.Error(errorMsg)
 		http.Error(rsp, errorMsg, http.StatusInternalServerError)
 		return
 	}
 
-	logging.Debugf("Metrics for host %s collected", target)
+	log.Debug("Metrics for host %s collected", target)
 
 	header := rsp.Header()
 	header.Set(contentTypeHeader, "text/plain")
