@@ -4,6 +4,7 @@ groups:
       - alert: ServerNotHealthy
         expr: idrac_system_health{status!="OK"}
         for: 3m
+        keep_firing_for: 5m
         labels:
           severity: >
             {{- if $labels.status -}}
@@ -21,8 +22,9 @@ groups:
       - alert: ServerNotReporting
         expr: up{job=~".*idrac.*"} == 0
         for: 5m
+        keep_firing_for: 5m
         labels:
-          severity: critical
+          severity: warning
         annotations:
           description: Server {{ $labels.instance }} is not reporting.
           summary: Hardware server failed to reply to monitoring.
