@@ -18,10 +18,15 @@ func (c *RootConfig) GetHostCfg(target string) *HostConfig {
 
 	hostCfg, ok := c.Hosts[target]
 	if !ok {
+		def, ok := c.Hosts["default"]
+		if !ok {
+			log.Error("Could not find login information for host: %s", target)
+			return nil
+		}
 		hostCfg = &HostConfig{
 			Hostname: target,
-			Username: c.Hosts["default"].Username,
-			Password: c.Hosts["default"].Password,
+			Username: def.Username,
+			Password: def.Password,
 		}
 		c.Hosts[target] = hostCfg
 	}
@@ -32,13 +37,13 @@ func (c *RootConfig) GetHostCfg(target string) *HostConfig {
 func readConfigFile(filename string) {
 	yamlFile, err := os.Open(filename)
 	if err != nil {
-		log.Fatal("failed to open configuration file: %s: %s", filename, err)
+		log.Fatal("Failed to open configuration file: %s: %s", filename, err)
 	}
 
 	err = yaml.NewDecoder(yamlFile).Decode(&Config)
 	yamlFile.Close()
 	if err != nil {
-		log.Fatal("invalid configuration file: %s: %s", filename, err.Error())
+		log.Fatal("Invalid configuration file: %s: %s", filename, err.Error())
 	}
 }
 
@@ -70,15 +75,15 @@ func ReadConfig(filename string) {
 	}
 
 	if len(Config.Hosts) == 0 {
-		log.Fatal("invalid configuration: empty section: hosts")
+		log.Fatal("Invalid configuration: empty section: hosts")
 	}
 
 	for k, v := range Config.Hosts {
 		if v.Username == "" {
-			log.Fatal("invalid configuration: missing username for host: %s", k)
+			log.Fatal("Invalid configuration: missing username for host: %s", k)
 		}
 		if v.Password == "" {
-			log.Fatal("invalid configuration: missing password for host: %s", k)
+			log.Fatal("Invalid configuration: missing password for host: %s", k)
 		}
 		v.Hostname = k
 	}

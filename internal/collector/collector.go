@@ -475,6 +475,9 @@ func GetCollector(target string) (*Collector, error) {
 	if collector.client == nil {
 		if collector.retries < config.Config.Retries {
 			host := config.Config.GetHostCfg(target)
+			if host == nil {
+				return nil, fmt.Errorf("failed to get host information")
+			}
 			c, err := NewClient(host)
 			if err != nil {
 				collector.retries++
