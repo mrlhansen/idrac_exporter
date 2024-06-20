@@ -68,7 +68,7 @@ metrics:
   network: false
 ```
 
-As shown in the example above, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
+As shown in the above example, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. The login user only needs read-only permissions. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
 
 For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file.
 

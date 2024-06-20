@@ -1,0 +1,45 @@
+name: Release Go Binaries
+
+on:
+  release:
+    types:
+      - created
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release-go-binaries:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goarch: arm64
+            goos: windows
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Environment variables
+        run: |
+          echo "VERSION=$(git tag --points-at HEAD | grep -oP 'v\K[0-9.]+')" >> $GITHUB_ENV
+          echo "REVISION=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Build and release
+        uses: wangyoucao577/go-release-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          project_path: "./cmd/idrac_exporter"
+          binary_name: "idrac_exporter"
+          md5sum: false
+          compress_assets: false
+          ldflags: >
+            -X github.com/mrlhansen/idrac_exporter/internal/version.Version=${{ env.VERSION }}
+            -X github.com/mrlhansen/idrac_exporter/internal/version.Revision=${{ env.REVISION }}
