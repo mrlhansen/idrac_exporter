@@ -3,6 +3,8 @@ package config
 import (
 	"math"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"gopkg.in/yaml.v2"
@@ -54,6 +56,7 @@ func ReadConfig(filename string) {
 
 	readConfigEnv()
 
+	// main section
 	if Config.Address == "" {
 		Config.Address = "0.0.0.0"
 	}
@@ -74,6 +77,7 @@ func ReadConfig(filename string) {
 		Config.MetricsPrefix = "idrac"
 	}
 
+	// hosts section
 	if len(Config.Hosts) == 0 {
 		log.Fatal("Invalid configuration: empty section: hosts")
 	}
@@ -87,4 +91,26 @@ func ReadConfig(filename string) {
 		}
 		v.Hostname = k
 	}
+
+	// events section
+	switch strings.ToLower(Config.Event.Severity) {
+	case "ok":
+		Config.Event.SeverityLevel = 0
+	case "warning", "":
+		Config.Event.SeverityLevel = 1
+	case "critical":
+		Config.Event.SeverityLevel = 2
+	default:
+		log.Fatal("Invalid configuration: invalid value: %s", Config.Event.Severity)
+	}
+
+	if Config.Event.MaxAge == "" {
+		Config.Event.MaxAge = "168h"
+	}
+
+	t, err := time.ParseDuration(Config.Event.MaxAge)
+	if err != nil {
+		log.Fatal("Invalid configuration: unable to parse duration: %v", err)
+	}
+	Config.Event.MaxAgeSeconds = t.Seconds()
 }

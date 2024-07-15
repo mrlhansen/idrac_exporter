@@ -51,14 +51,19 @@ hosts:
 # The metrics section is used to select different groups of metrics.
 # See the README file for a detailed list of metrics in each group.
 # Each section can also be enabled using an environment variable.
-#
-# The "sel" section (System Event Log) only works on iDRAC, but
-# the remaining sections work for all supported machine types.
 metrics:
   system: false   # CONFIG_METRICS_SYSTEM=true
   sensors: false  # CONFIG_METRICS_SENSORS=true
   power: false    # CONFIG_METRICS_POWER=true
-  sel: false      # CONFIG_METRICS_SEL=true
+  events: false   # CONFIG_METRICS_EVENTS=true
   storage: false  # CONFIG_METRICS_STORAGE=true
   memory: false   # CONFIG_METRICS_MEMORY=true
   network: false  # CONFIG_METRICS_NETWORK=true
+
+# The events section is used for filtering events and it is only needed when
+# the "events" metrics are enabled. Events can be filtered based on minimum
+# severity and maximum age.
+# Severity must be one of "ok", "warning", "critical"
+events:
+  severity: warning  # CONFIG_EVENTS_SEVERITY=warning
+  maxage: 168h       # CONFIG_EVENTS_MAXAGE=168h

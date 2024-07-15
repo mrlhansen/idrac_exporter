@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-func health2value(health string) float64 {
+func health2value(health string) int {
 	switch health {
 	case "OK":
 		return 0
@@ -20,7 +20,7 @@ func health2value(health string) float64 {
 	return 10
 }
 
-func linkstatus2value(status string) float64 {
+func linkstatus2value(status string) int {
 	switch status {
 	case "Up", "LinkUp":
 		return 1
@@ -45,7 +45,7 @@ func (mc *Collector) NewSystemHealth(health string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemHealth,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		health,
 	)
 }
@@ -117,7 +117,7 @@ func (mc *Collector) NewSensorsFanHealth(id, name, health string) prometheus.Met
 	return prometheus.MustNewConstMetric(
 		mc.SensorsFanHealth,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		id,
 		name,
 		health,
@@ -140,7 +140,7 @@ func (mc *Collector) NewPowerSupplyHealth(health, id string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.PowerSupplyHealth,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		id,
 		health,
 	)
@@ -251,14 +251,13 @@ func (mc *Collector) NewPowerControlInterval(interval int, id, name string) prom
 	)
 }
 
-func (mc *Collector) NewSelEntry(id string, message string, component string, severity string, created time.Time) prometheus.Metric {
+func (mc *Collector) NewEventLogEntry(id string, message string, severity string, created time.Time) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
-		mc.SelEntry,
+		mc.EventLogEntry,
 		prometheus.CounterValue,
 		float64(created.Unix()),
 		id,
 		message,
-		component,
 		severity,
 	)
 }
@@ -292,7 +291,7 @@ func (mc *Collector) NewDriveHealth(id, health string) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.DriveHealth,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		id,
 		health,
 	)
@@ -336,7 +335,7 @@ func (mc *Collector) NewMemoryModuleHealth(id, health string) prometheus.Metric 
 	return prometheus.MustNewConstMetric(
 		mc.MemoryModuleHealth,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		id,
 		health,
 	)
@@ -365,7 +364,7 @@ func (mc *Collector) NewNetworkInterfaceHealth(id, health string) prometheus.Met
 	return prometheus.MustNewConstMetric(
 		mc.NetworkInterfaceHealth,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		id,
 		health,
 	)
@@ -376,7 +375,7 @@ func (mc *Collector) NewNetworkPortHealth(iface, id, health string) prometheus.M
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortHealth,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		iface,
 		id,
 		health,
@@ -398,7 +397,7 @@ func (mc *Collector) NewNetworkPortLinkUp(iface, id, status string) prometheus.M
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortLinkUp,
 		prometheus.GaugeValue,
-		value,
+		float64(value),
 		iface,
 		id,
 		status,

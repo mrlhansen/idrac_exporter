@@ -61,7 +61,7 @@ type Collector struct {
 	PowerControlInterval         *prometheus.Desc
 
 	// System event log
-	SelEntry *prometheus.Desc
+	EventLogEntry *prometheus.Desc
 
 	// Disk drives
 	DriveInfo     *prometheus.Desc
@@ -210,10 +210,10 @@ func NewCollector() *Collector {
 			"Interval for measurements of power control system",
 			[]string{"id", "name"}, nil,
 		),
-		SelEntry: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "sel", "entry"),
+		EventLogEntry: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "log", "entry"),
 			"Entry from the system event log",
-			[]string{"id", "message", "component", "severity"}, nil,
+			[]string{"id", "message", "severity"}, nil,
 		),
 		DriveInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "drive", "info"),
@@ -310,7 +310,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.PowerControlMaxConsumedWatts
 	ch <- collector.PowerControlAvgConsumedWatts
 	ch <- collector.PowerControlInterval
-	ch <- collector.SelEntry
+	ch <- collector.EventLogEntry
 	ch <- collector.DriveInfo
 	ch <- collector.DriveHealth
 	ch <- collector.DriveCapacity
@@ -372,10 +372,10 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.SEL {
+	if config.Config.Collect.Events {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshIdracSel(collector, ch)
+			err := collector.client.RefreshEventLog(collector, ch)
 			if err != nil {
 				collector.errors.Add(1)
 			}

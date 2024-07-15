@@ -49,6 +49,8 @@ func readConfigEnv() {
 	getEnvString("CONFIG_METRICS_PREFIX", &Config.MetricsPrefix)
 	getEnvString("CONFIG_DEFAULT_USERNAME", &username)
 	getEnvString("CONFIG_DEFAULT_PASSWORD", &password)
+	getEnvString("CONFIG_EVENT_SEVERITY", &Config.Event.Severity)
+	getEnvString("CONFIG_EVENT_MAXAGE", &Config.Event.MaxAge)
 
 	getEnvUint("CONFIG_PORT", &Config.Port)
 	getEnvUint("CONFIG_TIMEOUT", &Config.Timeout)
@@ -56,7 +58,7 @@ func readConfigEnv() {
 
 	getEnvBool("CONFIG_METRICS_SYSTEM", &Config.Collect.System)
 	getEnvBool("CONFIG_METRICS_SENSORS", &Config.Collect.Sensors)
-	getEnvBool("CONFIG_METRICS_SEL", &Config.Collect.SEL)
+	getEnvBool("CONFIG_METRICS_EVENTS", &Config.Collect.Events)
 	getEnvBool("CONFIG_METRICS_POWER", &Config.Collect.Power)
 	getEnvBool("CONFIG_METRICS_STORAGE", &Config.Collect.Storage)
 	getEnvBool("CONFIG_METRICS_MEMORY", &Config.Collect.Memory)
