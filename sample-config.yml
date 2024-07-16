@@ -60,10 +60,9 @@ metrics:
   memory: false   # CONFIG_METRICS_MEMORY=true
   network: false  # CONFIG_METRICS_NETWORK=true
 
-# The events section is used for filtering events and it is only needed when
-# the "events" metrics are enabled. Events can be filtered based on minimum
-# severity and maximum age.
+# The events section is used for filtering events when the "events" metrics group
+# is enabled. Events can be filtered based on minimum severity and maximum age.
 # Severity must be one of "ok", "warning", "critical"
 events:
   severity: warning  # CONFIG_EVENTS_SEVERITY=warning
-  maxage: 168h       # CONFIG_EVENTS_MAXAGE=168h
+  maxage: 7d         # CONFIG_EVENTS_MAXAGE=7d

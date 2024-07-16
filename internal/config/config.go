@@ -4,9 +4,9 @@ import (
 	"math"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/log"
+	"github.com/xhit/go-str2duration/v2"
 	"gopkg.in/yaml.v2"
 )
 
@@ -105,10 +105,10 @@ func ReadConfig(filename string) {
 	}
 
 	if Config.Event.MaxAge == "" {
-		Config.Event.MaxAge = "168h"
+		Config.Event.MaxAge = "7d"
 	}
 
-	t, err := time.ParseDuration(Config.Event.MaxAge)
+	t, err := str2duration.ParseDuration(Config.Event.MaxAge)
 	if err != nil {
 		log.Fatal("Invalid configuration: unable to parse duration: %v", err)
 	}

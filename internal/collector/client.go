@@ -124,6 +124,16 @@ func (client *Client) findAllEndpoints() error {
 		client.vendor = H3C
 	}
 
+	// Path for event log
+	switch client.vendor {
+	case DELL:
+		client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
+	case LENOVO:
+		client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
+	case HPE:
+		client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
+	}
+
 	// Fix for Inspur bug
 	if client.vendor == INSPUR {
 		client.storagePath = strings.ReplaceAll(client.storagePath, "Storages", "Storage")
@@ -134,18 +144,9 @@ func (client *Client) findAllEndpoints() error {
 		if strings.Contains(root.Name, "HP RESTful") {
 			client.memoryPath = "/redfish/v1/Systems/1/Memory/"
 			client.storagePath = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
+			client.eventPath = ""
 			client.version = 4
 		}
-	}
-
-	// Path for event log
-	switch client.vendor {
-	case DELL:
-		client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
-	case LENOVO:
-		client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
-	case HPE:
-		client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
 	}
 
 	return nil
