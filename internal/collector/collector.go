@@ -211,7 +211,7 @@ func NewCollector() *Collector {
 			[]string{"id", "name"}, nil,
 		),
 		EventLogEntry: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "log", "entry"),
+			prometheus.BuildFQName(prefix, "events", "log_entry"),
 			"Entry from the system event log",
 			[]string{"id", "message", "severity"}, nil,
 		),

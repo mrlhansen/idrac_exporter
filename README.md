@@ -129,7 +129,7 @@ idrac_power_control_interval_in_minutes{id="0",name="System Power Control"} 1
 This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the unix timestamp for when the entry was created.
 
 ```text
-idrac_log_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",severity="OK"} 1631175352
+idrac_events_log_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",severity="OK"} 1631175352
 ```
 
 ### Storage

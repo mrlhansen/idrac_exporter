@@ -476,6 +476,7 @@ type EventLogResponse struct {
 	Description string `json:"Description"`
 	Members     []struct {
 		Id           string  `json:"Id"`
+		EventId      string  `json:"EventId"`
 		Name         string  `json:"Name"`
 		Created      string  `json:"Created"`
 		Description  string  `json:"Description"`

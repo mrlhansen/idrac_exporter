@@ -25,12 +25,12 @@
           "uid": "${datasource}"
         },
         "enable": true,
-        "expr": "idrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
+        "expr": "idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
         "iconColor": "purple",
         "name": "SEL",
-        "tagKeys": "instance,component,severity",
+        "tagKeys": "instance,severity",
         "textFormat": "{{ message }}",
-        "titleFormat": "{{id}}:{{ component }}",
+        "titleFormat": "{{ id }}",
         "useValueForTime": "on"
       }
     ]
@@ -2647,18 +2647,6 @@
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "component"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 217
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
                   "options": "instance"
                 },
                 "properties": [
@@ -2699,10 +2687,10 @@
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "idrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_sel_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
+              "expr": "idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
               "format": "table",
               "instant": true,
-              "legendFormat": "{{id}} {{component}}:  {{message}}",
+              "legendFormat": "{{ id }}: {{ message }}",
               "range": false,
               "refId": "A"
             }
@@ -2737,7 +2725,7 @@
               "id": "filterFieldsByName",
               "options": {
                 "include": {
-                  "pattern": "message|id|component|severity|Value"
+                  "pattern": "message|id|severity|Value"
                 }
               }
             },
@@ -2747,10 +2735,9 @@
                 "excludeByName": {},
                 "indexByName": {
                   "Value": 0,
-                  "component": 4,
                   "id": 2,
                   "instance": 1,
-                  "message": 5,
+                  "message": 4,
                   "severity": 3
                 },
                 "renameByName": {
