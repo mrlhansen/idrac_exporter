@@ -257,7 +257,7 @@ func (mc *Collector) NewEventLogEntry(id string, message string, severity string
 		prometheus.CounterValue,
 		float64(created.Unix()),
 		id,
-		message,
+		strings.TrimSpace(message),
 		severity,
 	)
 }

@@ -127,7 +127,7 @@ func (client *Client) findAllEndpoints() error {
 	// Path for event log
 	switch client.vendor {
 	case DELL:
-		client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
+		client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
 	case LENOVO:
 		client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
 	case HPE:
