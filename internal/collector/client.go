@@ -38,6 +38,7 @@ type Client struct {
 	storagePath string
 	memoryPath  string
 	networkPath string
+	eventPath   string
 }
 
 func newHttpClient() *http.Client {
@@ -123,6 +124,16 @@ func (client *Client) findAllEndpoints() error {
 		client.vendor = H3C
 	}
 
+	// Path for event log
+	switch client.vendor {
+	case DELL:
+		client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
+	case LENOVO:
+		client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
+	case HPE:
+		client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
+	}
+
 	// Fix for Inspur bug
 	if client.vendor == INSPUR {
 		client.storagePath = strings.ReplaceAll(client.storagePath, "Storages", "Storage")
@@ -133,6 +144,7 @@ func (client *Client) findAllEndpoints() error {
 		if strings.Contains(root.Name, "HP RESTful") {
 			client.memoryPath = "/redfish/v1/Systems/1/Memory/"
 			client.storagePath = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
+			client.eventPath = ""
 			client.version = 4
 		}
 	}
@@ -287,23 +299,37 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 	return nil
 }
 
-func (client *Client) RefreshIdracSel(mc *Collector, ch chan<- prometheus.Metric) error {
-	if client.vendor != DELL {
+func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric) error {
+	if client.eventPath == "" {
 		return nil
 	}
 
-	resp := IdracSelResponse{}
-	err := client.redfishGet(redfishRootPath+"/Managers/iDRAC.Embedded.1/Logs/Sel", &resp)
+	resp := EventLogResponse{}
+	err := client.redfishGet(client.eventPath, &resp)
 	if err != nil {
 		return err
 	}
 
+	level := config.Config.Event.SeverityLevel
+	maxage := config.Config.Event.MaxAgeSeconds
+
 	for _, e := range resp.Members {
-		st := string(e.SensorType)
-		if st == "" {
-			st = "Unknown"
+		t, err := time.Parse(time.RFC3339, e.Created)
+		if err != nil {
+			continue
 		}
-		ch <- mc.NewSelEntry(e.Id, e.Message, st, e.Severity, e.Created)
+
+		d := time.Since(t)
+		if d.Seconds() > maxage {
+			continue
+		}
+
+		severity := health2value(e.Severity)
+		if severity < level {
+			continue
+		}
+
+		ch <- mc.NewEventLogEntry(e.Id, e.Message, e.Severity, t)
 	}
 
 	return nil

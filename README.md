@@ -62,7 +62,7 @@ metrics:
   system: true
   sensors: true
   power: true
-  sel: false
+  events: false
   storage: false
   memory: false
   network: false
@@ -70,7 +70,7 @@ metrics:
 
 As shown in the above example, under `hosts` you can specify login information for individual hosts via their IP address, otherwise the exporter will attempt to use the login information under `default`. The login user only needs read-only permissions. Under `metrics` you can select what kind of metrics that should be returned, as described in more detail below.
 
-For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file.
+**For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file.**
 
 Because the metrics are collected on-demand it can take several minutes to scrape the metrics endpoint, depending on how many metrics groups are selected in the configuration file. For this reason you should carefully select the metrics of interest and make sure Prometheus is configured with a sufficiently high scrape timeout value.
 
@@ -126,10 +126,10 @@ idrac_power_control_interval_in_minutes{id="0",name="System Power Control"} 1
 ```
 
 ### System Event Log
-On iDRAC only, the system event log can also be exported. This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the unix timestamp for when the entry was created (as reported by iDRAC).
+This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the unix timestamp for when the entry was created.
 
 ```text
-idrac_sel_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",component="BaseOSBoot/InstallationStatus",severity="OK"} 1631175352
+idrac_events_log_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",severity="OK"} 1631175352
 ```
 
 ### Storage

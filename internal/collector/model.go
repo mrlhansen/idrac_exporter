@@ -2,7 +2,6 @@ package collector
 
 import (
 	"strconv"
-	"time"
 )
 
 const (
@@ -472,21 +471,22 @@ func (psu *PowerSupplyUnit) GetOutputPower() float64 {
 	return psu.LastPowerOutputWatts
 }
 
-type IdracSelResponse struct {
+type EventLogResponse struct {
 	Name        string `json:"Name"`
 	Description string `json:"Description"`
 	Members     []struct {
-		Id           string    `json:"Id"`
-		Name         string    `json:"Name"`
-		Created      time.Time `json:"Created"`
-		Description  string    `json:"Description"`
-		EntryCode    xstring   `json:"EntryCode"`
-		EntryType    string    `json:"EntryType"`
-		Message      string    `json:"Message"`
-		MessageArgs  []any     `json:"MessageArgs"`
-		MessageId    string    `json:"MessageId"`
-		SensorNumber int       `json:"SensorNumber"`
-		SensorType   xstring   `json:"SensorType"`
-		Severity     string    `json:"Severity"`
+		Id           string  `json:"Id"`
+		EventId      string  `json:"EventId"`
+		Name         string  `json:"Name"`
+		Created      string  `json:"Created"`
+		Description  string  `json:"Description"`
+		EntryCode    xstring `json:"EntryCode"`
+		EntryType    string  `json:"EntryType"`
+		Message      string  `json:"Message"`
+		MessageArgs  []any   `json:"MessageArgs"`
+		MessageId    string  `json:"MessageId"`
+		SensorNumber int     `json:"SensorNumber"`
+		SensorType   xstring `json:"SensorType"`
+		Severity     string  `json:"Severity"`
 	} `json:"Members"`
 }
