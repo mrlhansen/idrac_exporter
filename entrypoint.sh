@@ -15,8 +15,8 @@ elif [ ! -e "$config" ]; then
 		export IDRAC_USERNAME=$(cut -f1  -d= $auth_file)
 		export IDRAC_PASSWORD=$(cut -f2- -d= $auth_file)
 		envsubst <${config}.template > /app/config/idrac.yml
+		config=/app/config/idrac.yml
 	fi
-
 fi
 
 exec bin/idrac_exporter -config="$config"
