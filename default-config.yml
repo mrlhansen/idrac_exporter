@@ -1,0 +1,17 @@
+address: 0.0.0.0
+port: 9348
+hosts:
+  default:
+    username: root
+    password: calvin
+metrics:
+  system: true
+  sensors: true
+  power: true
+  events: true
+  storage: true
+  memory: true
+  network: true
+events:
+  severity: warning
+  maxage: 7d

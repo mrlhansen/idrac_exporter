@@ -11,6 +11,6 @@ FROM ${ARCH}alpine:3.18 as container
 WORKDIR /app
 COPY --from=builder /app/src/idrac_exporter /app/bin/
 RUN apk add -U bash gettext
-COPY idrac.yml.template /etc/prometheus/
+COPY default-config.yml /etc/prometheus/idrac.yml
 COPY entrypoint.sh /app
-ENTRYPOINT /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
