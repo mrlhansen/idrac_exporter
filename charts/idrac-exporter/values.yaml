@@ -78,18 +78,16 @@ tolerations: []
 
 affinity: {}
 
-# If true idracConfig mounts as "idrac.yml.template" to be used with environment
-# variables in entrypoint.sh for container deployments.
-idracConfigIsTemplate: false
+extraArgs: []
 
 idracConfig: |
-  address: 0.0.0.0   # Running in a container, this makes sense
-  port: 9348         # Listen port
-  timeout: 60        # HTTP timeout (in seconds) for Redfish API calls
+  address: 0.0.0.0
+  port: 9348
+  timeout: 60
   hosts:
     default:
-      username: IDRAC_USERNAME
-      password: IDRAC_PASSWORD
+      username: USERNAME
+      password: PASSWORD
   metrics:
     system: true
     sensors: true
@@ -100,9 +98,9 @@ idracConfig: |
     network: true
 
 env: []
-# - name: IDRAC_USERNAME
+# - name: CONFIG_DEFAULT_USERNAME
 #   value: root
-# - name: IDRAC_PASSWORD
+# - name: CONFIG_DEFAULT_PASSWORD
 #   valueFrom:
 #     secretKeyRef:
 #        name: my-external-idrac-secret

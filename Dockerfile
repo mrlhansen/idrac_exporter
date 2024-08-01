@@ -10,7 +10,7 @@ FROM ${ARCH}alpine:3.18 as container
 
 WORKDIR /app
 COPY --from=builder /app/src/idrac_exporter /app/bin/
-RUN apk add -U bash gettext
+RUN apk add -U bash
 COPY default-config.yml /etc/prometheus/idrac.yml
 COPY entrypoint.sh /app
 ENTRYPOINT ["/app/entrypoint.sh"]
