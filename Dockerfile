@@ -1,12 +1,12 @@
 ARG ARCH=
-FROM ${ARCH}golang:1.21-alpine3.18 as builder
+FROM ${ARCH}golang:1.21-alpine3.18 AS builder
 
 WORKDIR /app/src
 RUN apk add -U make git grep
 COPY . .
 RUN make build
 
-FROM ${ARCH}alpine:3.18 as container
+FROM ${ARCH}alpine:3.18 AS container
 
 WORKDIR /app
 COPY --from=builder /app/src/idrac_exporter /app/bin/
