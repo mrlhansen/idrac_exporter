@@ -23,6 +23,7 @@ const (
 	LENOVO
 	INSPUR
 	H3C
+	INVENTEC
 )
 
 type Client struct {
@@ -122,6 +123,8 @@ func (client *Client) findAllEndpoints() error {
 		client.vendor = INSPUR
 	} else if strings.Contains(m, "h3c") {
 		client.vendor = H3C
+	} else if strings.Contains(m, "inventec") {
+		client.vendor = INVENTEC
 	}
 
 	// Path for event log
@@ -267,6 +270,11 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 	}
 
 	for i, psu := range resp.PowerSupplies {
+		// Status is missing, but information is there
+		if client.vendor == INVENTEC {
+			psu.Status.State = StateEnabled
+		}
+
 		if psu.Status.State != StateEnabled {
 			continue
 		}

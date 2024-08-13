@@ -37,7 +37,7 @@ docker run -v /host-path/config.yml:/etc/prometheus/idrac.yml -p 9348:9348 mrlha
 Remember to set the listen address to `0.0.0.0` when running inside a container.
 
 ### Helm Chart
-There is also an official [Helm](https://helm.sh/docs/) chart for installating the exporter in a Kubernetes cluster.
+There is also an official [Helm](https://helm.sh/docs/) chart for installing the exporter in a Kubernetes cluster.
 
 ```sh
 helm repo add idrac-exporter https://mrlhansen.github.io/idrac_exporter
@@ -45,7 +45,7 @@ helm install idrac-exporter/idrac-exporter idrac-exporter
 ```
 
 ## Configuration
-In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
+In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default, the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
 
 ```yaml
 address: 127.0.0.1 # Listen address
@@ -72,7 +72,7 @@ As shown in the above example, under `hosts` you can specify login information f
 
 **For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file. In this file you can also find the corresponding environment variables for the different configuration options.**
 
-Because the metrics are collected on-demand it can take several minutes to scrape the metrics endpoint, depending on how many metrics groups are selected in the configuration file. For this reason you should carefully select the metrics of interest and make sure Prometheus is configured with a sufficiently high scrape timeout value.
+Because the metrics are collected on-demand it can take several minutes to scrape the metrics endpoint, depending on how many metrics groups are selected in the configuration file. For this reason, you should carefully select the metrics of interest and make sure Prometheus is configured with a sufficiently high scrape timeout value.
 
 ## List of Metrics
 The exporter can expose the metrics listed in the sections below. For all `<name>_health` metrics the value has the following mapping.
@@ -126,7 +126,7 @@ idrac_power_control_interval_in_minutes{id="0",name="System Power Control"} 1
 ```
 
 ### System Event Log
-This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the unix timestamp for when the entry was created.
+This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the Unix timestamp for when the entry was created.
 
 ```text
 idrac_events_log_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",severity="OK"} 1631175352
