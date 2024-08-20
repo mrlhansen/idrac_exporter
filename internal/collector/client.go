@@ -253,6 +253,14 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 				return err
 			}
 
+			// Fix for issue #92
+			if client.vendor == DELL {
+				if ni.Id == port.Id {
+					s := strings.Split(c, "/")
+					port.Id = s[len(s)-1]
+				}
+			}
+
 			ch <- mc.NewNetworkPortHealth(ni.Id, port.Id, port.Status.Health)
 			ch <- mc.NewNetworkPortSpeed(ni.Id, port.Id, port.GetSpeed())
 			ch <- mc.NewNetworkPortLinkUp(ni.Id, port.Id, port.LinkStatus)
