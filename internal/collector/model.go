@@ -237,17 +237,17 @@ type Drive struct {
 	Protocol          string  `json:"Protocol"`
 	Revision          string  `json:"Revision"`
 	PartNumber        string  `json:"PartNumber"`
-	PredictedLifeLeft int     `json:"PredictedMediaLifeLeftPercent"`
-	RotationSpeedRPM  int     `json:"RotationSpeedRPM"`
+	PredictedLifeLeft float64 `json:"PredictedMediaLifeLeftPercent"`
+	RotationSpeedRPM  float64 `json:"RotationSpeedRPM"`
 	PhysicalLocation  *struct {
 		PartLocation *struct {
 			LocationOrdinalValue int `json:"LocationOrdinalValue"`
 		} `json:"PartLocation"`
 	} `json:"PhysicalLocation"`
 	// iLO 4
-	CapacityMiB                       int    `json:"CapacityMiB"`
-	InterfaceType                     string `json:"InterfaceType"`
-	SSDEnduranceUtilizationPercentage int    `json:"SSDEnduranceUtilizationPercentage"`
+	CapacityMiB                       int     `json:"CapacityMiB"`
+	InterfaceType                     string  `json:"InterfaceType"`
+	SSDEnduranceUtilizationPercentage float64 `json:"SSDEnduranceUtilizationPercentage"`
 }
 
 func (d *Drive) GetSlot() int {
@@ -304,20 +304,20 @@ func (n *NetworkInterface) GetPorts() string {
 }
 
 type NetworkPort struct {
-	Id                        string `json:"Id"`
-	Name                      string `json:"Name"`
-	Description               string `json:"Description"`
-	LinkStatus                string `json:"LinkStatus"`
-	CurrentLinkSpeedMbps      int    `json:"CurrentLinkSpeedMbps"`
-	CurrentSpeedGbps          int    `json:"CurrentSpeedGbps"`
-	Status                    Status `json:"Status"`
+	Id                        string  `json:"Id"`
+	Name                      string  `json:"Name"`
+	Description               string  `json:"Description"`
+	LinkStatus                string  `json:"LinkStatus"`
+	CurrentLinkSpeedMbps      float64 `json:"CurrentLinkSpeedMbps"`
+	CurrentSpeedGbps          float64 `json:"CurrentSpeedGbps"`
+	Status                    Status  `json:"Status"`
 	SupportedLinkCapabilities []struct {
-		LinkNetworkTechnology string `json:"LinkNetworkTechnology"`
-		LinkSpeedMbps         int    `json:"LinkSpeedMbps"`
+		LinkNetworkTechnology string  `json:"LinkNetworkTechnology"`
+		LinkSpeedMbps         float64 `json:"LinkSpeedMbps"`
 	} `json:"SupportedLinkCapabilities"`
 }
 
-func (n *NetworkPort) GetSpeed() int {
+func (n *NetworkPort) GetSpeed() float64 {
 	if n.CurrentLinkSpeedMbps > 0 {
 		return n.CurrentLinkSpeedMbps
 	}

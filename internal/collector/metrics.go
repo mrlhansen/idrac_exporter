@@ -306,11 +306,11 @@ func (mc *Collector) NewDriveCapacity(id string, capacity int) prometheus.Metric
 	)
 }
 
-func (mc *Collector) NewDriveLifeLeft(id string, lifeLeft int) prometheus.Metric {
+func (mc *Collector) NewDriveLifeLeft(id string, lifeLeft float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.DriveLifeLeft,
 		prometheus.GaugeValue,
-		float64(lifeLeft),
+		lifeLeft,
 		id,
 	)
 }
@@ -382,11 +382,11 @@ func (mc *Collector) NewNetworkPortHealth(iface, id, health string) prometheus.M
 	)
 }
 
-func (mc *Collector) NewNetworkPortSpeed(iface, id string, speed int) prometheus.Metric {
+func (mc *Collector) NewNetworkPortSpeed(iface, id string, speed float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortSpeed,
 		prometheus.GaugeValue,
-		float64(speed),
+		speed,
 		iface,
 		id,
 	)

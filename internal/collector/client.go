@@ -382,11 +382,15 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				return err
 			}
 
+			if drive.Status.State == StateAbsent {
+				continue
+			}
+
 			// iLO 4
 			if (client.vendor == HPE) && (client.version == 4) {
 				drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
 				drive.Protocol = drive.InterfaceType
-				drive.PredictedLifeLeft = 100 - drive.SSDEnduranceUtilizationPercentage
+				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
 			}
 
 			ch <- mc.NewDriveInfo(drive.Id, drive.Name, drive.Manufacturer, drive.Model, drive.SerialNumber, drive.MediaType, drive.Protocol, drive.GetSlot())
