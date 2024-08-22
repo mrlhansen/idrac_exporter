@@ -205,6 +205,11 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 		return err
 	}
 
+	// Need on iLO 6
+	if resp.IndicatorLED == "" && client.vendor == HPE {
+		resp.IndicatorLED = resp.Oem.Hpe.IndicatorLED
+	}
+
 	ch <- mc.NewSystemPowerOn(resp.PowerState)
 	ch <- mc.NewSystemHealth(resp.Status.Health)
 	ch <- mc.NewSystemIndicatorLED(resp.IndicatorLED)

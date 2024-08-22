@@ -389,6 +389,11 @@ type SystemResponse struct {
 		InterfaceType   string `json:"InterfaceType"`
 		Status          Status `json:"Status"`
 	} `json:"TrustedModules"`
+	Oem struct {
+		Hpe struct {
+			IndicatorLED string `json:"IndicatorLED"`
+		} `json:"Hpe"`
+	} `json:"Oem"`
 }
 
 type PowerResponse struct {
