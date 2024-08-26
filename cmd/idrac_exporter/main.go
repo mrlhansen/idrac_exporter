@@ -18,6 +18,7 @@ func main() {
 	flag.StringVar(&configFile, "config", "/etc/prometheus/idrac.yml", "Path to idrac exporter configuration file")
 	flag.Parse()
 
+	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
 	config.ReadConfig(configFile)
 
 	if verbose {
@@ -27,9 +28,8 @@ func main() {
 	http.HandleFunc("/metrics", MetricsHandler)
 	http.HandleFunc("/health", HealthHandler)
 	http.HandleFunc("/reset", ResetHandler)
-	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 
-	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
+	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 	log.Info("Server listening on %s", bind)
 
 	err := http.ListenAndServe(bind, nil)
