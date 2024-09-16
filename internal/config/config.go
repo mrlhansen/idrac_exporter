@@ -47,6 +47,8 @@ func readConfigFile(filename string) {
 	if err != nil {
 		log.Fatal("Invalid configuration file: %s: %s", filename, err.Error())
 	}
+
+	log.Info("Configuration file: %s", filename)
 }
 
 func ReadConfig(filename string) {
