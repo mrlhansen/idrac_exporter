@@ -1,0 +1,26 @@
+stages:
+  - build
+
+build-cldx:
+  before_script:
+    - docker login $DOCKER_REGISTRY_PUSH -u $DOCKER_REGISTRY_USERNAME -p $DOCKER_REGISTRY_PASSWORD 2>/dev/null
+  stage: build
+  tags:
+    - shell
+  only:
+    - cldx
+  script:
+    - docker build -t $DOCKER_REGISTRY_PUSH/monitoring/idrac_exporter:$CI_COMMIT_SHORT_SHA .
+    - docker push $DOCKER_REGISTRY_PUSH/monitoring/idrac_exporter:$CI_COMMIT_SHORT_SHA
+
+build-tags:
+  before_script:
+    - docker login $DOCKER_REGISTRY_PUSH -u $DOCKER_REGISTRY_USERNAME -p $DOCKER_REGISTRY_PASSWORD 2>/dev/null
+  stage: build
+  tags:
+    - shell
+  only:
+    - cldx
+  script:
+    - docker build -t $DOCKER_REGISTRY_PUSH/monitoring/idrac_exporter:$CI_COMMIT_TAG .
+    - docker push $DOCKER_REGISTRY_PUSH/monitoring/idrac_exporter:$CI_COMMIT_TAG

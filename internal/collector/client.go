@@ -458,25 +458,25 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 	req.Header.Add("Accept", "application/json")
 	req.SetBasicAuth(client.username, client.password)
 
-	log.Debug("Querying %q", url)
+	log.Debug("Querying url %q", url)
 
 	resp, err := client.httpClient.Do(req)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		log.Error("Failed to query %q: %v", url, err)
+		log.Debug("Failed to query url %q: %v", url, err)
 		return err
 	}
 
 	if resp.StatusCode != 200 {
-		log.Error("Query to %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
+		log.Debug("Query to url %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
 		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(res)
 	if err != nil {
-		log.Error("Error decoding response from %q: %v", url, err)
+		log.Debug("Error decoding response from url %q: %v", url, err)
 		return err
 	}
 
