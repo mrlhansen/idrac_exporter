@@ -25,9 +25,9 @@
           "uid": "${datasource}"
         },
         "enable": true,
-        "expr": "idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
+        "expr": "last_over_time(idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"}[$__interval] offset -$__interval) * 1000 < ${__to}\nand \nlast_over_time(idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"}[$__interval] offset -$__interval) * 1000 > ${__from}",
         "iconColor": "purple",
-        "name": "SEL",
+        "name": "Events",
         "tagKeys": "instance,severity",
         "textFormat": "{{ message }}",
         "titleFormat": "{{ id }}",
@@ -38,7 +38,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2510,
+  "id": 1155,
   "links": [
     {
       "asDropdown": false,
@@ -126,7 +126,6 @@
       "hideTimeOverride": true,
       "id": 8,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "background",
@@ -140,10 +139,12 @@
           "fields": "/^status$/",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "auto"
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -227,7 +228,6 @@
       "hideTimeOverride": true,
       "id": 33,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -241,10 +241,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "name"
+        "textMode": "name",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -468,7 +470,7 @@
           }
         ]
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -602,7 +604,6 @@
       },
       "hideTimeOverride": true,
       "id": 4,
-      "links": [],
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -615,10 +616,12 @@
           "fields": "/^manufacturer$/",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -696,7 +699,6 @@
       },
       "hideTimeOverride": true,
       "id": 6,
-      "links": [],
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -709,10 +711,12 @@
           "fields": "/^serial$/",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -756,7 +760,6 @@
       "hideTimeOverride": true,
       "id": 20,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -770,10 +773,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -853,7 +858,6 @@
       },
       "hideTimeOverride": true,
       "id": 5,
-      "links": [],
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -866,10 +870,12 @@
           "fields": "/^model$/",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -922,7 +928,6 @@
       },
       "hideTimeOverride": true,
       "id": 7,
-      "links": [],
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -935,10 +940,12 @@
           "fields": "/^sku$/",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -982,7 +989,6 @@
       "hideTimeOverride": true,
       "id": 21,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -996,10 +1002,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -1070,7 +1078,6 @@
       "hideTimeOverride": true,
       "id": 30,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -1084,10 +1091,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -1172,7 +1181,6 @@
       "hideTimeOverride": true,
       "id": 25,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -1186,10 +1194,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "name"
+        "textMode": "name",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -1275,7 +1285,6 @@
       "hideTimeOverride": true,
       "id": 9,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -1289,10 +1298,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -1499,7 +1510,7 @@
           }
         ]
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1754,7 +1765,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1881,6 +1892,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -1894,6 +1906,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
@@ -1942,6 +1955,7 @@
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "desc"
         }
@@ -1994,6 +2008,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -2007,6 +2022,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
@@ -2055,6 +2071,7 @@
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "desc"
         }
@@ -2120,6 +2137,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": true,
             "axisColorMode": "text",
             "axisLabel": "In/Out",
@@ -2133,6 +2151,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
@@ -2192,6 +2211,7 @@
           "showLegend": true
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "desc"
         }
@@ -2272,7 +2292,6 @@
       "hideTimeOverride": true,
       "id": 23,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -2286,10 +2305,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -2341,6 +2362,7 @@
             "mode": "palette-classic"
           },
           "custom": {
+            "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
             "axisLabel": "",
@@ -2354,6 +2376,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
@@ -2400,6 +2423,7 @@
           "showLegend": false
         },
         "tooltip": {
+          "maxHeight": 600,
           "mode": "multi",
           "sort": "desc"
         }
@@ -2468,7 +2492,6 @@
       "hideTimeOverride": true,
       "id": 24,
       "interval": "1m",
-      "links": [],
       "maxDataPoints": 1,
       "options": {
         "colorMode": "value",
@@ -2482,10 +2505,12 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
-        "textMode": "value"
+        "textMode": "value",
+        "wideLayout": true
       },
-      "pluginVersion": "10.0.3",
+      "pluginVersion": "11.0.0",
       "targets": [
         {
           "alias": "",
@@ -2527,7 +2552,7 @@
       "type": "stat"
     },
     {
-      "collapsed": true,
+      "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2535,227 +2560,244 @@
         "y": 39
       },
       "id": 29,
-      "panels": [
+      "panels": [],
+      "title": "Event log",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "filterable": false,
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Value"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "dateTimeAsSystem"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "id"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 52
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Time"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 168
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "severity"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 91
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Critical": {
+                        "color": "red",
+                        "index": 0
+                      },
+                      "OK": {
+                        "color": "green",
+                        "index": 2
+                      },
+                      "Warning": {
+                        "color": "yellow",
+                        "index": 1
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 27,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.0.0",
+      "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
-              "custom": {
-                "align": "auto",
-                "cellOptions": {
-                  "type": "auto"
-                },
-                "inspect": false
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green"
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": [
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Value"
-                },
-                "properties": [
-                  {
-                    "id": "unit",
-                    "value": "dateTimeAsSystem"
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "id"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 52
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "Time"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 168
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "severity"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 91
-                  },
-                  {
-                    "id": "mappings",
-                    "value": [
-                      {
-                        "options": {
-                          "Critical": {
-                            "color": "red",
-                            "index": 0
-                          },
-                          "OK": {
-                            "color": "green",
-                            "index": 2
-                          },
-                          "Warning": {
-                            "color": "yellow",
-                            "index": 1
-                          }
-                        },
-                        "type": "value"
-                      }
-                    ]
-                  },
-                  {
-                    "id": "custom.cellOptions",
-                    "value": {
-                      "type": "color-text"
-                    }
-                  }
-                ]
-              },
-              {
-                "matcher": {
-                  "id": "byName",
-                  "options": "instance"
-                },
-                "properties": [
-                  {
-                    "id": "custom.width",
-                    "value": 103
-                  }
-                ]
-              }
-            ]
-          },
-          "gridPos": {
-            "h": 7,
-            "w": 24,
-            "x": 0,
-            "y": 40
-          },
-          "id": 27,
-          "options": {
-            "cellHeight": "sm",
-            "footer": {
-              "countRows": false,
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true,
-            "sortBy": []
-          },
-          "pluginVersion": "10.0.3",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "${datasource}"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 < ${__to} and \nidrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"} * 1000 > ${__from}",
-              "format": "table",
-              "instant": true,
-              "legendFormat": "{{ id }}: {{ message }}",
-              "range": false,
-              "refId": "A"
-            }
-          ],
-          "title": "System Event Log (SEL)",
-          "transformations": [
-            {
-              "id": "convertFieldType",
-              "options": {
-                "conversions": [
-                  {
-                    "destinationType": "number",
-                    "targetField": "id"
-                  }
-                ],
-                "fields": {}
-              }
-            },
-            {
-              "id": "sortBy",
-              "options": {
-                "fields": {},
-                "sort": [
-                  {
-                    "desc": true,
-                    "field": "id"
-                  }
-                ]
-              }
-            },
-            {
-              "id": "filterFieldsByName",
-              "options": {
-                "include": {
-                  "pattern": "message|id|severity|Value"
-                }
-              }
-            },
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {},
-                "indexByName": {
-                  "Value": 0,
-                  "id": 2,
-                  "instance": 1,
-                  "message": 4,
-                  "severity": 3
-                },
-                "renameByName": {
-                  "Value": "Time"
-                }
-              }
-            }
-          ],
-          "type": "table"
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "last_over_time(idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"}[$__interval] offset -$__interval) * 1000 < ${__to}\nand \nlast_over_time(idrac_events_log_entry{job=~\"$job\", instance=~\"$instance\"}[$__interval] offset -$__interval) * 1000 > ${__from}",
+          "format": "table",
+          "instant": false,
+          "interval": "1",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
         }
       ],
-      "title": "Event log",
-      "type": "row"
+      "title": "System Event Log (SEL)",
+      "transformations": [
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "number",
+                "targetField": "id"
+              }
+            ],
+            "fields": {}
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": true,
+                "field": "Time"
+              }
+            ]
+          }
+        },
+        {
+          "id": "filterFieldsByName",
+          "options": {
+            "include": {
+              "names": [
+                "id",
+                "message",
+                "severity",
+                "Value"
+              ],
+              "pattern": "message|id|severity|Value"
+            }
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {
+              "Value": 0,
+              "id": 2,
+              "instance": 1,
+              "message": 4,
+              "severity": 3
+            },
+            "renameByName": {
+              "Value": "Time"
+            }
+          }
+        },
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Time": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "id": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "message": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "severity": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": "30s",
-  "schemaVersion": 38,
-  "style": "dark",
+  "schemaVersion": 39,
   "tags": [
     "dell",
     "idrac",
@@ -2837,6 +2879,6 @@
   "timezone": "",
   "title": "BMC",
   "uid": "YVz226S4z",
-  "version": 22,
+  "version": 5,
   "weekStart": ""
 }
