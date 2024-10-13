@@ -17,14 +17,14 @@ groups:
             critical
             {{- end -}}
         annotations:
-          description: Server {{ $labels.instance }} is not healthy, current status is {{ $labels.status }}.
+          description: Server {{ $labels.instance }} is not healthy, current status is {{ $labels.status }}. Please check server BMC system event log.
           summary: Hardware server status is not healthy.
       - alert: ServerNotReporting
         expr: up{job=~".*idrac.*"} == 0
-        for: 5m
+        for: 15m
         keep_firing_for: 5m
         labels:
           severity: warning
         annotations:
-          description: Server {{ $labels.instance }} is not reporting.
-          summary: Hardware server failed to reply to monitoring.
+          description: Server {{ $labels.instance }} failed to reply via Redfish API. Please check idrac_exporter logs for more details.
+          summary: Hardware server failed to reply to monitoring via Redfish API.
