@@ -10,6 +10,7 @@ import (
 
 	"github.com/mrlhansen/idrac_exporter/internal/collector"
 	"github.com/mrlhansen/idrac_exporter/internal/log"
+	"github.com/mrlhansen/idrac_exporter/internal/version"
 )
 
 const (
@@ -24,11 +25,25 @@ var gzipPool = sync.Pool{
 	},
 }
 
-func HealthHandler(rsp http.ResponseWriter, req *http.Request) {
+const landingPageTemplate = `<html lang="en">
+<head><title>iDRAC Exporter</title></head>
+<body style="font-family: sans-serif">
+<h2>iDRAC Exporter</h2>
+<div>Build information: version=%s revision=%s</div>
+<ul><li><a href="/metrics">Metrics</a> (needs <code>target</code> parameter)</li></ul>
+</body>
+</html>
+`
+
+func rootHandler(rsp http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(rsp, landingPageTemplate, version.Version, version.Revision)
+}
+
+func healthHandler(rsp http.ResponseWriter, req *http.Request) {
 	// just return a simple 200 for now
 }
 
-func ResetHandler(rsp http.ResponseWriter, req *http.Request) {
+func resetHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {
 		log.Error("Received request from %s without 'target' parameter", req.Host)
@@ -41,7 +56,7 @@ func ResetHandler(rsp http.ResponseWriter, req *http.Request) {
 	collector.Reset(target)
 }
 
-func MetricsHandler(rsp http.ResponseWriter, req *http.Request) {
+func metricsHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {
 		log.Error("Received request from %s without 'target' parameter", req.Host)

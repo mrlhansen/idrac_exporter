@@ -25,9 +25,10 @@ func main() {
 		log.SetLevel(log.LevelDebug)
 	}
 
-	http.HandleFunc("/metrics", MetricsHandler)
-	http.HandleFunc("/health", HealthHandler)
-	http.HandleFunc("/reset", ResetHandler)
+	http.HandleFunc("/metrics", metricsHandler)
+	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/reset", resetHandler)
+	http.HandleFunc("/", rootHandler)
 
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
 	log.Info("Server listening on %s", bind)
