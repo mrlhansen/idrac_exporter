@@ -25,6 +25,12 @@ type EventConfig struct {
 	MaxAgeSeconds float64
 }
 
+type TLSConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	CertFile string `yaml:"cert_file"`
+	KeyFile  string `yaml:"key_file"`
+}
+
 type RootConfig struct {
 	mutex         sync.Mutex
 	Address       string                 `yaml:"address"`
@@ -32,6 +38,7 @@ type RootConfig struct {
 	MetricsPrefix string                 `yaml:"metrics_prefix"`
 	Collect       CollectConfig          `yaml:"metrics"`
 	Event         EventConfig            `yaml:"events"`
+	TLS           TLSConfig              `yaml:"tls"`
 	Timeout       uint                   `yaml:"timeout"`
 	Retries       uint                   `yaml:"retries"`
 	Hosts         map[string]*HostConfig `yaml:"hosts"`

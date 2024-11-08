@@ -13,6 +13,7 @@ import (
 func main() {
 	var verbose bool
 	var configFile string
+	var err error
 
 	flag.BoolVar(&verbose, "verbose", false, "Set verbose logging")
 	flag.StringVar(&configFile, "config", "/etc/prometheus/idrac.yml", "Path to idrac exporter configuration file")
@@ -31,9 +32,14 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 
 	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
-	log.Info("Server listening on %s", bind)
+	log.Info("Server listening on %s (TLS: %v)", bind, config.Config.TLS.Enabled)
 
-	err := http.ListenAndServe(bind, nil)
+	if config.Config.TLS.Enabled {
+		err = http.ListenAndServeTLS(bind, config.Config.TLS.CertFile, config.Config.TLS.KeyFile, nil)
+	} else {
+		err = http.ListenAndServe(bind, nil)
+	}
+
 	if err != nil {
 		log.Fatal("%v", err)
 	}

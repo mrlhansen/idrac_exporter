@@ -51,11 +51,14 @@ func readConfigEnv() {
 	getEnvString("CONFIG_DEFAULT_PASSWORD", &password)
 	getEnvString("CONFIG_EVENTS_SEVERITY", &Config.Event.Severity)
 	getEnvString("CONFIG_EVENTS_MAXAGE", &Config.Event.MaxAge)
+	getEnvString("CONFIG_TLS_CERT_FILE", &Config.TLS.CertFile)
+	getEnvString("CONFIG_TLS_KEY_FILE", &Config.TLS.KeyFile)
 
 	getEnvUint("CONFIG_PORT", &Config.Port)
 	getEnvUint("CONFIG_TIMEOUT", &Config.Timeout)
 	getEnvUint("CONFIG_RETRIES", &Config.Retries)
 
+	getEnvBool("CONFIG_TLS_ENABLED", &Config.TLS.Enabled)
 	getEnvBool("CONFIG_METRICS_SYSTEM", &Config.Collect.System)
 	getEnvBool("CONFIG_METRICS_SENSORS", &Config.Collect.Sensors)
 	getEnvBool("CONFIG_METRICS_EVENTS", &Config.Collect.Events)

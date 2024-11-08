@@ -28,6 +28,15 @@ retries: 0
 # Environment variable CONFIG_METRICS_PREFIX=idrac
 metrics_prefix: idrac
 
+# The TLS section is used to enable HTTPS for the exporter. To enable TLS you
+# need a PEM encoded certificate and private key. The public certificate must
+# include the entire chain of trust.
+# TLS can also be configured using the corresponding environment variables.
+tls:
+  enabled: false  # CONFIG_TLS_ENABLED=false
+  cert_file: ""   # CONFIG_TLS_CERT_FILE=
+  key_file: ""    # CONFIG_TLS_KEY_FILE=
+
 # The hosts section is used to define login information for the different targets.
 # Hosts can be referenced either via their IP address or their hostname, as long
 # as it matches the "target" parameter when scraping metrics.
