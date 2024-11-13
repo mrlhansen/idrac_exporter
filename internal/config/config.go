@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var Debug bool = false
 var Config RootConfig = RootConfig{
 	Hosts: make(map[string]*HostConfig),
 }

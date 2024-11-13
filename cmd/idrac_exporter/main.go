@@ -12,15 +12,22 @@ import (
 
 func main() {
 	var verbose bool
+	var debug bool
 	var configFile string
 	var err error
 
-	flag.BoolVar(&verbose, "verbose", false, "Set verbose logging")
+	flag.BoolVar(&verbose, "verbose", false, "Enable more verbose logging")
+	flag.BoolVar(&debug, "debug", false, "Dump JSON response from Redfish requests (only for debugging purpose)")
 	flag.StringVar(&configFile, "config", "/etc/prometheus/idrac.yml", "Path to idrac exporter configuration file")
 	flag.Parse()
 
 	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
 	config.ReadConfig(configFile)
+
+	if debug {
+		config.Debug = true
+		verbose = true
+	}
 
 	if verbose {
 		log.SetLevel(log.LevelDebug)

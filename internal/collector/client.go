@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -474,7 +475,16 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(res)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("Error reading response from %q: %v", url, err)
+	}
+
+	if config.Debug {
+		log.Debug("Reponse from %q: %s", url, body)
+	}
+
+	err = json.Unmarshal(body, res)
 	if err != nil {
 		log.Error("Error decoding response from %q: %v", url, err)
 		return err
