@@ -481,7 +481,7 @@ func (client *Client) redfishGet(path string, res interface{}) error {
 	}
 
 	if config.Debug {
-		log.Debug("Reponse from %q: %s", url, body)
+		log.Debug("Response from %q: %s", url, body)
 	}
 
 	err = json.Unmarshal(body, res)
