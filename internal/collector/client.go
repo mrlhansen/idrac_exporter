@@ -46,6 +46,7 @@ type Client struct {
 func newHttpClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
+			Proxy:           http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 		Timeout: time.Duration(config.Config.Timeout) * time.Second,
