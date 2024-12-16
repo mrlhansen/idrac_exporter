@@ -263,17 +263,17 @@ func NewCollector() *Collector {
 		NetworkPortHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "health"),
 			"Health status for network ports",
-			[]string{"interface", "id", "status"}, nil,
+			[]string{"id", "interface", "status"}, nil,
 		),
 		NetworkPortSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "speed_mbps"),
 			"Link speed of ports in Mbps",
-			[]string{"interface", "id"}, nil,
+			[]string{"id", "interface"}, nil,
 		),
 		NetworkPortLinkUp: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "link_up"),
 			"Status of network ports, Up or Down",
-			[]string{"interface", "id", "status"}, nil,
+			[]string{"id", "interface", "status"}, nil,
 		),
 	}
 

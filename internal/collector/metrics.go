@@ -370,36 +370,36 @@ func (mc *Collector) NewNetworkInterfaceHealth(id, health string) prometheus.Met
 	)
 }
 
-func (mc *Collector) NewNetworkPortHealth(iface, id, health string) prometheus.Metric {
+func (mc *Collector) NewNetworkPortHealth(id, iface, health string) prometheus.Metric {
 	value := health2value(health)
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortHealth,
 		prometheus.GaugeValue,
 		float64(value),
-		iface,
 		id,
+		iface,
 		health,
 	)
 }
 
-func (mc *Collector) NewNetworkPortSpeed(iface, id string, speed float64) prometheus.Metric {
+func (mc *Collector) NewNetworkPortSpeed(id, iface string, speed float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortSpeed,
 		prometheus.GaugeValue,
 		speed,
-		iface,
 		id,
+		iface,
 	)
 }
 
-func (mc *Collector) NewNetworkPortLinkUp(iface, id, status string) prometheus.Metric {
+func (mc *Collector) NewNetworkPortLinkUp(id, iface, status string) prometheus.Metric {
 	value := linkstatus2value(status)
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortLinkUp,
 		prometheus.GaugeValue,
 		float64(value),
-		iface,
 		id,
+		iface,
 		status,
 	)
 }

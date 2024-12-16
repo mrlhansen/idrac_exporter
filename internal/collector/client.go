@@ -268,9 +268,9 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 				}
 			}
 
-			ch <- mc.NewNetworkPortHealth(ni.Id, port.Id, port.Status.Health)
-			ch <- mc.NewNetworkPortSpeed(ni.Id, port.Id, port.GetSpeed())
-			ch <- mc.NewNetworkPortLinkUp(ni.Id, port.Id, port.LinkStatus)
+			ch <- mc.NewNetworkPortHealth(port.Id, ni.Id, port.Status.Health)
+			ch <- mc.NewNetworkPortSpeed(port.Id, ni.Id, port.GetSpeed())
+			ch <- mc.NewNetworkPortLinkUp(port.Id, ni.Id, port.LinkStatus)
 		}
 	}
 
@@ -446,7 +446,7 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 	return nil
 }
 
-func (client *Client) redfishGet(path string, res interface{}) error {
+func (client *Client) redfishGet(path string, res any) error {
 	if !strings.HasPrefix(path, redfishRootPath) {
 		return fmt.Errorf("invalid url for redfish request")
 	}
