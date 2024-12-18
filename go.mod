@@ -6,7 +6,7 @@ require (
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.48.0
 	github.com/xhit/go-str2duration/v2 v2.1.0
-	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

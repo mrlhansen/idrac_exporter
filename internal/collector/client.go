@@ -400,10 +400,10 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
 			}
 
-			ch <- mc.NewDriveInfo(drive.Id, drive.Name, drive.Manufacturer, drive.Model, drive.SerialNumber, drive.MediaType, drive.Protocol, drive.GetSlot())
-			ch <- mc.NewDriveHealth(drive.Id, drive.Status.Health)
-			ch <- mc.NewDriveCapacity(drive.Id, drive.CapacityBytes)
-			ch <- mc.NewDriveLifeLeft(drive.Id, drive.PredictedLifeLeft)
+			ch <- mc.NewDriveInfo(drive.Id, ctlr.Id, drive.Name, drive.Manufacturer, drive.Model, drive.SerialNumber, drive.MediaType, drive.Protocol, drive.GetSlot())
+			ch <- mc.NewDriveHealth(drive.Id, ctlr.Id, drive.Status.Health)
+			ch <- mc.NewDriveCapacity(drive.Id, ctlr.Id, drive.CapacityBytes)
+			ch <- mc.NewDriveLifeLeft(drive.Id, ctlr.Id, drive.PredictedLifeLeft)
 		}
 	}
 

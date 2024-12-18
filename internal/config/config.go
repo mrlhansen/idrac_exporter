@@ -7,7 +7,7 @@ import (
 
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"github.com/xhit/go-str2duration/v2"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var Debug bool = false

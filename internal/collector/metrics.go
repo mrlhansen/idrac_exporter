@@ -262,7 +262,7 @@ func (mc *Collector) NewEventLogEntry(id string, message string, severity string
 	)
 }
 
-func (mc *Collector) NewDriveInfo(id, name, manufacturer, model, serial, mediatype, protocol string, slot int) prometheus.Metric {
+func (mc *Collector) NewDriveInfo(id, parent, name, manufacturer, model, serial, mediatype, protocol string, slot int) prometheus.Metric {
 	var slotstr string
 
 	if slot < 0 {
@@ -276,6 +276,7 @@ func (mc *Collector) NewDriveInfo(id, name, manufacturer, model, serial, mediaty
 		prometheus.UntypedValue,
 		1.0,
 		id,
+		parent,
 		manufacturer,
 		mediatype,
 		model,
@@ -286,18 +287,19 @@ func (mc *Collector) NewDriveInfo(id, name, manufacturer, model, serial, mediaty
 	)
 }
 
-func (mc *Collector) NewDriveHealth(id, health string) prometheus.Metric {
+func (mc *Collector) NewDriveHealth(id, parent, health string) prometheus.Metric {
 	value := health2value(health)
 	return prometheus.MustNewConstMetric(
 		mc.DriveHealth,
 		prometheus.GaugeValue,
 		float64(value),
 		id,
+		parent,
 		health,
 	)
 }
 
-func (mc *Collector) NewDriveCapacity(id string, capacity int) prometheus.Metric {
+func (mc *Collector) NewDriveCapacity(id, parent string, capacity int) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.DriveCapacity,
 		prometheus.GaugeValue,
@@ -306,12 +308,13 @@ func (mc *Collector) NewDriveCapacity(id string, capacity int) prometheus.Metric
 	)
 }
 
-func (mc *Collector) NewDriveLifeLeft(id string, lifeLeft float64) prometheus.Metric {
+func (mc *Collector) NewDriveLifeLeft(id, parent string, lifeLeft float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.DriveLifeLeft,
 		prometheus.GaugeValue,
 		lifeLeft,
 		id,
+		parent,
 	)
 }
 
@@ -370,36 +373,36 @@ func (mc *Collector) NewNetworkInterfaceHealth(id, health string) prometheus.Met
 	)
 }
 
-func (mc *Collector) NewNetworkPortHealth(id, iface, health string) prometheus.Metric {
+func (mc *Collector) NewNetworkPortHealth(id, parent, health string) prometheus.Metric {
 	value := health2value(health)
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortHealth,
 		prometheus.GaugeValue,
 		float64(value),
 		id,
-		iface,
+		parent,
 		health,
 	)
 }
 
-func (mc *Collector) NewNetworkPortSpeed(id, iface string, speed float64) prometheus.Metric {
+func (mc *Collector) NewNetworkPortSpeed(id, parent string, speed float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortSpeed,
 		prometheus.GaugeValue,
 		speed,
 		id,
-		iface,
+		parent,
 	)
 }
 
-func (mc *Collector) NewNetworkPortLinkUp(id, iface, status string) prometheus.Metric {
+func (mc *Collector) NewNetworkPortLinkUp(id, parent, status string) prometheus.Metric {
 	value := linkstatus2value(status)
 	return prometheus.MustNewConstMetric(
 		mc.NetworkPortLinkUp,
 		prometheus.GaugeValue,
 		float64(value),
 		id,
-		iface,
+		parent,
 		status,
 	)
 }

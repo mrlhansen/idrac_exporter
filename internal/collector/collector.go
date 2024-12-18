@@ -218,22 +218,22 @@ func NewCollector() *Collector {
 		DriveInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "drive", "info"),
 			"Information about disk drives",
-			[]string{"id", "manufacturer", "mediatype", "model", "name", "protocol", "serial", "slot"}, nil,
+			[]string{"id", "controller_id", "manufacturer", "mediatype", "model", "name", "protocol", "serial", "slot"}, nil,
 		),
 		DriveHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "drive", "health"),
 			"Health status for disk drives",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "controller_id", "status"}, nil,
 		),
 		DriveCapacity: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "drive", "capacity_bytes"),
 			"Capacity of disk drives in bytes",
-			[]string{"id"}, nil,
+			[]string{"id", "controller_id"}, nil,
 		),
 		DriveLifeLeft: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "drive", "life_left_percent"),
 			"Predicted life left in percent",
-			[]string{"id"}, nil,
+			[]string{"id", "controller_id"}, nil,
 		),
 		MemoryModuleInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "info"),
@@ -263,17 +263,17 @@ func NewCollector() *Collector {
 		NetworkPortHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "health"),
 			"Health status for network ports",
-			[]string{"id", "interface", "status"}, nil,
+			[]string{"id", "interface_id", "status"}, nil,
 		),
 		NetworkPortSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "speed_mbps"),
 			"Link speed of ports in Mbps",
-			[]string{"id", "interface"}, nil,
+			[]string{"id", "interface_id"}, nil,
 		),
 		NetworkPortLinkUp: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "link_up"),
 			"Status of network ports, Up or Down",
-			[]string{"id", "interface", "status"}, nil,
+			[]string{"id", "interface_id", "status"}, nil,
 		),
 	}
 
