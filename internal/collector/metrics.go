@@ -305,6 +305,7 @@ func (mc *Collector) NewDriveCapacity(id, parent string, capacity int) prometheu
 		prometheus.GaugeValue,
 		float64(capacity),
 		id,
+		parent,
 	)
 }
 
