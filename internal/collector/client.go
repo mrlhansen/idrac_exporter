@@ -134,7 +134,13 @@ func (client *Client) findAllEndpoints() error {
 	case DELL:
 		client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
 	case LENOVO:
-		client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
+		{
+			if client.redfishExists("/redfish/v1/Systems/1/LogServices/PlatformLog/Entries") {
+				client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
+			} else if client.redfishExists("/redfish/v1/Systems/1/LogServices/StandardLog/Entries") {
+				client.eventPath = "/redfish/v1/Systems/1/LogServices/StandardLog/Entries"
+			}
+		}
 	case HPE:
 		client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
 	}
@@ -492,4 +498,29 @@ func (client *Client) redfishGet(path string, res any) error {
 	}
 
 	return nil
+}
+
+func (client *Client) redfishExists(path string) bool {
+	url := "https://" + client.hostname + path
+	req, err := http.NewRequest("HEAD", url, nil)
+	if err != nil {
+		return false
+	}
+
+	req.Header.Add("Accept", "application/json")
+	req.SetBasicAuth(client.username, client.password)
+
+	resp, err := client.httpClient.Do(req)
+	if resp != nil {
+		resp.Body.Close()
+	}
+	if err != nil {
+		return false
+	}
+
+	if resp.StatusCode == 404 {
+		return false
+	}
+
+	return true
 }
