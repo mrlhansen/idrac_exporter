@@ -28,6 +28,10 @@ retries: 0
 # Environment variable CONFIG_METRICS_PREFIX=idrac
 metrics_prefix: idrac
 
+# Enable the use of an https proxy for all requests
+# Environment variable: HTTPS_PROXY=http://localhost:8888
+https_proxy: http://localhost:8888
+
 # The TLS section is used to enable HTTPS for the exporter. To enable TLS you
 # need a PEM encoded certificate and private key. The public certificate must
 # include the entire chain of trust.

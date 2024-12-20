@@ -35,6 +35,7 @@ type RootConfig struct {
 	mutex         sync.Mutex
 	Address       string                 `yaml:"address"`
 	Port          uint                   `yaml:"port"`
+	HttpsProxy    string                 `yaml:"https_proxy"`
 	MetricsPrefix string                 `yaml:"metrics_prefix"`
 	Collect       CollectConfig          `yaml:"metrics"`
 	Event         EventConfig            `yaml:"events"`

@@ -80,6 +80,10 @@ func ReadConfig(filename string) {
 		Config.MetricsPrefix = "idrac"
 	}
 
+	if Config.HttpsProxy != "" {
+		os.Setenv("HTTPS_PROXY", Config.HttpsProxy)
+	}
+
 	// hosts section
 	if len(Config.Hosts) == 0 {
 		log.Fatal("Invalid configuration: empty section: hosts")
