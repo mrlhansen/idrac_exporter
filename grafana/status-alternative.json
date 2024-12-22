@@ -1959,7 +1959,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,interface) (idrac_network_port_link_up{instance=\"$instance\"})",
+          "expr": "sum by (id,interface_id) (idrac_network_port_link_up{instance=\"$instance\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1973,7 +1973,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,interface,status) (idrac_network_port_health{instance=\"$instance\"})",
+          "expr": "sum by (id,interface_id,status) (idrac_network_port_health{instance=\"$instance\"})",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -1988,7 +1988,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,interface) (idrac_network_port_speed_mbps{instance=\"$instance\"})",
+          "expr": "sum by (id,interface_id) (idrac_network_port_speed_mbps{instance=\"$instance\"})",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2010,7 +2010,7 @@
             "sort": [
               {
                 "desc": false,
-                "field": "interface"
+                "field": "interface_id"
               }
             ]
           }
@@ -2031,7 +2031,7 @@
               "Value #B": 5,
               "Value #D": 6,
               "id": 2,
-              "interface": 1,
+              "interface_id": 1,
               "status": 3
             },
             "renameByName": {
@@ -2040,7 +2040,7 @@
               "Value #C": "Capacity",
               "Value #D": "Speed",
               "id": "Port",
-              "interface": "Interface",
+              "interface_id": "Interface",
               "manufacturer": "Vendor",
               "name": "Name",
               "serial": "Serial Number",

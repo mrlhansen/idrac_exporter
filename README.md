@@ -1,11 +1,11 @@
 # iDRAC Exporter
-This is a simple iDRAC (and iLO and XClarity) exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to communicate with iDRAC and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics for an iDRAC instance on the IP address `123.45.6.78` call the following URL address.
+This is a simple Redfish (iDRAC, iLO, XClarity) exporter for [Prometheus](https://prometheus.io). The exporter uses the Redfish API to collect information and it supports the regular `/metrics` endpoint to expose metrics from the host passed via the `target` parameter. For example, to scrape metrics from a Redfish instance on the IP address `123.45.6.78` call the following URL address.
 
 ```text
 http://localhost:9348/metrics?target=123.45.6.78
 ```
 
-Every time the exporter is called with a new target, it tries to establish a connection to iDRAC. If the target is unreachable or if the authentication fails, the status code 500 is returned together with an error message.
+Every time the exporter is called with a new target, it tries to establish a connection to the Redfish API. If the target is unreachable or if the authentication fails, the status code 500 is returned together with an error message.
 
 ## Supported Systems
 The program supports several different systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
@@ -45,7 +45,7 @@ helm install idrac-exporter/idrac-exporter idrac-exporter
 ```
 
 ## Configuration
-In the configuration file for the iDRAC exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all iDRAC hosts. By default, the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
+In the configuration file for the exporter you can specify the bind address and port for the metrics exporter, as well as username and password for all remote hosts. By default, the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
 
 ```yaml
 address: 127.0.0.1 # Listen address
@@ -136,10 +136,10 @@ idrac_events_log_entry{id="1",message="The process of installing an operating sy
 These metrics include information about disk drives in the machine.
 
 ```text
-idrac_drive_info{id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
-idrac_drive_health{id="Disk.Direct.1-1:AHCI.Slot.5-1",status="OK"} 0
-idrac_drive_capacity_bytes{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
-idrac_drive_life_left_percent{id="Disk.Direct.1-1:AHCI.Slot.5-1"} 100
+idrac_drive_info{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
+idrac_drive_health{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:AHCI.Slot.5-1",status="OK"} 0
+idrac_drive_capacity_bytes{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
+idrac_drive_life_left_percent{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:AHCI.Slot.5-1"} 100
 ```
 
 ### Memory
@@ -157,9 +157,9 @@ These metrics include health of network interfaces, as well as health, link spee
 
 ```text
 idrac_network_interface_health{id="NIC.Embedded.1",status="OK"} 0
-idrac_network_port_health{id="NIC.Embedded.1-1",interface="NIC.Embedded.1",status="OK"} 0
-idrac_network_port_link_up{id="NIC.Embedded.1-1",interface="NIC.Embedded.1",status="Up"} 1
-idrac_network_port_speed_mbps{id="NIC.Embedded.1-1",interface="NIC.Embedded.1"} 1000
+idrac_network_port_health{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1",status="OK"} 0
+idrac_network_port_link_up{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1",status="Up"} 1
+idrac_network_port_speed_mbps{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1"} 1000
 ```
 
 ### Exporter
@@ -175,12 +175,12 @@ The exporter currently has three different endpoints.
 
 | Endpoint   | Parameters | Description                                         |
 | ---------- | ---------- | --------------------------------------------------- |
-| `/metrics` | `target`   | Metrics for the specified target                    |
-| `/reset`   | `target`   | Reset internal state for the specified target       |
-| `/health`  |            | Returns http status 200 and nothing else            |
+| `/metrics` | `target`   | Metrics for the specified target                    |
+| `/reset`   | `target`   | Reset internal state for the specified target       |
+| `/health`  |            | Returns http status 200 and nothing else            |
 
 ## Prometheus Configuration
-For the situation where you have a single `idrac_exporter` and multiple iDRACs to query, the following `prometheus.yml` snippet can be used.
+For the situation where you have a single `idrac_exporter` and multiple hosts to query, the following `prometheus.yml` snippet can be used.
 
 ```yaml
 scrape_configs:
@@ -196,7 +196,7 @@ scrape_configs:
         replacement: exporter:9348
 ```
 
-Here `123.45.6.78` and `123.45.6.79` are the iDRACs to query, and `exporter:9348` is the address and port where `idrac_exporter` is running.
+Here `123.45.6.78` and `123.45.6.79` are the hosts to query, and `exporter:9348` is the address and port where `idrac_exporter` is running.
 
 ## Grafana Dashboard
 There are two Grafana Dashboards in the `grafana` folder, one that shows an overview of all systems and one that shows information for a specific machine. Thanks to [@7840vz](https://www.github.com/7840vz)  for creating these!
