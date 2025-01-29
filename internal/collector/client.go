@@ -1,21 +1,13 @@
 package collector
 
 import (
-	"crypto/tls"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
-	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"github.com/prometheus/client_golang/prometheus"
 )
-
-const redfishRootPath = "/redfish/v1"
 
 const (
 	UNKNOWN = iota
@@ -28,10 +20,7 @@ const (
 )
 
 type Client struct {
-	hostname    string
-	username    string
-	password    string
-	httpClient  *http.Client
+	redfish     *Redfish
 	vendor      int
 	version     int
 	systemPath  string
@@ -43,68 +32,61 @@ type Client struct {
 	eventPath   string
 }
 
-func newHttpClient() *http.Client {
-	return &http.Client{
-		Transport: &http.Transport{
-			Proxy:           http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
-		Timeout: time.Duration(config.Config.Timeout) * time.Second,
-	}
-}
-
-func NewClient(hostConfig *config.HostConfig) (*Client, error) {
+func NewClient(hostConfig *config.HostConfig) *Client {
 	client := &Client{
-		hostname:   hostConfig.Hostname,
-		username:   hostConfig.Username,
-		password:   hostConfig.Password,
-		httpClient: newHttpClient(),
+		redfish: NewRedfish(
+			hostConfig.Hostname,
+			hostConfig.Username,
+			hostConfig.Password,
+		),
 	}
 
-	err := client.findAllEndpoints()
-	if err != nil {
-		return nil, err
+	client.redfish.CreateSession()
+	ok := client.findAllEndpoints()
+	if !ok {
+		client.redfish.DeleteSession()
+		return nil
 	}
 
-	return client, nil
+	return client
 }
 
-func (client *Client) findAllEndpoints() error {
+func (client *Client) findAllEndpoints() bool {
 	var root V1Response
 	var group GroupResponse
 	var chassis ChassisResponse
 	var system SystemResponse
-	var err error
+	var ok bool
 
 	// Root
-	err = client.redfishGet(redfishRootPath, &root)
-	if err != nil {
-		return err
+	ok = client.redfish.Get(redfishRootPath, &root)
+	if !ok {
+		return false
 	}
 
 	// System
-	err = client.redfishGet(root.Systems.OdataId, &group)
-	if err != nil {
-		return err
+	ok = client.redfish.Get(root.Systems.OdataId, &group)
+	if !ok {
+		return false
 	}
 
 	client.systemPath = group.Members[0].OdataId
 
 	// Chassis
-	err = client.redfishGet(root.Chassis.OdataId, &group)
-	if err != nil {
-		return err
+	ok = client.redfish.Get(root.Chassis.OdataId, &group)
+	if !ok {
+		return false
 	}
 
 	// Thermal and Power
-	err = client.redfishGet(group.Members[0].OdataId, &chassis)
-	if err != nil {
-		return err
+	ok = client.redfish.Get(group.Members[0].OdataId, &chassis)
+	if !ok {
+		return false
 	}
 
-	err = client.redfishGet(client.systemPath, &system)
-	if err != nil {
-		return err
+	ok = client.redfish.Get(client.systemPath, &system)
+	if !ok {
+		return false
 	}
 
 	client.storagePath = system.Storage.OdataId
@@ -130,19 +112,21 @@ func (client *Client) findAllEndpoints() error {
 	}
 
 	// Path for event log
-	switch client.vendor {
-	case DELL:
-		client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
-	case LENOVO:
-		{
-			if client.redfishExists("/redfish/v1/Systems/1/LogServices/PlatformLog/Entries") {
-				client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
-			} else if client.redfishExists("/redfish/v1/Systems/1/LogServices/StandardLog/Entries") {
-				client.eventPath = "/redfish/v1/Systems/1/LogServices/StandardLog/Entries"
+	if config.Config.Collect.Events {
+		switch client.vendor {
+		case DELL:
+			client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
+		case LENOVO:
+			{
+				if client.redfish.Exists("/redfish/v1/Systems/1/LogServices/PlatformLog/Entries") {
+					client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
+				} else if client.redfish.Exists("/redfish/v1/Systems/1/LogServices/StandardLog/Entries") {
+					client.eventPath = "/redfish/v1/Systems/1/LogServices/StandardLog/Entries"
+				}
 			}
+		case HPE:
+			client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
 		}
-	case HPE:
-		client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
 	}
 
 	// Fix for Inspur bug
@@ -160,14 +144,14 @@ func (client *Client) findAllEndpoints() error {
 		}
 	}
 
-	return nil
+	return true
 }
 
-func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) bool {
 	resp := ThermalResponse{}
-	err := client.redfishGet(client.thermalPath, &resp)
-	if err != nil {
-		return err
+	ok := client.redfish.Get(client.thermalPath, &resp)
+	if !ok {
+		return false
 	}
 
 	for n, t := range resp.Temperatures {
@@ -203,14 +187,14 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 		ch <- mc.NewSensorsFanSpeed(f.GetReading(), id, name, strings.ToLower(units))
 	}
 
-	return nil
+	return true
 }
 
-func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) bool {
 	resp := SystemResponse{}
-	err := client.redfishGet(client.systemPath, &resp)
-	if err != nil {
-		return err
+	ok := client.redfish.Get(client.systemPath, &resp)
+	if !ok {
+		return false
 	}
 
 	// Need on iLO 6
@@ -230,21 +214,21 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	ch <- mc.NewSystemBiosInfo(resp.BiosVersion)
 	ch <- mc.NewSystemMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
 
-	return nil
+	return true
 }
 
-func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric) bool {
 	group := GroupResponse{}
-	err := client.redfishGet(client.networkPath, &group)
-	if err != nil {
-		return err
+	ok := client.redfish.Get(client.networkPath, &group)
+	if !ok {
+		return false
 	}
 
 	for _, c := range group.Members.GetLinks() {
 		ni := NetworkInterface{}
-		err = client.redfishGet(c, &ni)
-		if err != nil {
-			return err
+		ok = client.redfish.Get(c, &ni)
+		if !ok {
+			return false
 		}
 
 		if ni.Status.State != StateEnabled {
@@ -254,16 +238,16 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 		ch <- mc.NewNetworkInterfaceHealth(ni.Id, ni.Status.Health)
 
 		ports := GroupResponse{}
-		err = client.redfishGet(ni.GetPorts(), &ports)
-		if err != nil {
-			return err
+		ok = client.redfish.Get(ni.GetPorts(), &ports)
+		if !ok {
+			return false
 		}
 
 		for _, c := range ports.Members.GetLinks() {
 			port := NetworkPort{}
-			err = client.redfishGet(c, &port)
-			if err != nil {
-				return err
+			ok = client.redfish.Get(c, &port)
+			if !ok {
+				return false
 			}
 
 			// Fix for issue #92
@@ -280,14 +264,14 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 		}
 	}
 
-	return nil
+	return true
 }
 
-func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) bool {
 	resp := PowerResponse{}
-	err := client.redfishGet(client.powerPath, &resp)
-	if err != nil {
-		return err
+	ok := client.redfish.Get(client.powerPath, &resp)
+	if !ok {
+		return false
 	}
 
 	for i, psu := range resp.PowerSupplies {
@@ -325,18 +309,18 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) e
 		ch <- mc.NewPowerControlInterval(pm.IntervalInMinutes, id, pc.Name)
 	}
 
-	return nil
+	return true
 }
 
-func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric) bool {
 	if client.eventPath == "" {
-		return nil
+		return true
 	}
 
 	resp := EventLogResponse{}
-	err := client.redfishGet(client.eventPath, &resp)
-	if err != nil {
-		return err
+	ok := client.redfish.Get(client.eventPath, &resp)
+	if !ok {
+		return false
 	}
 
 	level := config.Config.Event.SeverityLevel
@@ -361,38 +345,38 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 		ch <- mc.NewEventLogEntry(e.Id, e.Message, e.Severity, t)
 	}
 
-	return nil
+	return true
 }
 
-func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric) bool {
 	group := GroupResponse{}
-	err := client.redfishGet(client.storagePath, &group)
-	if err != nil {
-		return err
+	ok := client.redfish.Get(client.storagePath, &group)
+	if !ok {
+		return false
 	}
 
 	for _, c := range group.Members.GetLinks() {
 		ctlr := StorageController{}
-		err = client.redfishGet(c, &ctlr)
-		if err != nil {
-			return err
+		ok = client.redfish.Get(c, &ctlr)
+		if !ok {
+			return false
 		}
 
 		// iLO 4
 		if (client.vendor == HPE) && (client.version == 4) {
 			grp := GroupResponse{}
-			err = client.redfishGet(c+"DiskDrives/", &grp)
-			if err != nil {
-				return err
+			ok = client.redfish.Get(c+"DiskDrives/", &grp)
+			if !ok {
+				return false
 			}
 			ctlr.Drives = grp.Members
 		}
 
 		for _, c := range ctlr.Drives.GetLinks() {
 			drive := Drive{}
-			err = client.redfishGet(c, &drive)
-			if err != nil {
-				return err
+			ok = client.redfish.Get(c, &drive)
+			if !ok {
+				return false
 			}
 
 			if drive.Status.State == StateAbsent {
@@ -413,21 +397,21 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 		}
 	}
 
-	return nil
+	return true
 }
 
-func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) error {
+func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) bool {
 	group := GroupResponse{}
-	err := client.redfishGet(client.memoryPath, &group)
-	if err != nil {
-		return err
+	ok := client.redfish.Get(client.memoryPath, &group)
+	if !ok {
+		return false
 	}
 
 	for _, c := range group.Members.GetLinks() {
 		m := Memory{}
-		err = client.redfishGet(c, &m)
-		if err != nil {
-			return err
+		ok = client.redfish.Get(c, &m)
+		if !ok {
+			return false
 		}
 
 		if (m.Status.State == StateAbsent) || (m.Id == "") {
@@ -445,81 +429,8 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 
 		ch <- mc.NewMemoryModuleInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)
 		ch <- mc.NewMemoryModuleHealth(m.Id, m.Status.Health)
-		ch <- mc.NewMemoryModuleCapacity(m.Id, m.CapacityMiB*1048576)
+		ch <- mc.NewMemoryModuleCapacity(m.Id, 1048576*m.CapacityMiB)
 		ch <- mc.NewMemoryModuleSpeed(m.Id, m.OperatingSpeedMhz)
-	}
-
-	return nil
-}
-
-func (client *Client) redfishGet(path string, res any) error {
-	if !strings.HasPrefix(path, redfishRootPath) {
-		return fmt.Errorf("invalid url for redfish request")
-	}
-
-	url := "https://" + client.hostname + path
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("Accept", "application/json")
-	req.SetBasicAuth(client.username, client.password)
-
-	log.Debug("Querying %q", url)
-
-	resp, err := client.httpClient.Do(req)
-	if resp != nil {
-		defer resp.Body.Close()
-	}
-	if err != nil {
-		log.Error("Failed to query %q: %v", url, err)
-		return err
-	}
-
-	if resp.StatusCode != 200 {
-		log.Error("Query to %q returned unexpected status code: %d (%s)", url, resp.StatusCode, resp.Status)
-		return fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Error("Error reading response from %q: %v", url, err)
-	}
-
-	if config.Debug {
-		log.Debug("Response from %q: %s", url, body)
-	}
-
-	err = json.Unmarshal(body, res)
-	if err != nil {
-		log.Error("Error decoding response from %q: %v", url, err)
-		return err
-	}
-
-	return nil
-}
-
-func (client *Client) redfishExists(path string) bool {
-	url := "https://" + client.hostname + path
-	req, err := http.NewRequest("HEAD", url, nil)
-	if err != nil {
-		return false
-	}
-
-	req.Header.Add("Accept", "application/json")
-	req.SetBasicAuth(client.username, client.password)
-
-	resp, err := client.httpClient.Do(req)
-	if resp != nil {
-		resp.Body.Close()
-	}
-	if err != nil {
-		return false
-	}
-
-	if resp.StatusCode == 404 {
-		return false
 	}
 
 	return true

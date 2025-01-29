@@ -327,12 +327,13 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	var wg sync.WaitGroup
+	collector.client.redfish.RefreshSession()
 
 	if config.Config.Collect.System {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshSystem(collector, ch)
-			if err != nil {
+			ok := collector.client.RefreshSystem(collector, ch)
+			if !ok {
 				collector.errors.Add(1)
 			}
 			wg.Done()
@@ -342,8 +343,8 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if config.Config.Collect.Sensors {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshSensors(collector, ch)
-			if err != nil {
+			ok := collector.client.RefreshSensors(collector, ch)
+			if !ok {
 				collector.errors.Add(1)
 			}
 			wg.Done()
@@ -353,8 +354,8 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if config.Config.Collect.Power {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshPower(collector, ch)
-			if err != nil {
+			ok := collector.client.RefreshPower(collector, ch)
+			if !ok {
 				collector.errors.Add(1)
 			}
 			wg.Done()
@@ -364,8 +365,8 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if config.Config.Collect.Network {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshNetwork(collector, ch)
-			if err != nil {
+			ok := collector.client.RefreshNetwork(collector, ch)
+			if !ok {
 				collector.errors.Add(1)
 			}
 			wg.Done()
@@ -375,8 +376,8 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if config.Config.Collect.Events {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshEventLog(collector, ch)
-			if err != nil {
+			ok := collector.client.RefreshEventLog(collector, ch)
+			if !ok {
 				collector.errors.Add(1)
 			}
 			wg.Done()
@@ -386,8 +387,8 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if config.Config.Collect.Storage {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshStorage(collector, ch)
-			if err != nil {
+			ok := collector.client.RefreshStorage(collector, ch)
+			if !ok {
 				collector.errors.Add(1)
 			}
 			wg.Done()
@@ -397,8 +398,8 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if config.Config.Collect.Memory {
 		wg.Add(1)
 		go func() {
-			err := collector.client.RefreshMemory(collector, ch)
-			if err != nil {
+			ok := collector.client.RefreshMemory(collector, ch)
+			if !ok {
 				collector.errors.Add(1)
 			}
 			wg.Done()
@@ -478,10 +479,10 @@ func GetCollector(target string) (*Collector, error) {
 			if host == nil {
 				return nil, fmt.Errorf("failed to get host information")
 			}
-			c, err := NewClient(host)
-			if err != nil {
+			c := NewClient(host)
+			if c == nil {
 				collector.retries++
-				return nil, err
+				return nil, fmt.Errorf("failed to instantiate new client")
 			} else {
 				collector.client = c
 			}

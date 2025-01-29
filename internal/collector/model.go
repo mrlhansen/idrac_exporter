@@ -9,6 +9,17 @@ const (
 	StateAbsent  = "Absent"
 )
 
+// Session
+type Session struct {
+	Id          string `json:"Id,omitempty"`
+	Name        string `json:"Name,omitempty"`
+	Username    string `json:"UserName,omitempty"`
+	Password    string `json:"Password,omitempty"`
+	CreatedTime string `json:"CreatedTime,omitempty"`
+	SessionType string `json:"SessionType,omitempty"`
+	OdataId     string `json:"@odata.id,omitempty"`
+}
+
 // Odata is a common structure to unmarshal Open Data Protocol metadata
 type Odata struct {
 	OdataContext string `json:"@odata.context"`
@@ -81,20 +92,21 @@ type GroupResponse struct {
 }
 
 type ChassisResponse struct {
-	Name               string `json:"Name"`
-	AssetTag           string `json:"AssetTag"`
-	SerialNumber       string `json:"SerialNumber"`
-	PartNumber         string `json:"PartNumber"`
-	Model              string `json:"Model"`
-	ChassisType        string `json:"ChassisType"`
-	Manufacturer       string `json:"Manufacturer"`
-	Description        string `json:"Description"`
-	SKU                string `json:"SKU"`
-	PowerState         string `json:"PowerState"`
-	EnvironmentalClass string `json:"EnvironmentalClass"`
-	IndicatorLED       string `json:"IndicatorLED"`
-	Assembly           Odata  `json:"Assembly"`
-	Location           *struct {
+	Name                    string `json:"Name"`
+	AssetTag                string `json:"AssetTag"`
+	SerialNumber            string `json:"SerialNumber"`
+	PartNumber              string `json:"PartNumber"`
+	Model                   string `json:"Model"`
+	ChassisType             string `json:"ChassisType"`
+	Manufacturer            string `json:"Manufacturer"`
+	Description             string `json:"Description"`
+	SKU                     string `json:"SKU"`
+	PowerState              string `json:"PowerState"`
+	EnvironmentalClass      string `json:"EnvironmentalClass"`
+	IndicatorLED            string `json:"IndicatorLED"`
+	LocationIndicatorActive *bool  `json:"LocationIndicatorActive"`
+	Assembly                Odata  `json:"Assembly"`
+	Location                *struct {
 		Info       string `json:"Info"`
 		InfoFormat string `json:"InfoFormat"`
 		Placement  struct {
