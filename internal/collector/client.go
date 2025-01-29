@@ -287,6 +287,13 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 			psu.Status.State = StateEnabled
 		}
 
+		// iLO 4 (for issue #116)
+		if (client.vendor == HPE) && (client.version == 4) {
+			if psu.FirmwareVersion == "0.00" {
+				continue
+			}
+		}
+
 		if psu.Status.State != StateEnabled {
 			continue
 		}
