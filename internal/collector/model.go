@@ -345,16 +345,17 @@ func (n *NetworkPort) GetSpeed() float64 {
 }
 
 type SystemResponse struct {
-	IndicatorLED string `json:"IndicatorLED"`
-	Manufacturer string `json:"Manufacturer"`
-	AssetTag     string `json:"AssetTag"`
-	PartNumber   string `json:"PartNumber"`
-	Description  string `json:"Description"`
-	HostName     string `json:"HostName"`
-	PowerState   string `json:"PowerState"`
-	Bios         Odata  `json:"Bios"`
-	BiosVersion  string `json:"BiosVersion"`
-	Boot         *struct {
+	IndicatorLED            string `json:"IndicatorLED"`
+	LocationIndicatorActive *bool  `json:"LocationIndicatorActive"`
+	Manufacturer            string `json:"Manufacturer"`
+	AssetTag                string `json:"AssetTag"`
+	PartNumber              string `json:"PartNumber"`
+	Description             string `json:"Description"`
+	HostName                string `json:"HostName"`
+	PowerState              string `json:"PowerState"`
+	Bios                    Odata  `json:"Bios"`
+	BiosVersion             string `json:"BiosVersion"`
+	Boot                    *struct {
 		BootOptions                                    Odata    `json:"BootOptions"`
 		Certificates                                   Odata    `json:"Certificates"`
 		BootOrder                                      []string `json:"BootOrder"`

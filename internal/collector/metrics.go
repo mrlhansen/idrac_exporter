@@ -63,6 +63,18 @@ func (mc *Collector) NewSystemIndicatorLED(state string) prometheus.Metric {
 	)
 }
 
+func (mc *Collector) NewSystemIndicatorActive(state bool) prometheus.Metric {
+	var value float64
+	if state {
+		value = 1
+	}
+	return prometheus.MustNewConstMetric(
+		mc.SystemIndicatorActive,
+		prometheus.GaugeValue,
+		value,
+	)
+}
+
 func (mc *Collector) NewSystemMemorySize(memory float64) prometheus.Metric {
 	return prometheus.MustNewConstMetric(
 		mc.SystemMemorySize,

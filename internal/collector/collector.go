@@ -31,13 +31,14 @@ type Collector struct {
 	ExporterScrapeErrorsTotal *prometheus.Desc
 
 	// System
-	SystemPowerOn      *prometheus.Desc
-	SystemHealth       *prometheus.Desc
-	SystemIndicatorLED *prometheus.Desc
-	SystemMemorySize   *prometheus.Desc
-	SystemCpuCount     *prometheus.Desc
-	SystemBiosInfo     *prometheus.Desc
-	SystemMachineInfo  *prometheus.Desc
+	SystemPowerOn         *prometheus.Desc
+	SystemHealth          *prometheus.Desc
+	SystemIndicatorLED    *prometheus.Desc // This attribute is deprecated in Redfish
+	SystemIndicatorActive *prometheus.Desc
+	SystemMemorySize      *prometheus.Desc
+	SystemCpuCount        *prometheus.Desc
+	SystemBiosInfo        *prometheus.Desc
+	SystemMachineInfo     *prometheus.Desc
 
 	// Sensors
 	SensorsTemperature *prometheus.Desc
@@ -114,6 +115,11 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "system", "indicator_led_on"),
 			"Indicator LED state of the system",
 			[]string{"state"}, nil,
+		),
+		SystemIndicatorActive: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "system", "indicator_active"),
+			"State of the system location indicator",
+			nil, nil,
 		),
 		SystemMemorySize: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "memory_size_bytes"),
@@ -291,6 +297,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SystemPowerOn
 	ch <- collector.SystemHealth
 	ch <- collector.SystemIndicatorLED
+	ch <- collector.SystemIndicatorActive
 	ch <- collector.SystemMemorySize
 	ch <- collector.SystemCpuCount
 	ch <- collector.SystemBiosInfo
