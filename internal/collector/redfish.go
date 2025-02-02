@@ -128,6 +128,12 @@ func (r *Redfish) RefreshSession() bool {
 		return false
 	}
 
+	defer func() {
+		if r.session.disabled {
+			log.Info("Session authentication disabled for %s due to failed refresh", r.hostname)
+		}
+	}()
+
 	if len(r.session.token) == 0 {
 		ok := r.CreateSession()
 		if !ok {

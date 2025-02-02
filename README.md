@@ -83,10 +83,11 @@ The exporter can expose the metrics listed in the sections below. For all `<name
 ### System
 These metrics include power, health, and LED state, total memory size, number of physical processors, BIOS version and machine information.
 
-```text
+```c
 idrac_system_power_on 1
 idrac_system_health{status="OK"} 0
-idrac_system_indicator_led_on{state="Lit"} 1
+idrac_system_indicator_led_on{state="Lit"} 1 // deprecated, new metric below
+idrac_system_indicator_active 1
 idrac_system_memory_size_bytes 137438953472
 idrac_system_cpu_count{model="Intel(R) Xeon(R) Gold 6130 CPU @ 2.10GHz"} 2
 idrac_system_bios_info{version="2.3.10"} 1
@@ -96,7 +97,7 @@ idrac_system_machine_info{manufacturer="Dell Inc.",model="PowerEdge C6420",seria
 ### Sensors
 These metrics include temperature and FAN health and speeds.
 
-```text
+```c
 idrac_sensors_temperature{id="0",name="Inlet Temp",units="celsius"} 19
 idrac_sensors_fan_health{id="0",name="FAN1A",status="OK"} 0
 idrac_sensors_fan_speed{id="0",name="FAN1A",units="rpm"} 7912
@@ -105,7 +106,7 @@ idrac_sensors_fan_speed{id="0",name="FAN1A",units="rpm"} 7912
 ### Power
 These metrics include two sets of power readings. The first set is PSU power readings, such as power usage, total power capacity, input voltage and efficiency. Be aware that not all metrics are available on all systems.
 
-```text
+```c
 idrac_power_supply_health{id="0",status="OK"} 0
 idrac_power_supply_output_watts{id="0"} 74.5
 idrac_power_supply_input_watts{id="0"} 89
@@ -116,7 +117,7 @@ idrac_power_supply_efficiency_percent{id="0"} 91
 
 The second set is the power consumption for the entire system (and sometimes also for certain subsystems, such as the CPUs). The first two metrics are instantaneous readings, while the last four metrics are the minimum, maximum and average power consumption as measure over the reported interval.
 
-```text
+```c
 idrac_power_control_consumed_watts{id="0",name="System Power Control"} 166
 idrac_power_control_capacity_watts{id="0",name="System Power Control"} 816
 idrac_power_control_min_consumed_watts{id="0",name="System Power Control"} 165
@@ -128,14 +129,14 @@ idrac_power_control_interval_in_minutes{id="0",name="System Power Control"} 1
 ### System Event Log
 This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the Unix timestamp for when the entry was created.
 
-```text
+```c
 idrac_events_log_entry{id="1",message="The process of installing an operating system or hypervisor is successfully completed",severity="OK"} 1631175352
 ```
 
 ### Storage
 These metrics include information about disk drives in the machine.
 
-```text
+```c
 idrac_drive_info{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:AHCI.Slot.5-1",manufacturer="MICRON",mediatype="SSD",model="MTFDDAV240TDU",name="SSD 1",protocol="SATA",serial="xyz",slot="1"} 1
 idrac_drive_health{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:AHCI.Slot.5-1",status="OK"} 0
 idrac_drive_capacity_bytes{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:AHCI.Slot.5-1"} 240057409536
@@ -145,7 +146,7 @@ idrac_drive_life_left_percent{controller_id="AHCI.Slot.5-1",id="Disk.Direct.1-1:
 ### Memory
 These metrics include information about memory modules in the machine.
 
-```text
+```c
 idrac_memory_module_info{ecc="MultiBitECC",id="DIMM.Socket.A2",manufacturer="Micron Technology",name="DIMM A2",rank="2",serial="xyz",type="DDR4"} 1
 idrac_memory_module_health{id="DIMM.Socket.A2",status="OK"} 0
 idrac_memory_module_capacity_bytes{id="DIMM.Socket.A2"} 34359738368
@@ -155,7 +156,7 @@ idrac_memory_module_speed_mhz{id="DIMM.Socket.A2"} 2400
 ### Network
 These metrics include health of network interfaces, as well as health, link speed, and link status for each of the network ports.
 
-```text
+```c
 idrac_network_interface_health{id="NIC.Embedded.1",status="OK"} 0
 idrac_network_port_health{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1",status="OK"} 0
 idrac_network_port_link_up{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1",status="Up"} 1
@@ -165,7 +166,7 @@ idrac_network_port_speed_mbps{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1
 ### Exporter
 These metrics contain information about the exporter itself, such as build information and how many errors that have been encountered when scraping the Redfish API.
 
-```text
+```c
 idrac_exporter_build_info{goversion="go1.21.1",revision="xyz",version="1.0.0"} 1
 idrac_exporter_scrape_errors_total 0
 ```
