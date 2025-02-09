@@ -10,7 +10,9 @@ import (
 
 func health2value(health string) int {
 	switch health {
-	case "OK":
+	case "":
+		return -1
+	case "OK", "GoodInUse":
 		return 0
 	case "Warning":
 		return 1
@@ -28,21 +30,24 @@ func linkstatus2value(status string) int {
 	return 0
 }
 
-func (mc *Collector) NewSystemPowerOn(state string) prometheus.Metric {
+func (mc *Collector) NewSystemPowerOn(ch chan<- prometheus.Metric, state string) {
 	var value float64
 	if state == "On" {
 		value = 1
 	}
-	return prometheus.MustNewConstMetric(
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemPowerOn,
 		prometheus.GaugeValue,
 		value,
 	)
 }
 
-func (mc *Collector) NewSystemHealth(health string) prometheus.Metric {
+func (mc *Collector) NewSystemHealth(ch chan<- prometheus.Metric, health string) {
 	value := health2value(health)
-	return prometheus.MustNewConstMetric(
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemHealth,
 		prometheus.GaugeValue,
 		float64(value),
@@ -50,12 +55,12 @@ func (mc *Collector) NewSystemHealth(health string) prometheus.Metric {
 	)
 }
 
-func (mc *Collector) NewSystemIndicatorLED(state string) prometheus.Metric {
+func (mc *Collector) NewSystemIndicatorLED(ch chan<- prometheus.Metric, state string) {
 	var value float64
 	if state != "Off" {
 		value = 1
 	}
-	return prometheus.MustNewConstMetric(
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemIndicatorLED,
 		prometheus.GaugeValue,
 		value,
@@ -63,28 +68,28 @@ func (mc *Collector) NewSystemIndicatorLED(state string) prometheus.Metric {
 	)
 }
 
-func (mc *Collector) NewSystemIndicatorActive(state bool) prometheus.Metric {
+func (mc *Collector) NewSystemIndicatorActive(ch chan<- prometheus.Metric, state bool) {
 	var value float64
 	if state {
 		value = 1
 	}
-	return prometheus.MustNewConstMetric(
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemIndicatorActive,
 		prometheus.GaugeValue,
 		value,
 	)
 }
 
-func (mc *Collector) NewSystemMemorySize(memory float64) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewSystemMemorySize(ch chan<- prometheus.Metric, memory float64) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemMemorySize,
 		prometheus.GaugeValue,
 		memory,
 	)
 }
 
-func (mc *Collector) NewSystemCpuCount(cpus int, model string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewSystemCpuCount(ch chan<- prometheus.Metric, cpus int, model string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemCpuCount,
 		prometheus.GaugeValue,
 		float64(cpus),
@@ -92,8 +97,8 @@ func (mc *Collector) NewSystemCpuCount(cpus int, model string) prometheus.Metric
 	)
 }
 
-func (mc *Collector) NewSystemBiosInfo(version string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewSystemBiosInfo(ch chan<- prometheus.Metric, version string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemBiosInfo,
 		prometheus.UntypedValue,
 		1.0,
@@ -101,8 +106,8 @@ func (mc *Collector) NewSystemBiosInfo(version string) prometheus.Metric {
 	)
 }
 
-func (mc *Collector) NewSystemMachineInfo(manufacturer, model, serial, sku string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewSystemMachineInfo(ch chan<- prometheus.Metric, manufacturer, model, serial, sku string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.SystemMachineInfo,
 		prometheus.UntypedValue,
 		1.0,
@@ -113,8 +118,8 @@ func (mc *Collector) NewSystemMachineInfo(manufacturer, model, serial, sku strin
 	)
 }
 
-func (mc *Collector) NewSensorsTemperature(temperature float64, id, name, units string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewSensorsTemperature(ch chan<- prometheus.Metric, temperature float64, id, name, units string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.SensorsTemperature,
 		prometheus.GaugeValue,
 		temperature,
@@ -124,9 +129,12 @@ func (mc *Collector) NewSensorsTemperature(temperature float64, id, name, units 
 	)
 }
 
-func (mc *Collector) NewSensorsFanHealth(id, name, health string) prometheus.Metric {
+func (mc *Collector) NewSensorsFanHealth(ch chan<- prometheus.Metric, id, name, health string) {
 	value := health2value(health)
-	return prometheus.MustNewConstMetric(
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.SensorsFanHealth,
 		prometheus.GaugeValue,
 		float64(value),
@@ -136,8 +144,8 @@ func (mc *Collector) NewSensorsFanHealth(id, name, health string) prometheus.Met
 	)
 }
 
-func (mc *Collector) NewSensorsFanSpeed(speed float64, id, name, units string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewSensorsFanSpeed(ch chan<- prometheus.Metric, speed float64, id, name, units string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.SensorsFanSpeed,
 		prometheus.GaugeValue,
 		speed,
@@ -147,9 +155,12 @@ func (mc *Collector) NewSensorsFanSpeed(speed float64, id, name, units string) p
 	)
 }
 
-func (mc *Collector) NewPowerSupplyHealth(health, id string) prometheus.Metric {
+func (mc *Collector) NewPowerSupplyHealth(ch chan<- prometheus.Metric, health, id string) {
 	value := health2value(health)
-	return prometheus.MustNewConstMetric(
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerSupplyHealth,
 		prometheus.GaugeValue,
 		float64(value),
@@ -158,8 +169,8 @@ func (mc *Collector) NewPowerSupplyHealth(health, id string) prometheus.Metric {
 	)
 }
 
-func (mc *Collector) NewPowerSupplyInputWatts(value float64, id string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerSupplyInputWatts(ch chan<- prometheus.Metric, value float64, id string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerSupplyInputWatts,
 		prometheus.GaugeValue,
 		value,
@@ -167,8 +178,8 @@ func (mc *Collector) NewPowerSupplyInputWatts(value float64, id string) promethe
 	)
 }
 
-func (mc *Collector) NewPowerSupplyInputVoltage(value float64, id string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerSupplyInputVoltage(ch chan<- prometheus.Metric, value float64, id string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerSupplyInputVoltage,
 		prometheus.GaugeValue,
 		value,
@@ -176,8 +187,8 @@ func (mc *Collector) NewPowerSupplyInputVoltage(value float64, id string) promet
 	)
 }
 
-func (mc *Collector) NewPowerSupplyOutputWatts(value float64, id string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerSupplyOutputWatts(ch chan<- prometheus.Metric, value float64, id string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerSupplyOutputWatts,
 		prometheus.GaugeValue,
 		value,
@@ -185,8 +196,8 @@ func (mc *Collector) NewPowerSupplyOutputWatts(value float64, id string) prometh
 	)
 }
 
-func (mc *Collector) NewPowerSupplyCapacityWatts(value float64, id string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerSupplyCapacityWatts(ch chan<- prometheus.Metric, value float64, id string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerSupplyCapacityWatts,
 		prometheus.GaugeValue,
 		value,
@@ -194,8 +205,8 @@ func (mc *Collector) NewPowerSupplyCapacityWatts(value float64, id string) prome
 	)
 }
 
-func (mc *Collector) NewPowerSupplyEfficiencyPercent(value float64, id string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerSupplyEfficiencyPercent(ch chan<- prometheus.Metric, value float64, id string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerSupplyEfficiencyPercent,
 		prometheus.GaugeValue,
 		value,
@@ -203,8 +214,8 @@ func (mc *Collector) NewPowerSupplyEfficiencyPercent(value float64, id string) p
 	)
 }
 
-func (mc *Collector) NewPowerControlConsumedWatts(value float64, id, name string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerControlConsumedWatts(ch chan<- prometheus.Metric, value float64, id, name string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerControlConsumedWatts,
 		prometheus.GaugeValue,
 		value,
@@ -213,8 +224,8 @@ func (mc *Collector) NewPowerControlConsumedWatts(value float64, id, name string
 	)
 }
 
-func (mc *Collector) NewPowerControlCapacityWatts(value float64, id, name string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerControlCapacityWatts(ch chan<- prometheus.Metric, value float64, id, name string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerControlCapacityWatts,
 		prometheus.GaugeValue,
 		value,
@@ -223,8 +234,8 @@ func (mc *Collector) NewPowerControlCapacityWatts(value float64, id, name string
 	)
 }
 
-func (mc *Collector) NewPowerControlMinConsumedWatts(value float64, id, name string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerControlMinConsumedWatts(ch chan<- prometheus.Metric, value float64, id, name string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerControlMinConsumedWatts,
 		prometheus.GaugeValue,
 		value,
@@ -233,8 +244,8 @@ func (mc *Collector) NewPowerControlMinConsumedWatts(value float64, id, name str
 	)
 }
 
-func (mc *Collector) NewPowerControlMaxConsumedWatts(value float64, id, name string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerControlMaxConsumedWatts(ch chan<- prometheus.Metric, value float64, id, name string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerControlMaxConsumedWatts,
 		prometheus.GaugeValue,
 		value,
@@ -243,8 +254,8 @@ func (mc *Collector) NewPowerControlMaxConsumedWatts(value float64, id, name str
 	)
 }
 
-func (mc *Collector) NewPowerControlAvgConsumedWatts(value float64, id, name string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerControlAvgConsumedWatts(ch chan<- prometheus.Metric, value float64, id, name string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerControlAvgConsumedWatts,
 		prometheus.GaugeValue,
 		value,
@@ -253,8 +264,8 @@ func (mc *Collector) NewPowerControlAvgConsumedWatts(value float64, id, name str
 	)
 }
 
-func (mc *Collector) NewPowerControlInterval(interval int, id, name string) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewPowerControlInterval(ch chan<- prometheus.Metric, interval int, id, name string) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.PowerControlInterval,
 		prometheus.GaugeValue,
 		float64(interval),
@@ -263,8 +274,8 @@ func (mc *Collector) NewPowerControlInterval(interval int, id, name string) prom
 	)
 }
 
-func (mc *Collector) NewEventLogEntry(id string, message string, severity string, created time.Time) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, message string, severity string, created time.Time) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.EventLogEntry,
 		prometheus.CounterValue,
 		float64(created.Unix()),
@@ -274,148 +285,179 @@ func (mc *Collector) NewEventLogEntry(id string, message string, severity string
 	)
 }
 
-func (mc *Collector) NewDriveInfo(id, parent, name, manufacturer, model, serial, mediatype, protocol string, slot int) prometheus.Metric {
-	var slotstr string
+func (mc *Collector) NewDriveInfo(ch chan<- prometheus.Metric, parent string, m *Drive) {
+	var slot string
 
-	if slot < 0 {
-		slotstr = ""
-	} else {
-		slotstr = fmt.Sprint(slot)
+	if m.PhysicalLocation != nil {
+		if m.PhysicalLocation.PartLocation != nil {
+			slot = fmt.Sprint(m.PhysicalLocation.PartLocation.LocationOrdinalValue)
+		}
 	}
 
-	return prometheus.MustNewConstMetric(
+	ch <- prometheus.MustNewConstMetric(
 		mc.DriveInfo,
 		prometheus.UntypedValue,
 		1.0,
-		id,
+		m.Id,
 		parent,
-		manufacturer,
-		mediatype,
-		model,
-		name,
-		protocol,
-		serial,
-		slotstr,
+		m.Manufacturer,
+		m.MediaType,
+		m.Model,
+		m.Name,
+		m.Protocol,
+		m.SerialNumber,
+		slot,
 	)
 }
 
-func (mc *Collector) NewDriveHealth(id, parent, health string) prometheus.Metric {
-	value := health2value(health)
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewDriveHealth(ch chan<- prometheus.Metric, parent string, m *Drive) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.DriveHealth,
 		prometheus.GaugeValue,
 		float64(value),
-		id,
+		m.Id,
 		parent,
-		health,
+		m.Status.Health,
 	)
 }
 
-func (mc *Collector) NewDriveCapacity(id, parent string, capacity int) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewDriveCapacity(ch chan<- prometheus.Metric, parent string, m *Drive) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.DriveCapacity,
 		prometheus.GaugeValue,
-		float64(capacity),
-		id,
+		float64(m.CapacityBytes),
+		m.Id,
 		parent,
 	)
 }
 
-func (mc *Collector) NewDriveLifeLeft(id, parent string, lifeLeft float64) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewDriveLifeLeft(ch chan<- prometheus.Metric, parent string, m *Drive) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.DriveLifeLeft,
 		prometheus.GaugeValue,
-		lifeLeft,
-		id,
+		m.PredictedLifeLeft,
+		m.Id,
 		parent,
 	)
 }
 
-func (mc *Collector) NewMemoryModuleInfo(id, name, manufacturer, memtype, serial, ecc string, rank int) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewMemoryModuleInfo(ch chan<- prometheus.Metric, m *Memory) {
+	ch <- prometheus.MustNewConstMetric(
 		mc.MemoryModuleInfo,
 		prometheus.UntypedValue,
 		1.0,
-		id,
-		ecc,
-		manufacturer,
-		memtype,
-		name,
-		serial,
-		fmt.Sprint(rank),
+		m.Id,
+		m.ErrorCorrection,
+		m.Manufacturer,
+		m.MemoryDeviceType,
+		m.Name,
+		m.SerialNumber,
+		fmt.Sprint(m.RankCount),
 	)
 }
 
-func (mc *Collector) NewMemoryModuleHealth(id, health string) prometheus.Metric {
-	value := health2value(health)
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewMemoryModuleHealth(ch chan<- prometheus.Metric, m *Memory) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.MemoryModuleHealth,
 		prometheus.GaugeValue,
 		float64(value),
-		id,
-		health,
+		m.Id,
+		m.Status.Health,
 	)
 }
 
-func (mc *Collector) NewMemoryModuleCapacity(id string, capacity int) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewMemoryModuleCapacity(ch chan<- prometheus.Metric, m *Memory) {
+	capacity := 1048576 * m.CapacityMiB
+	if capacity == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.MemoryModuleCapacity,
 		prometheus.GaugeValue,
 		float64(capacity),
-		id,
+		m.Id,
 	)
 }
 
-func (mc *Collector) NewMemoryModuleSpeed(id string, speed int) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewMemoryModuleSpeed(ch chan<- prometheus.Metric, m *Memory) {
+	if m.OperatingSpeedMhz == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.MemoryModuleSpeed,
 		prometheus.GaugeValue,
-		float64(speed),
-		id,
+		float64(m.OperatingSpeedMhz),
+		m.Id,
 	)
 }
 
-func (mc *Collector) NewNetworkInterfaceHealth(id, health string) prometheus.Metric {
-	value := health2value(health)
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewNetworkInterfaceHealth(ch chan<- prometheus.Metric, m *NetworkInterface) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.NetworkInterfaceHealth,
 		prometheus.GaugeValue,
 		float64(value),
-		id,
-		health,
+		m.Id,
+		m.Status.Health,
 	)
 }
 
-func (mc *Collector) NewNetworkPortHealth(id, parent, health string) prometheus.Metric {
-	value := health2value(health)
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewNetworkPortHealth(ch chan<- prometheus.Metric, parent string, m *NetworkPort) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
 		mc.NetworkPortHealth,
 		prometheus.GaugeValue,
 		float64(value),
-		id,
+		m.Id,
 		parent,
-		health,
+		m.Status.Health,
 	)
 }
 
-func (mc *Collector) NewNetworkPortSpeed(id, parent string, speed float64) prometheus.Metric {
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewNetworkPortSpeed(ch chan<- prometheus.Metric, parent string, m *NetworkPort) {
+	var speed float64
+
+	if m.CurrentLinkSpeedMbps > 0 {
+		speed = m.CurrentLinkSpeedMbps
+	} else if m.CurrentSpeedGbps > 0 {
+		speed = 1000 * m.CurrentSpeedGbps
+	} else if len(m.SupportedLinkCapabilities) > 0 {
+		if s := m.SupportedLinkCapabilities[0].LinkSpeedMbps; s > 0 {
+			speed = s
+		}
+	}
+
+	ch <- prometheus.MustNewConstMetric(
 		mc.NetworkPortSpeed,
 		prometheus.GaugeValue,
 		speed,
-		id,
+		m.Id,
 		parent,
 	)
 }
 
-func (mc *Collector) NewNetworkPortLinkUp(id, parent, status string) prometheus.Metric {
-	value := linkstatus2value(status)
-	return prometheus.MustNewConstMetric(
+func (mc *Collector) NewNetworkPortLinkUp(ch chan<- prometheus.Metric, parent string, m *NetworkPort) {
+	value := linkstatus2value(m.LinkStatus)
+	ch <- prometheus.MustNewConstMetric(
 		mc.NetworkPortLinkUp,
 		prometheus.GaugeValue,
 		float64(value),
-		id,
+		m.Id,
 		parent,
-		status,
+		m.LinkStatus,
 	)
 }

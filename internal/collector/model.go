@@ -262,16 +262,6 @@ type Drive struct {
 	SSDEnduranceUtilizationPercentage float64 `json:"SSDEnduranceUtilizationPercentage"`
 }
 
-func (d *Drive) GetSlot() int {
-	slot := -1
-	if d.PhysicalLocation != nil {
-		if d.PhysicalLocation.PartLocation != nil {
-			slot = d.PhysicalLocation.PartLocation.LocationOrdinalValue
-		}
-	}
-	return slot
-}
-
 type Memory struct {
 	Id                string `json:"Id"`
 	Name              string `json:"Name"`
@@ -327,21 +317,6 @@ type NetworkPort struct {
 		LinkNetworkTechnology string  `json:"LinkNetworkTechnology"`
 		LinkSpeedMbps         float64 `json:"LinkSpeedMbps"`
 	} `json:"SupportedLinkCapabilities"`
-}
-
-func (n *NetworkPort) GetSpeed() float64 {
-	if n.CurrentLinkSpeedMbps > 0 {
-		return n.CurrentLinkSpeedMbps
-	}
-	if n.CurrentSpeedGbps > 0 {
-		return 1000 * n.CurrentSpeedGbps
-	}
-	if len(n.SupportedLinkCapabilities) > 0 {
-		if s := n.SupportedLinkCapabilities[0].LinkSpeedMbps; s > 0 {
-			return s
-		}
-	}
-	return 0
 }
 
 type SystemResponse struct {

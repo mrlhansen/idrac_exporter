@@ -129,7 +129,7 @@ func (client *Client) findAllEndpoints() bool {
 		}
 	}
 
-	// Fix for Inspur bug
+	// Issue #50
 	if client.vendor == INSPUR {
 		client.storagePath = strings.ReplaceAll(client.storagePath, "Storages", "Storage")
 	}
@@ -164,7 +164,7 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 		}
 
 		id := t.GetId(n)
-		ch <- mc.NewSensorsTemperature(t.ReadingCelsius, id, t.Name, "celsius")
+		mc.NewSensorsTemperature(ch, t.ReadingCelsius, id, t.Name, "celsius")
 	}
 
 	for n, f := range resp.Fans {
@@ -183,8 +183,8 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 		}
 
 		id := f.GetId(n)
-		ch <- mc.NewSensorsFanHealth(id, name, f.Status.Health)
-		ch <- mc.NewSensorsFanSpeed(f.GetReading(), id, name, strings.ToLower(units))
+		mc.NewSensorsFanHealth(ch, id, name, f.Status.Health)
+		mc.NewSensorsFanSpeed(ch, f.GetReading(), id, name, strings.ToLower(units))
 	}
 
 	return true
@@ -202,24 +202,24 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 		resp.IndicatorLED = resp.Oem.Hpe.IndicatorLED
 	}
 
-	ch <- mc.NewSystemPowerOn(resp.PowerState)
-	ch <- mc.NewSystemHealth(resp.Status.Health)
-	ch <- mc.NewSystemIndicatorLED(resp.IndicatorLED)
+	mc.NewSystemPowerOn(ch, resp.PowerState)
+	mc.NewSystemHealth(ch, resp.Status.Health)
+	mc.NewSystemIndicatorLED(ch, resp.IndicatorLED)
 
 	if resp.LocationIndicatorActive != nil {
-		ch <- mc.NewSystemIndicatorActive(*resp.LocationIndicatorActive)
+		mc.NewSystemIndicatorActive(ch, *resp.LocationIndicatorActive)
 	}
 
 	if resp.MemorySummary != nil {
-		ch <- mc.NewSystemMemorySize(resp.MemorySummary.TotalSystemMemoryGiB * 1073741824)
+		mc.NewSystemMemorySize(ch, resp.MemorySummary.TotalSystemMemoryGiB*1073741824)
 	}
 
 	if resp.ProcessorSummary != nil {
-		ch <- mc.NewSystemCpuCount(resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
+		mc.NewSystemCpuCount(ch, resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
 	}
 
-	ch <- mc.NewSystemBiosInfo(resp.BiosVersion)
-	ch <- mc.NewSystemMachineInfo(resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
+	mc.NewSystemBiosInfo(ch, resp.BiosVersion)
+	mc.NewSystemMachineInfo(ch, resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
 
 	return true
 }
@@ -242,7 +242,7 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 			continue
 		}
 
-		ch <- mc.NewNetworkInterfaceHealth(ni.Id, ni.Status.Health)
+		mc.NewNetworkInterfaceHealth(ch, &ni)
 
 		ports := GroupResponse{}
 		ok = client.redfish.Get(ni.GetPorts(), &ports)
@@ -257,7 +257,7 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 				return false
 			}
 
-			// Fix for issue #92
+			// Issue #92
 			if client.vendor == DELL {
 				if ni.Id == port.Id {
 					s := strings.Split(c, "/")
@@ -265,9 +265,9 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 				}
 			}
 
-			ch <- mc.NewNetworkPortHealth(port.Id, ni.Id, port.Status.Health)
-			ch <- mc.NewNetworkPortSpeed(port.Id, ni.Id, port.GetSpeed())
-			ch <- mc.NewNetworkPortLinkUp(port.Id, ni.Id, port.LinkStatus)
+			mc.NewNetworkPortHealth(ch, ni.Id, &port)
+			mc.NewNetworkPortSpeed(ch, ni.Id, &port)
+			mc.NewNetworkPortLinkUp(ch, ni.Id, &port)
 		}
 	}
 
@@ -287,7 +287,7 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 			psu.Status.State = StateEnabled
 		}
 
-		// iLO 4 (for issue #116)
+		// Issue #116
 		if (client.vendor == HPE) && (client.version == 4) {
 			if psu.FirmwareVersion == "0.00" {
 				continue
@@ -299,28 +299,28 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 		}
 
 		id := strconv.Itoa(i)
-		ch <- mc.NewPowerSupplyHealth(psu.Status.Health, id)
-		ch <- mc.NewPowerSupplyInputWatts(psu.PowerInputWatts, id)
-		ch <- mc.NewPowerSupplyInputVoltage(psu.LineInputVoltage, id)
-		ch <- mc.NewPowerSupplyOutputWatts(psu.GetOutputPower(), id)
-		ch <- mc.NewPowerSupplyCapacityWatts(psu.PowerCapacityWatts, id)
-		ch <- mc.NewPowerSupplyEfficiencyPercent(psu.EfficiencyPercent, id)
+		mc.NewPowerSupplyHealth(ch, psu.Status.Health, id)
+		mc.NewPowerSupplyInputWatts(ch, psu.PowerInputWatts, id)
+		mc.NewPowerSupplyInputVoltage(ch, psu.LineInputVoltage, id)
+		mc.NewPowerSupplyOutputWatts(ch, psu.GetOutputPower(), id)
+		mc.NewPowerSupplyCapacityWatts(ch, psu.PowerCapacityWatts, id)
+		mc.NewPowerSupplyEfficiencyPercent(ch, psu.EfficiencyPercent, id)
 	}
 
 	for i, pc := range resp.PowerControl {
 		id := strconv.Itoa(i)
-		ch <- mc.NewPowerControlConsumedWatts(pc.PowerConsumedWatts, id, pc.Name)
-		ch <- mc.NewPowerControlCapacityWatts(pc.PowerCapacityWatts, id, pc.Name)
+		mc.NewPowerControlConsumedWatts(ch, pc.PowerConsumedWatts, id, pc.Name)
+		mc.NewPowerControlCapacityWatts(ch, pc.PowerCapacityWatts, id, pc.Name)
 
 		if pc.PowerMetrics == nil {
 			continue
 		}
 
 		pm := pc.PowerMetrics
-		ch <- mc.NewPowerControlMinConsumedWatts(pm.MinConsumedWatts, id, pc.Name)
-		ch <- mc.NewPowerControlMaxConsumedWatts(pm.MaxConsumedWatts, id, pc.Name)
-		ch <- mc.NewPowerControlAvgConsumedWatts(pm.AverageConsumedWatts, id, pc.Name)
-		ch <- mc.NewPowerControlInterval(pm.IntervalInMinutes, id, pc.Name)
+		mc.NewPowerControlMinConsumedWatts(ch, pm.MinConsumedWatts, id, pc.Name)
+		mc.NewPowerControlMaxConsumedWatts(ch, pm.MaxConsumedWatts, id, pc.Name)
+		mc.NewPowerControlAvgConsumedWatts(ch, pm.AverageConsumedWatts, id, pc.Name)
+		mc.NewPowerControlInterval(ch, pm.IntervalInMinutes, id, pc.Name)
 	}
 
 	return true
@@ -356,7 +356,7 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 			continue
 		}
 
-		ch <- mc.NewEventLogEntry(e.Id, e.Message, e.Severity, t)
+		mc.NewEventLogEntry(ch, e.Id, e.Message, e.Severity, t)
 	}
 
 	return true
@@ -404,10 +404,10 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
 			}
 
-			ch <- mc.NewDriveInfo(drive.Id, ctlr.Id, drive.Name, drive.Manufacturer, drive.Model, drive.SerialNumber, drive.MediaType, drive.Protocol, drive.GetSlot())
-			ch <- mc.NewDriveHealth(drive.Id, ctlr.Id, drive.Status.Health)
-			ch <- mc.NewDriveCapacity(drive.Id, ctlr.Id, drive.CapacityBytes)
-			ch <- mc.NewDriveLifeLeft(drive.Id, ctlr.Id, drive.PredictedLifeLeft)
+			mc.NewDriveInfo(ch, ctlr.Id, &drive)
+			mc.NewDriveHealth(ch, ctlr.Id, &drive)
+			mc.NewDriveCapacity(ch, ctlr.Id, &drive)
+			mc.NewDriveLifeLeft(ch, ctlr.Id, &drive)
 		}
 	}
 
@@ -441,10 +441,10 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 			m.CapacityMiB = m.SizeMB
 		}
 
-		ch <- mc.NewMemoryModuleInfo(m.Id, m.Name, m.Manufacturer, m.MemoryDeviceType, m.SerialNumber, m.ErrorCorrection, m.RankCount)
-		ch <- mc.NewMemoryModuleHealth(m.Id, m.Status.Health)
-		ch <- mc.NewMemoryModuleCapacity(m.Id, 1048576*m.CapacityMiB)
-		ch <- mc.NewMemoryModuleSpeed(m.Id, m.OperatingSpeedMhz)
+		mc.NewMemoryModuleInfo(ch, &m)
+		mc.NewMemoryModuleHealth(ch, &m)
+		mc.NewMemoryModuleCapacity(ch, &m)
+		mc.NewMemoryModuleSpeed(ch, &m)
 	}
 
 	return true
