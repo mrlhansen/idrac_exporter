@@ -18,11 +18,6 @@ port: 9348
 # Environment variable CONFIG_TIMEOUT=10
 timeout: 10
 
-# Retries before a target is marked as invalid (use 0 to disable invalidation)
-# Default value: 0
-# Environment variable CONFIG_RETRIES=0
-retries: 0
-
 # Prefix for the exported metrics
 # Default value: idrac
 # Environment variable CONFIG_METRICS_PREFIX=idrac

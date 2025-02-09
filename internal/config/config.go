@@ -1,7 +1,6 @@
 package config
 
 import (
-	"math"
 	"os"
 	"strings"
 
@@ -70,10 +69,6 @@ func ReadConfig(filename string) {
 
 	if Config.Timeout == 0 {
 		Config.Timeout = 10
-	}
-
-	if Config.Retries == 0 {
-		Config.Retries = math.MaxUint
 	}
 
 	if Config.MetricsPrefix == "" {

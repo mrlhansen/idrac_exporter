@@ -22,7 +22,6 @@ type Collector struct {
 	registry   *prometheus.Registry
 	collected  *sync.Cond
 	collecting bool
-	retries    uint
 	errors     atomic.Uint64
 	builder    *strings.Builder
 
@@ -481,20 +480,15 @@ func GetCollector(target string) (*Collector, error) {
 
 	// Try to instantiate a new Redfish host
 	if collector.client == nil {
-		if collector.retries < config.Config.Retries {
-			host := config.Config.GetHostCfg(target)
-			if host == nil {
-				return nil, fmt.Errorf("failed to get host information")
-			}
-			c := NewClient(host)
-			if c == nil {
-				collector.retries++
-				return nil, fmt.Errorf("failed to instantiate new client")
-			} else {
-				collector.client = c
-			}
+		host := config.Config.GetHostCfg(target)
+		if host == nil {
+			return nil, fmt.Errorf("failed to get host information")
+		}
+		c := NewClient(host)
+		if c == nil {
+			return nil, fmt.Errorf("failed to instantiate new client")
 		} else {
-			return nil, fmt.Errorf("host unreachable after %d retries", collector.retries)
+			collector.client = c
 		}
 	}
 

@@ -56,7 +56,6 @@ func readConfigEnv() {
 
 	getEnvUint("CONFIG_PORT", &Config.Port)
 	getEnvUint("CONFIG_TIMEOUT", &Config.Timeout)
-	getEnvUint("CONFIG_RETRIES", &Config.Retries)
 
 	getEnvBool("CONFIG_TLS_ENABLED", &Config.TLS.Enabled)
 	getEnvBool("CONFIG_METRICS_SYSTEM", &Config.Collect.System)

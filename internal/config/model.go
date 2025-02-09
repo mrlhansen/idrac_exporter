@@ -41,6 +41,5 @@ type RootConfig struct {
 	Event         EventConfig            `yaml:"events"`
 	TLS           TLSConfig              `yaml:"tls"`
 	Timeout       uint                   `yaml:"timeout"`
-	Retries       uint                   `yaml:"retries"`
 	Hosts         map[string]*HostConfig `yaml:"hosts"`
 }

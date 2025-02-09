@@ -69,7 +69,7 @@ func metricsHandler(rsp http.ResponseWriter, req *http.Request) {
 	c, err := collector.GetCollector(target)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error instantiating metrics collector for host %s: %v", target, err)
-		log.Error(errorMsg)
+		log.Error("%v", errorMsg)
 		http.Error(rsp, errorMsg, http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +79,7 @@ func metricsHandler(rsp http.ResponseWriter, req *http.Request) {
 	metrics, err := c.Gather()
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error collecting metrics for host %s: %v", target, err)
-		log.Error(errorMsg)
+		log.Error("%v", errorMsg)
 		http.Error(rsp, errorMsg, http.StatusInternalServerError)
 		return
 	}
