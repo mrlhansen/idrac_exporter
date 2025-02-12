@@ -461,3 +461,28 @@ func (mc *Collector) NewNetworkPortLinkUp(ch chan<- prometheus.Metric, parent st
 		m.LinkStatus,
 	)
 }
+
+func (mc *Collector) NewDellBatteryRollupHealth(ch chan<- prometheus.Metric, m *DellSystem) {
+	value := health2value(m.BatteryRollupStatus)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.DellBatteryRollupHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.BatteryRollupStatus,
+	)
+}
+
+func (mc *Collector) NewDellEstimatedSystemAirflowCFM(ch chan<- prometheus.Metric, m *DellSystem) {
+	value := m.EstimatedSystemAirflowCFM
+	if value == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.DellEstimatedSystemAirflowCFM,
+		prometheus.GaugeValue,
+		float64(value),
+	)
+}

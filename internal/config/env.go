@@ -65,6 +65,7 @@ func readConfigEnv() {
 	getEnvBool("CONFIG_METRICS_STORAGE", &Config.Collect.Storage)
 	getEnvBool("CONFIG_METRICS_MEMORY", &Config.Collect.Memory)
 	getEnvBool("CONFIG_METRICS_NETWORK", &Config.Collect.Network)
+	getEnvBool("CONFIG_METRICS_OEM", &Config.Collect.OEM)
 
 	def, ok := Config.Hosts["default"]
 	if !ok {
