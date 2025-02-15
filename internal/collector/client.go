@@ -450,7 +450,7 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 	return true
 }
 
-func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bool { // rename to RefreshOEM ?
+func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bool {
 	if client.vendor != DELL {
 		return true
 	}

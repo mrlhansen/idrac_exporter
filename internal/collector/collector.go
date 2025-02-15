@@ -343,6 +343,8 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.NetworkPortHealth
 	ch <- collector.NetworkPortSpeed
 	ch <- collector.NetworkPortLinkUp
+	ch <- collector.DellBatteryRollupHealth
+	ch <- collector.DellEstimatedSystemAirflowCFM
 }
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
