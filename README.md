@@ -163,13 +163,12 @@ idrac_network_port_link_up{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1",s
 idrac_network_port_speed_mbps{id="NIC.Embedded.1-1",interface_id="NIC.Embedded.1"} 1000
 ```
 
-#### OEM
+### OEM
 These metrics are OEM specific and thus only available on the supported systems. At the moment only two Dell specific metrics are exported.
 
 ```c
 idrac_dell_battery_rollup_health{status="OK"} 0
 idrac_dell_estimated_system_airflow_cfm 47
-
 ```
 
 ### Exporter
