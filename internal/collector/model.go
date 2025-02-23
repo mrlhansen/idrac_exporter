@@ -483,3 +483,31 @@ type EventLogResponse struct {
 		Severity     string  `json:"Severity"`
 	} `json:"Members"`
 }
+
+// Dell OEM: /redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1
+type DellSystem struct {
+	BIOSReleaseDate                    string `json:"BIOSReleaseDate"`
+	BatteryRollupStatus                string `json:"BatteryRollupStatus"`
+	CoolingRollupStatus                string `json:"CoolingRollupStatus"`
+	CurrentRollupStatus                string `json:"CurrentRollupStatus"`
+	EstimatedExhaustTemperatureCelsius int    `json:"EstimatedExhaustTemperatureCelsius"`
+	EstimatedSystemAirflowCFM          int    `json:"EstimatedSystemAirflowCFM"`
+	ExpressServiceCode                 string `json:"ExpressServiceCode"`
+	FanRollupStatus                    string `json:"FanRollupStatus"`
+	IntrusionRollupStatus              string `json:"IntrusionRollupStatus"`
+	LicensingRollupStatus              string `json:"LicensingRollupStatus"`
+	MaxCPUSockets                      int    `json:"MaxCPUSockets"`
+	MaxDIMMSlots                       int    `json:"MaxDIMMSlots"`
+	MaxPCIeSlots                       int    `json:"MaxPCIeSlots"`
+	MaxSystemMemoryMiB                 int    `json:"MaxSystemMemoryMiB"`
+	PSRollupStatus                     string `json:"PSRollupStatus"`
+	PopulatedDIMMSlots                 int    `json:"PopulatedDIMMSlots"`
+	PopulatedPCIeSlots                 int    `json:"PopulatedPCIeSlots"`
+	PowerCapEnabledState               string `json:"PowerCapEnabledState"`
+	SELRollupStatus                    string `json:"SELRollupStatus"`
+	StorageRollupStatus                string `json:"StorageRollupStatus"`
+	SystemGeneration                   string `json:"SystemGeneration"`
+	SystemHealthRollupStatus           string `json:"SystemHealthRollupStatus"`
+	TempRollupStatus                   string `json:"TempRollupStatus"`
+	TempStatisticsRollupStatus         string `json:"TempStatisticsRollupStatus"`
+}

@@ -449,3 +449,20 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 
 	return true
 }
+
+func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.vendor != DELL {
+		return true
+	}
+
+	resp := DellSystem{}
+	ok := client.redfish.Get("/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1", &resp)
+	if !ok {
+		return false
+	}
+
+	mc.NewDellBatteryRollupHealth(ch, &resp)
+	mc.NewDellEstimatedSystemAirflowCFM(ch, &resp)
+
+	return true
+}

@@ -80,6 +80,10 @@ type Collector struct {
 	NetworkPortHealth      *prometheus.Desc
 	NetworkPortSpeed       *prometheus.Desc
 	NetworkPortLinkUp      *prometheus.Desc
+
+	// Dell OEM
+	DellBatteryRollupHealth       *prometheus.Desc
+	DellEstimatedSystemAirflowCFM *prometheus.Desc
 }
 
 func NewCollector() *Collector {
@@ -272,13 +276,23 @@ func NewCollector() *Collector {
 		),
 		NetworkPortSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "speed_mbps"),
-			"Link speed of ports in Mbps",
+			"Link speed of network ports in Mbps",
 			[]string{"id", "interface_id"}, nil,
 		),
 		NetworkPortLinkUp: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "link_up"),
-			"Status of network ports, Up or Down",
+			"Link status of network ports (up or down)",
 			[]string{"id", "interface_id", "status"}, nil,
+		),
+		DellBatteryRollupHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
+			"Health rollup status for the batteries",
+			[]string{"status"}, nil,
+		),
+		DellEstimatedSystemAirflowCFM: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "dell", "estimated_system_airflow_cfm"),
+			"Estimated system airflow in cubic feet per minute",
+			nil, nil,
 		),
 	}
 
@@ -329,6 +343,8 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.NetworkPortHealth
 	ch <- collector.NetworkPortSpeed
 	ch <- collector.NetworkPortLinkUp
+	ch <- collector.DellBatteryRollupHealth
+	ch <- collector.DellEstimatedSystemAirflowCFM
 }
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
@@ -405,6 +421,17 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshMemory(collector, ch)
+			if !ok {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
+	}
+
+	if config.Config.Collect.OEM {
+		wg.Add(1)
+		go func() {
+			ok := collector.client.RefreshDell(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
