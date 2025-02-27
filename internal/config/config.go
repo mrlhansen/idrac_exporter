@@ -85,6 +85,9 @@ func ReadConfig(filename string) {
 	}
 
 	for k, v := range Config.Hosts {
+		if v == nil {
+			log.Fatal("Invalid configuration: missing username and password for host: %s", k)
+		}
 		if v.Username == "" {
 			log.Fatal("Invalid configuration: missing username for host: %s", k)
 		}
