@@ -142,7 +142,7 @@ func NewCollector() *Collector {
 		SystemMachineInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "machine_info"),
 			"Information about the machine",
-			[]string{"manufacturer", "model", "serial", "sku"}, nil,
+			[]string{"manufacturer", "model", "serial", "sku", "hostname"}, nil,
 		),
 		SensorsTemperature: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "temperature"),

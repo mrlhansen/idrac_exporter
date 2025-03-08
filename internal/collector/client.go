@@ -198,28 +198,18 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	}
 
 	// Need on iLO 6
-	if resp.IndicatorLED == "" && client.vendor == HPE {
+	if client.vendor == HPE && resp.IndicatorLED == "" {
 		resp.IndicatorLED = resp.Oem.Hpe.IndicatorLED
 	}
 
-	mc.NewSystemPowerOn(ch, resp.PowerState)
-	mc.NewSystemHealth(ch, resp.Status.Health)
-	mc.NewSystemIndicatorLED(ch, resp.IndicatorLED)
-
-	if resp.LocationIndicatorActive != nil {
-		mc.NewSystemIndicatorActive(ch, *resp.LocationIndicatorActive)
-	}
-
-	if resp.MemorySummary != nil {
-		mc.NewSystemMemorySize(ch, resp.MemorySummary.TotalSystemMemoryGiB*1073741824)
-	}
-
-	if resp.ProcessorSummary != nil {
-		mc.NewSystemCpuCount(ch, resp.ProcessorSummary.Count, resp.ProcessorSummary.Model)
-	}
-
-	mc.NewSystemBiosInfo(ch, resp.BiosVersion)
-	mc.NewSystemMachineInfo(ch, resp.Manufacturer, resp.Model, resp.SerialNumber, resp.SKU)
+	mc.NewSystemPowerOn(ch, &resp)
+	mc.NewSystemHealth(ch, &resp)
+	mc.NewSystemIndicatorLED(ch, &resp)
+	mc.NewSystemIndicatorActive(ch, &resp)
+	mc.NewSystemMemorySize(ch, &resp)
+	mc.NewSystemCpuCount(ch, &resp)
+	mc.NewSystemBiosInfo(ch, &resp)
+	mc.NewSystemMachineInfo(ch, &resp)
 
 	return true
 }

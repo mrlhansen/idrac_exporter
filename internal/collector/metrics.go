@@ -30,9 +30,9 @@ func linkstatus2value(status string) int {
 	return 0
 }
 
-func (mc *Collector) NewSystemPowerOn(ch chan<- prometheus.Metric, state string) {
+func (mc *Collector) NewSystemPowerOn(ch chan<- prometheus.Metric, m *SystemResponse) {
 	var value float64
-	if state == "On" {
+	if m.PowerState == "On" {
 		value = 1
 	}
 	ch <- prometheus.MustNewConstMetric(
@@ -42,8 +42,8 @@ func (mc *Collector) NewSystemPowerOn(ch chan<- prometheus.Metric, state string)
 	)
 }
 
-func (mc *Collector) NewSystemHealth(ch chan<- prometheus.Metric, health string) {
-	value := health2value(health)
+func (mc *Collector) NewSystemHealth(ch chan<- prometheus.Metric, m *SystemResponse) {
+	value := health2value(m.Status.Health)
 	if value < 0 {
 		return
 	}
@@ -51,26 +51,29 @@ func (mc *Collector) NewSystemHealth(ch chan<- prometheus.Metric, health string)
 		mc.SystemHealth,
 		prometheus.GaugeValue,
 		float64(value),
-		health,
+		m.Status.Health,
 	)
 }
 
-func (mc *Collector) NewSystemIndicatorLED(ch chan<- prometheus.Metric, state string) {
+func (mc *Collector) NewSystemIndicatorLED(ch chan<- prometheus.Metric, m *SystemResponse) {
 	var value float64
-	if state != "Off" {
+	if m.IndicatorLED != "Off" {
 		value = 1
 	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.SystemIndicatorLED,
 		prometheus.GaugeValue,
 		value,
-		state,
+		m.IndicatorLED,
 	)
 }
 
-func (mc *Collector) NewSystemIndicatorActive(ch chan<- prometheus.Metric, state bool) {
+func (mc *Collector) NewSystemIndicatorActive(ch chan<- prometheus.Metric, m *SystemResponse) {
 	var value float64
-	if state {
+	if m.LocationIndicatorActive == nil {
+		return
+	}
+	if *m.LocationIndicatorActive {
 		value = 1
 	}
 	ch <- prometheus.MustNewConstMetric(
@@ -80,41 +83,48 @@ func (mc *Collector) NewSystemIndicatorActive(ch chan<- prometheus.Metric, state
 	)
 }
 
-func (mc *Collector) NewSystemMemorySize(ch chan<- prometheus.Metric, memory float64) {
+func (mc *Collector) NewSystemMemorySize(ch chan<- prometheus.Metric, m *SystemResponse) {
+	if m.MemorySummary == nil {
+		return
+	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.SystemMemorySize,
 		prometheus.GaugeValue,
-		memory,
+		m.MemorySummary.TotalSystemMemoryGiB*1073741824,
 	)
 }
 
-func (mc *Collector) NewSystemCpuCount(ch chan<- prometheus.Metric, cpus int, model string) {
+func (mc *Collector) NewSystemCpuCount(ch chan<- prometheus.Metric, m *SystemResponse) {
+	if m.ProcessorSummary == nil {
+		return
+	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.SystemCpuCount,
 		prometheus.GaugeValue,
-		float64(cpus),
-		strings.TrimSpace(model),
+		float64(m.ProcessorSummary.Count),
+		strings.TrimSpace(m.ProcessorSummary.Model),
 	)
 }
 
-func (mc *Collector) NewSystemBiosInfo(ch chan<- prometheus.Metric, version string) {
+func (mc *Collector) NewSystemBiosInfo(ch chan<- prometheus.Metric, m *SystemResponse) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.SystemBiosInfo,
 		prometheus.UntypedValue,
 		1.0,
-		version,
+		m.BiosVersion,
 	)
 }
 
-func (mc *Collector) NewSystemMachineInfo(ch chan<- prometheus.Metric, manufacturer, model, serial, sku string) {
+func (mc *Collector) NewSystemMachineInfo(ch chan<- prometheus.Metric, m *SystemResponse) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.SystemMachineInfo,
 		prometheus.UntypedValue,
 		1.0,
-		strings.TrimSpace(manufacturer),
-		strings.TrimSpace(model),
-		strings.TrimSpace(serial),
-		strings.TrimSpace(sku),
+		strings.TrimSpace(m.Manufacturer),
+		strings.TrimSpace(m.Model),
+		strings.TrimSpace(m.SerialNumber),
+		strings.TrimSpace(m.SKU),
+		strings.TrimSpace(m.HostName),
 	)
 }
 
