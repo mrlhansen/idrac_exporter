@@ -404,6 +404,35 @@ type PowerResponse struct {
 		UpperThresholdFatal       any `json:"UpperThresholdFatal"`
 		UpperThresholdNonCritical any `json:"UpperThresholdNonCritical"`
 	} `json:"Voltages"`
+	Oem struct {
+		TsFujitsu *struct {
+			OdataType               string `json:"@odata.type"`
+			PsuSumStatus            string `json:"PsuSumStatus"`
+			VoltageSumStatus        string `json:"VoltageSumStatus"`
+			PowerConfigSumStatus    string `json:"PowerConfigSumStatus"`
+			ChassisPowerConsumption *struct {
+				CurrentPowerConsumptionW float64 `json:"CurrentPowerConsumptionW"`
+				MinimumPowerW            float64 `json:"MinimumPowerW"`
+				PeakPowerW               float64 `json:"PeakPowerW"`
+				AveragePowerW            float64 `json:"AveragePowerW"`
+				WarningThresholdW        float64 `json:"WarningThresholdW"`
+				CriticalThresholdW       float64 `json:"CriticalThresholdW"`
+				Designation              string  `json:"Designation"`
+				CurrentMaximumPowerW     float64 `json:"CurrentMaximumPowerW"`
+			} `json:"ChassisPowerConsumption"`
+			ChassisPowerSensors []struct {
+				Designation              string  `json:"Designation"`
+				EntityID                 string  `json:"EntityId"`
+				EntityInstance           int     `json:"EntityInstance"`
+				CurrentPowerConsumptionW float64 `json:"CurrentPowerConsumptionW"`
+				LegacyStatus             string  `json:"LegacyStatus"`
+			} `json:"ChassisPowerSensors"`
+			MaxUsage                          float64 `json:"MaxUsage"`
+			ControlMode                       string  `json:"ControlMode"`
+			PsuSmartRedundancyStatusSensor    string  `json:"PsuSmartRedundancyStatusSensor"`
+			PsuSmartRedundancyActivePSUSensor int     `json:"PsuSmartRedundancyActivePSUSensor"`
+		} `json:"ts_fujitsu"`
+	} `json:"Oem"`
 }
 
 type PowerControlUnit struct {
@@ -419,12 +448,14 @@ type PowerControlUnit struct {
 		LimitException string `json:"LimitException"`
 		LimitInWatts   int    `json:"LimitInWatts"`
 	} `json:"PowerLimit"`
-	PowerMetrics *struct {
-		AverageConsumedWatts float64 `json:"AverageConsumedWatts"`
-		IntervalInMinutes    int     `json:"IntervalInMin"`
-		MaxConsumedWatts     float64 `json:"MaxConsumedWatts"`
-		MinConsumedWatts     float64 `json:"MinConsumedWatts"`
-	} `json:"PowerMetrics"`
+	PowerMetrics *PowerMetrics `json:"PowerMetrics"`
+}
+
+type PowerMetrics struct {
+	AvgConsumedWatts  float64 `json:"AverageConsumedWatts"`
+	MaxConsumedWatts  float64 `json:"MaxConsumedWatts"`
+	MinConsumedWatts  float64 `json:"MinConsumedWatts"`
+	IntervalInMinutes int     `json:"IntervalInMin"`
 }
 
 type PowerSupplyUnit struct {

@@ -276,6 +276,38 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 		return false
 	}
 
+	// Issue #121
+	if (client.vendor == FUJITSU) && (resp.Oem.TsFujitsu != nil) {
+		for n, p := range resp.PowerSupplies {
+			if len(p.Name) == 0 {
+				continue
+			}
+			for _, v := range resp.Oem.TsFujitsu.ChassisPowerSensors {
+				if (v.EntityID == "Power Supply") && strings.HasPrefix(v.Designation, p.Name) {
+					resp.PowerSupplies[n].PowerInputWatts = v.CurrentPowerConsumptionW
+				}
+			}
+		}
+		if cp := resp.Oem.TsFujitsu.ChassisPowerConsumption; cp != nil {
+			if len(resp.PowerControl) > 0 {
+				pc := &resp.PowerControl[0]
+				if cp.CurrentPowerConsumptionW > 0 {
+					pc.PowerConsumedWatts = cp.CurrentPowerConsumptionW
+				}
+				if cp.CurrentMaximumPowerW > 0 {
+					pc.PowerCapacityWatts = cp.CurrentMaximumPowerW
+				}
+				if pc.PowerMetrics == nil {
+					pc.PowerMetrics = &PowerMetrics{
+						AvgConsumedWatts: cp.AveragePowerW,
+						MaxConsumedWatts: cp.PeakPowerW,
+						MinConsumedWatts: cp.MinimumPowerW,
+					}
+				}
+			}
+		}
+	}
+
 	for i, psu := range resp.PowerSupplies {
 		// Status is missing, but information is there
 		if client.vendor == INVENTEC {
@@ -314,7 +346,7 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 		pm := pc.PowerMetrics
 		mc.NewPowerControlMinConsumedWatts(ch, pm.MinConsumedWatts, id, pc.Name)
 		mc.NewPowerControlMaxConsumedWatts(ch, pm.MaxConsumedWatts, id, pc.Name)
-		mc.NewPowerControlAvgConsumedWatts(ch, pm.AverageConsumedWatts, id, pc.Name)
+		mc.NewPowerControlAvgConsumedWatts(ch, pm.AvgConsumedWatts, id, pc.Name)
 		mc.NewPowerControlInterval(ch, pm.IntervalInMinutes, id, pc.Name)
 	}
 
