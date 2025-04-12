@@ -235,23 +235,25 @@ type StorageController struct {
 }
 
 type Drive struct {
-	Id                string  `json:"Id"`
-	Name              string  `json:"Name"`
-	Description       string  `json:"Description"`
-	MediaType         string  `json:"MediaType"`
-	Manufacturer      string  `json:"Manufacturer"`
-	Model             string  `json:"Model"`
-	CapacityBytes     int     `json:"CapacityBytes"`
-	BlockSizeBytes    int     `json:"BlockSizeBytes"`
-	CapableSpeedGbs   float64 `json:"CapableSpeedGbs"`
-	Status            Status  `json:"Status"`
-	SerialNumber      string  `json:"SerialNumber"`
-	Protocol          string  `json:"Protocol"`
-	Revision          string  `json:"Revision"`
-	PartNumber        string  `json:"PartNumber"`
-	PredictedLifeLeft float64 `json:"PredictedMediaLifeLeftPercent"`
-	RotationSpeedRPM  float64 `json:"RotationSpeedRPM"`
-	PhysicalLocation  *struct {
+	Id                      string  `json:"Id"`
+	Name                    string  `json:"Name"`
+	Description             string  `json:"Description"`
+	IndicatorLED            string  `json:"IndicatorLED"`
+	LocationIndicatorActive *bool   `json:"LocationIndicatorActive"`
+	MediaType               string  `json:"MediaType"`
+	Manufacturer            string  `json:"Manufacturer"`
+	Model                   string  `json:"Model"`
+	CapacityBytes           int     `json:"CapacityBytes"`
+	BlockSizeBytes          int     `json:"BlockSizeBytes"`
+	CapableSpeedGbs         float64 `json:"CapableSpeedGbs"`
+	Status                  Status  `json:"Status"`
+	SerialNumber            string  `json:"SerialNumber"`
+	Protocol                string  `json:"Protocol"`
+	Revision                string  `json:"Revision"`
+	PartNumber              string  `json:"PartNumber"`
+	PredictedLifeLeft       float64 `json:"PredictedMediaLifeLeftPercent"`
+	RotationSpeedRPM        float64 `json:"RotationSpeedRPM"`
+	PhysicalLocation        *struct {
 		PartLocation *struct {
 			LocationOrdinalValue int `json:"LocationOrdinalValue"`
 		} `json:"PartLocation"`

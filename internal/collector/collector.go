@@ -64,10 +64,11 @@ type Collector struct {
 	EventLogEntry *prometheus.Desc
 
 	// Disk drives
-	DriveInfo     *prometheus.Desc
-	DriveHealth   *prometheus.Desc
-	DriveCapacity *prometheus.Desc
-	DriveLifeLeft *prometheus.Desc
+	DriveInfo            *prometheus.Desc
+	DriveHealth          *prometheus.Desc
+	DriveCapacity        *prometheus.Desc
+	DriveLifeLeft        *prometheus.Desc
+	DriveIndicatorActive *prometheus.Desc
 
 	// Memory modules
 	MemoryModuleInfo     *prometheus.Desc
@@ -244,6 +245,11 @@ func NewCollector() *Collector {
 			"Predicted life left in percent",
 			[]string{"id", "controller_id"}, nil,
 		),
+		DriveIndicatorActive: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "drive", "indicator_active"),
+			"State of the drive location indicator",
+			[]string{"id", "controller_id"}, nil,
+		),
 		MemoryModuleInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "info"),
 			"Information about memory modules",
@@ -335,6 +341,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.DriveHealth
 	ch <- collector.DriveCapacity
 	ch <- collector.DriveLifeLeft
+	ch <- collector.DriveIndicatorActive
 	ch <- collector.MemoryModuleInfo
 	ch <- collector.MemoryModuleHealth
 	ch <- collector.MemoryModuleCapacity

@@ -355,6 +355,31 @@ func (mc *Collector) NewDriveLifeLeft(ch chan<- prometheus.Metric, parent string
 	)
 }
 
+func (mc *Collector) NewDriveIndicatorActive(ch chan<- prometheus.Metric, parent string, m *Drive) {
+	state := false
+	value := 0
+
+	if m.LocationIndicatorActive != nil {
+		state = *m.LocationIndicatorActive
+	} else if len(m.IndicatorLED) > 0 {
+		state = (m.IndicatorLED != "Off")
+	} else {
+		return
+	}
+
+	if state {
+		value = 1
+	}
+
+	ch <- prometheus.MustNewConstMetric(
+		mc.DriveIndicatorActive,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		parent,
+	)
+}
+
 func (mc *Collector) NewMemoryModuleInfo(ch chan<- prometheus.Metric, m *Memory) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.MemoryModuleInfo,

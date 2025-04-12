@@ -435,6 +435,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			mc.NewDriveHealth(ch, ctlr.Id, &drive)
 			mc.NewDriveCapacity(ch, ctlr.Id, &drive)
 			mc.NewDriveLifeLeft(ch, ctlr.Id, &drive)
+			mc.NewDriveIndicatorActive(ch, ctlr.Id, &drive)
 		}
 	}
 
