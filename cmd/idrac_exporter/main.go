@@ -3,7 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
+	"strings"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/log"
@@ -38,7 +40,9 @@ func main() {
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/", rootHandler)
 
-	bind := fmt.Sprintf("%s:%d", config.Config.Address, config.Config.Port)
+	port := fmt.Sprintf("%d", config.Config.Port)
+	host := strings.Trim(config.Config.Address, "[]")
+	bind := net.JoinHostPort(host, port)
 	log.Info("Server listening on %s (TLS: %v)", bind, config.Config.TLS.Enabled)
 
 	if config.Config.TLS.Enabled {
