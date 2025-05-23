@@ -5,6 +5,7 @@ hosts:
     username: root
     password: calvin
 metrics:
+  processors: true
   system: true
   sensors: true
   power: true

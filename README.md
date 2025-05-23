@@ -126,6 +126,18 @@ idrac_power_control_avg_consumed_watts{id="0",name="System Power Control"} 166
 idrac_power_control_interval_in_minutes{id="0",name="System Power Control"} 1
 ```
 
+### Processors
+These metrics include information about the CPUs in the system.
+
+```c
+idrac_cpu_health{id="CPU.Socket.1",status="OK"} 0
+idrac_cpu_info{arch="x86-64",id="CPU.Socket.1",manufacturer="Intel",model="Intel(R) Xeon(R) Silver 4108 CPU @ 1.80GHz",socket="CPU.Socket.1"} 1
+idrac_cpu_max_speed_mhz{id="CPU.Socket.1"} 4000
+idrac_cpu_operating_speed_mhz{id="CPU.Socket.1"} 1800
+idrac_cpu_total_cores{id="CPU.Socket.1"} 8
+idrac_cpu_total_threads{id="CPU.Socket.1"} 16
+```
+
 ### System Event Log
 This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the Unix timestamp for when the entry was created.
 

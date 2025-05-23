@@ -432,8 +432,8 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 	}
 
 	for _, c := range group.Members.GetLinks() {
-		ctlr := StorageController{}
-		ok = client.redfish.Get(c, &ctlr)
+		storage := Storage{}
+		ok = client.redfish.Get(c, &storage)
 		if !ok {
 			return false
 		}
@@ -445,11 +445,11 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			if !ok {
 				return false
 			}
-			ctlr.Drives = grp.Members
+			storage.Drives = grp.Members
 		}
 
-		for _, c := range ctlr.Drives.GetLinks() {
-			drive := Drive{}
+		for _, c := range storage.Drives.GetLinks() {
+			drive := StorageDrive{}
 			ok = client.redfish.Get(c, &drive)
 			if !ok {
 				return false
@@ -466,11 +466,11 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
 			}
 
-			mc.NewDriveInfo(ch, ctlr.Id, &drive)
-			mc.NewDriveHealth(ch, ctlr.Id, &drive)
-			mc.NewDriveCapacity(ch, ctlr.Id, &drive)
-			mc.NewDriveLifeLeft(ch, ctlr.Id, &drive)
-			mc.NewDriveIndicatorActive(ch, ctlr.Id, &drive)
+			mc.NewDriveInfo(ch, storage.Id, &drive)
+			mc.NewDriveHealth(ch, storage.Id, &drive)
+			mc.NewDriveCapacity(ch, storage.Id, &drive)
+			mc.NewDriveLifeLeft(ch, storage.Id, &drive)
+			mc.NewDriveIndicatorActive(ch, storage.Id, &drive)
 		}
 	}
 

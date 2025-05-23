@@ -295,7 +295,7 @@ func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, me
 	)
 }
 
-func (mc *Collector) NewDriveInfo(ch chan<- prometheus.Metric, parent string, m *Drive) {
+func (mc *Collector) NewDriveInfo(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	var slot string
 
 	if m.PhysicalLocation != nil {
@@ -320,7 +320,7 @@ func (mc *Collector) NewDriveInfo(ch chan<- prometheus.Metric, parent string, m 
 	)
 }
 
-func (mc *Collector) NewDriveHealth(ch chan<- prometheus.Metric, parent string, m *Drive) {
+func (mc *Collector) NewDriveHealth(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	value := health2value(m.Status.Health)
 	if value < 0 {
 		return
@@ -335,7 +335,7 @@ func (mc *Collector) NewDriveHealth(ch chan<- prometheus.Metric, parent string, 
 	)
 }
 
-func (mc *Collector) NewDriveCapacity(ch chan<- prometheus.Metric, parent string, m *Drive) {
+func (mc *Collector) NewDriveCapacity(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.DriveCapacity,
 		prometheus.GaugeValue,
@@ -345,7 +345,7 @@ func (mc *Collector) NewDriveCapacity(ch chan<- prometheus.Metric, parent string
 	)
 }
 
-func (mc *Collector) NewDriveLifeLeft(ch chan<- prometheus.Metric, parent string, m *Drive) {
+func (mc *Collector) NewDriveLifeLeft(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.DriveLifeLeft,
 		prometheus.GaugeValue,
@@ -355,7 +355,7 @@ func (mc *Collector) NewDriveLifeLeft(ch chan<- prometheus.Metric, parent string
 	)
 }
 
-func (mc *Collector) NewDriveIndicatorActive(ch chan<- prometheus.Metric, parent string, m *Drive) {
+func (mc *Collector) NewDriveIndicatorActive(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	state := false
 	value := 0
 

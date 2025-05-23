@@ -250,12 +250,13 @@ func (t *Temperature) GetId(fallback int) string {
 	return strconv.Itoa(fallback)
 }
 
-type StorageController struct { // storage
+type Storage struct {
 	Id                 string     `json:"Id"`
 	Name               string     `json:"Name"`
 	Description        string     `json:"Description"`
 	Drives             OdataSlice `json:"Drives"`
 	Controllers        OdataSlice `json:"Controllers"`
+	Volumes            OdataSlice `json:"Volumes"`
 	Status             Status     `json:"Status"`
 	StorageControllers []struct { // deprecated
 		FirmwareVersion string  `json:"FirmwareVersion"`
@@ -267,7 +268,33 @@ type StorageController struct { // storage
 	}
 }
 
-type Drive struct {
+type StorageController struct {
+	Description     string  `json:"Description"`
+	FirmwareVersion string  `json:"FirmwareVersion"`
+	Id              string  `json:"Id"`
+	Manufacturer    string  `json:"Manufacturer"`
+	Model           string  `json:"Model"`
+	Name            string  `json:"Name"`
+	SpeedGbps       float64 `json:"SpeedGbps"`
+	SerialNumber    string  `json:"SerialNumber"`
+	CacheSummary    struct {
+		TotalCacheSizeMiB int `json:"TotalCacheSizeMiB"`
+	} `json:"CacheSummary"`
+	ControllerRates struct {
+		ConsistencyCheckRatePercent int `json:"ConsistencyCheckRatePercent"`
+		RebuildRatePercent          int `json:"RebuildRatePercent"`
+	} `json:"ControllerRates"`
+	PCIeInterface struct {
+		LanesInUse int `json:"LanesInUse"`
+		MaxLanes   int `json:"MaxLanes"`
+	} `json:"PCIeInterface"`
+	Status                       Status   `json:"Status"`
+	SupportedControllerProtocols []string `json:"SupportedControllerProtocols"`
+	SupportedDeviceProtocols     []string `json:"SupportedDeviceProtocols"`
+	SupportedRAIDTypes           []string `json:"SupportedRAIDTypes"`
+}
+
+type StorageDrive struct {
 	Id                      string  `json:"Id"`
 	Name                    string  `json:"Name"`
 	Description             string  `json:"Description"`
