@@ -497,6 +497,75 @@ func (mc *Collector) NewNetworkPortLinkUp(ch chan<- prometheus.Metric, parent st
 	)
 }
 
+func (mc *Collector) NewCpuInfo(ch chan<- prometheus.Metric, m *Processor) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.CpuInfo,
+		prometheus.UntypedValue,
+		1.0,
+		m.Id,
+		m.Socket,
+		strings.TrimSpace(m.Manufacturer),
+		strings.TrimSpace(m.Model),
+		m.InstructionSet,
+	)
+}
+
+func (mc *Collector) NewCpuMaxSpeed(ch chan<- prometheus.Metric, m *Processor) {
+	if m.MaxSpeedMHz == nil {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.CpuMaxSpeed,
+		prometheus.GaugeValue,
+		float64(*m.MaxSpeedMHz),
+		m.Id,
+	)
+}
+
+func (mc *Collector) NewCpuOperatingSpeed(ch chan<- prometheus.Metric, m *Processor) {
+	if m.OperatingSpeedMHz == nil {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.CpuOperatingSpeed,
+		prometheus.GaugeValue,
+		float64(*m.OperatingSpeedMHz),
+		m.Id,
+	)
+}
+
+func (mc *Collector) NewCpuHealth(ch chan<- prometheus.Metric, m *Processor) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.CpuHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewCpuTotalCores(ch chan<- prometheus.Metric, m *Processor) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.CpuTotalCores,
+		prometheus.GaugeValue,
+		float64(m.TotalCores),
+		m.Id,
+	)
+}
+
+func (mc *Collector) NewCpuTotalThreads(ch chan<- prometheus.Metric, m *Processor) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.CpuTotalThreads,
+		prometheus.GaugeValue,
+		float64(m.TotalThreads),
+		m.Id,
+	)
+}
+
 func (mc *Collector) NewDellBatteryRollupHealth(ch chan<- prometheus.Metric, m *DellSystem) {
 	value := health2value(m.BatteryRollupStatus)
 	if value < 0 {

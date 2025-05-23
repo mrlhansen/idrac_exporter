@@ -82,6 +82,14 @@ type Collector struct {
 	NetworkPortSpeed       *prometheus.Desc
 	NetworkPortLinkUp      *prometheus.Desc
 
+	// Processors
+	CpuInfo           *prometheus.Desc
+	CpuMaxSpeed       *prometheus.Desc
+	CpuOperatingSpeed *prometheus.Desc
+	CpuHealth         *prometheus.Desc
+	CpuTotalCores     *prometheus.Desc
+	CpuTotalThreads   *prometheus.Desc
+
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
@@ -290,6 +298,36 @@ func NewCollector() *Collector {
 			"Link status of network ports (up or down)",
 			[]string{"id", "interface_id", "status"}, nil,
 		),
+		CpuInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "info"),
+			"Information about the CPU",
+			[]string{"id", "socket", "manufacturer", "model", "arch"}, nil,
+		),
+		CpuMaxSpeed: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "max_speed_mhz"),
+			"Maximum speed of the CPU in Mhz",
+			[]string{"id"}, nil,
+		),
+		CpuOperatingSpeed: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "operating_speed_mhz"),
+			"Operating speed of the CPU in Mhz",
+			[]string{"id"}, nil,
+		),
+		CpuHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "health"),
+			"Health status of the CPU",
+			[]string{"id", "status"}, nil,
+		),
+		CpuTotalCores: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "total_cores"),
+			"Total number of CPU cores",
+			[]string{"id"}, nil,
+		),
+		CpuTotalThreads: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "total_threads"),
+			"Total number of CPU threads",
+			[]string{"id"}, nil,
+		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
@@ -350,6 +388,12 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.NetworkPortHealth
 	ch <- collector.NetworkPortSpeed
 	ch <- collector.NetworkPortLinkUp
+	ch <- collector.CpuInfo
+	ch <- collector.CpuMaxSpeed
+	ch <- collector.CpuOperatingSpeed
+	ch <- collector.CpuHealth
+	ch <- collector.CpuTotalCores
+	ch <- collector.CpuTotalThreads
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 }
@@ -428,6 +472,17 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshMemory(collector, ch)
+			if !ok {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
+	}
+
+	if config.Config.Collect.Processors {
+		wg.Add(1)
+		go func() {
+			ok := collector.client.RefreshProcessors(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}

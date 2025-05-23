@@ -91,6 +91,38 @@ type GroupResponse struct {
 	Members     OdataSlice `json:"Members"`
 }
 
+type Processor struct {
+	Description           string `json:"Description"`
+	Id                    string `json:"Id"`
+	InstructionSet        string `json:"InstructionSet"`
+	Manufacturer          string `json:"Manufacturer"`
+	MaxSpeedMHz           *int   `json:"MaxSpeedMHz"`
+	Model                 string `json:"Model"`
+	Name                  string `json:"Name"`
+	Family                string `json:"Family"`
+	OperatingSpeedMHz     *int   `json:"OperatingSpeedMHz"`
+	PartNumber            string `json:"PartNumber"`
+	ProcessorArchitecture string `json:"ProcessorArchitecture"`
+	ProcessorId           struct {
+		EffectiveFamily               string `json:"EffectiveFamily"`
+		EffectiveModel                string `json:"EffectiveModel"`
+		IdentificationRegisters       string `json:"IdentificationRegisters"`
+		MicrocodeInfo                 string `json:"MicrocodeInfo"`
+		ProtectedIdentificationNumber string `json:"ProtectedIdentificationNumber"`
+		Step                          string `json:"Step"`
+		VendorID                      string `json:"VendorId"`
+	} `json:"ProcessorId"`
+	ProcessorType     string  `json:"ProcessorType"`
+	Socket            string  `json:"Socket"`
+	Status            Status  `json:"Status"`
+	TDPWatts          float64 `json:"TDPWatts"`
+	TotalCores        int     `json:"TotalCores"`
+	TotalEnabledCores int     `json:"TotalEnabledCores"`
+	TotalThreads      int     `json:"TotalThreads"`
+	TurboState        string  `json:"TurboState"`
+	Version           string  `json:"Version"`
+}
+
 type ChassisResponse struct {
 	Name                    string `json:"Name"`
 	AssetTag                string `json:"AssetTag"`
@@ -218,13 +250,14 @@ func (t *Temperature) GetId(fallback int) string {
 	return strconv.Itoa(fallback)
 }
 
-type StorageController struct {
+type StorageController struct { // storage
 	Id                 string     `json:"Id"`
 	Name               string     `json:"Name"`
 	Description        string     `json:"Description"`
 	Drives             OdataSlice `json:"Drives"`
+	Controllers        OdataSlice `json:"Controllers"`
 	Status             Status     `json:"Status"`
-	StorageControllers []struct {
+	StorageControllers []struct { // deprecated
 		FirmwareVersion string  `json:"FirmwareVersion"`
 		Manufacturer    string  `json:"Manufacturer"`
 		Model           string  `json:"Model"`

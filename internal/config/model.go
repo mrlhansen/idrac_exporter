@@ -9,14 +9,15 @@ type HostConfig struct {
 }
 
 type CollectConfig struct {
-	System  bool `yaml:"system"`
-	Sensors bool `yaml:"sensors"`
-	Events  bool `yaml:"events"`
-	Power   bool `yaml:"power"`
-	Storage bool `yaml:"storage"`
-	Memory  bool `yaml:"memory"`
-	Network bool `yaml:"network"`
-	OEM     bool `yaml:"oem"`
+	System     bool `yaml:"system"`
+	Sensors    bool `yaml:"sensors"`
+	Events     bool `yaml:"events"`
+	Power      bool `yaml:"power"`
+	Storage    bool `yaml:"storage"`
+	Memory     bool `yaml:"memory"`
+	Network    bool `yaml:"network"`
+	Processors bool `yaml:"processors"`
+	OEM        bool `yaml:"oem"`
 }
 
 type EventConfig struct {

@@ -31,6 +31,7 @@ type Client struct {
 	memoryPath  string
 	networkPath string
 	eventPath   string
+	procPath    string
 }
 
 func NewClient(hostConfig *config.HostConfig) *Client {
@@ -95,6 +96,7 @@ func (client *Client) findAllEndpoints() bool {
 	client.networkPath = system.NetworkInterfaces.OdataId
 	client.thermalPath = chassis.Thermal.OdataId
 	client.powerPath = chassis.Power.OdataId
+	client.procPath = system.Processors.OdataId
 
 	// Vendor
 	m := strings.ToLower(system.Manufacturer)
@@ -215,6 +217,39 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	mc.NewSystemCpuCount(ch, &resp)
 	mc.NewSystemBiosInfo(ch, &resp)
 	mc.NewSystemMachineInfo(ch, &resp)
+
+	return true
+}
+
+func (client *Client) RefreshProcessors(mc *Collector, ch chan<- prometheus.Metric) bool {
+	group := GroupResponse{}
+	ok := client.redfish.Get(client.procPath, &group)
+	if !ok {
+		return false
+	}
+
+	for _, c := range group.Members.GetLinks() {
+		resp := Processor{}
+		ok = client.redfish.Get(c, &resp)
+		if !ok {
+			return false
+		}
+
+		if resp.ProcessorType != "CPU" {
+			continue
+		}
+
+		if resp.Status.State != StateEnabled {
+			continue
+		}
+
+		mc.NewCpuInfo(ch, &resp)
+		mc.NewCpuHealth(ch, &resp)
+		mc.NewCpuMaxSpeed(ch, &resp)
+		mc.NewCpuOperatingSpeed(ch, &resp)
+		mc.NewCpuTotalCores(ch, &resp)
+		mc.NewCpuTotalThreads(ch, &resp)
+	}
 
 	return true
 }
