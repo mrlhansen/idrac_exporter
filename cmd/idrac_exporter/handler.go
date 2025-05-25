@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/mrlhansen/idrac_exporter/internal/collector"
+	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"github.com/mrlhansen/idrac_exporter/internal/version"
 )
@@ -54,6 +55,11 @@ func resetHandler(rsp http.ResponseWriter, req *http.Request) {
 	log.Debug("Handling reset-request from %s for host %s", req.Host, target)
 
 	collector.Reset(target)
+}
+
+func discoverHandler(rsp http.ResponseWriter, req *http.Request) {
+	rsp.Header().Set(contentTypeHeader, "application/json")
+	fmt.Fprint(rsp, config.GetDiscover())
 }
 
 func metricsHandler(rsp http.ResponseWriter, req *http.Request) {

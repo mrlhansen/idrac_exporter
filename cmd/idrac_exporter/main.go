@@ -35,6 +35,7 @@ func main() {
 		log.SetLevel(log.LevelDebug)
 	}
 
+	http.HandleFunc("/discover", discoverHandler)
 	http.HandleFunc("/metrics", metricsHandler)
 	http.HandleFunc("/health", healthHandler)
 	http.HandleFunc("/reset", resetHandler)
