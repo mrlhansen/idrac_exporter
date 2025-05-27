@@ -41,7 +41,7 @@ There is also an official [Helm](https://helm.sh/docs/) chart for installing the
 
 ```sh
 helm repo add idrac-exporter https://mrlhansen.github.io/idrac_exporter
-helm install idrac-exporter/idrac-exporter idrac-exporter
+helm install idrac-exporter idrac-exporter/idrac-exporter
 ```
 
 ## Configuration
