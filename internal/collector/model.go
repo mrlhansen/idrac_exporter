@@ -92,13 +92,13 @@ type GroupResponse struct {
 }
 
 type Processor struct {
-	Description           string `json:"Description"`
 	Id                    string `json:"Id"`
+	Name                  string `json:"Name"`
+	Description           string `json:"Description"`
 	InstructionSet        string `json:"InstructionSet"`
 	Manufacturer          string `json:"Manufacturer"`
 	MaxSpeedMHz           *int   `json:"MaxSpeedMHz"`
 	Model                 string `json:"Model"`
-	Name                  string `json:"Name"`
 	Family                string `json:"Family"`
 	OperatingSpeedMHz     *int   `json:"OperatingSpeedMHz"`
 	PartNumber            string `json:"PartNumber"`
@@ -269,12 +269,12 @@ type Storage struct {
 }
 
 type StorageController struct {
+	Id              string  `json:"Id"`
+	Name            string  `json:"Name"`
 	Description     string  `json:"Description"`
 	FirmwareVersion string  `json:"FirmwareVersion"`
-	Id              string  `json:"Id"`
 	Manufacturer    string  `json:"Manufacturer"`
 	Model           string  `json:"Model"`
-	Name            string  `json:"Name"`
 	SpeedGbps       float64 `json:"SpeedGbps"`
 	SerialNumber    string  `json:"SerialNumber"`
 	CacheSummary    struct {
@@ -322,6 +322,29 @@ type StorageDrive struct {
 	CapacityMiB                       int     `json:"CapacityMiB"`
 	InterfaceType                     string  `json:"InterfaceType"`
 	SSDEnduranceUtilizationPercentage float64 `json:"SSDEnduranceUtilizationPercentage"`
+}
+
+type StorageVolume struct {
+	Id                 string   `json:"Id"`
+	Name               string   `json:"Name"`
+	Description        string   `json:"Description"`
+	BlockSizeBytes     int      `json:"BlockSizeBytes"`
+	CapacityBytes      int      `json:"CapacityBytes"`
+	OptimumIOSizeBytes int      `json:"OptimumIOSizeBytes"`
+	StripSizeBytes     int      `json:"StripSizeBytes"`
+	DisplayName        string   `json:"DisplayName"`
+	Encrypted          bool     `json:"Encrypted"`
+	EncryptionTypes    []string `json:"EncryptionTypes"`
+	MediaSpanCount     int      `json:"MediaSpanCount"`
+	RAIDType           string   `json:"RAIDType"`
+	ReadCachePolicy    string   `json:"ReadCachePolicy"`
+	Status             Status   `json:"Status"`
+	VolumeType         string   `json:"VolumeType"`
+	WriteCachePolicy   string   `json:"WriteCachePolicy"`
+	Links              struct {
+		DrivesCount int        `json:"Drives@odata.count"`
+		Drives      OdataSlice `json:"Drives"`
+	} `json:"Links"`
 }
 
 type Memory struct {
@@ -498,8 +521,8 @@ type PowerResponse struct {
 }
 
 type PowerControlUnit struct {
-	Name                string  `json:"Name"`
 	Id                  string  `json:"Id"`
+	Name                string  `json:"Name"`
 	PowerAllocatedWatts float64 `json:"PowerAllocatedWatts"`
 	PowerAvailableWatts float64 `json:"PowerAvailableWatts"`
 	PowerCapacityWatts  float64 `json:"PowerCapacityWatts"`

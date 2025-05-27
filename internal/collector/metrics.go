@@ -295,7 +295,31 @@ func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, me
 	)
 }
 
-func (mc *Collector) NewDriveInfo(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+func (mc *Collector) NewStorageInfo(ch chan<- prometheus.Metric, m *Storage) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageInfo,
+		prometheus.UntypedValue,
+		1.0,
+		m.Id,
+		m.Name,
+	)
+}
+
+func (mc *Collector) NewStorageHealth(ch chan<- prometheus.Metric, m *Storage) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewStorageDriveInfo(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	var slot string
 
 	if m.PhysicalLocation != nil {
@@ -305,7 +329,7 @@ func (mc *Collector) NewDriveInfo(ch chan<- prometheus.Metric, parent string, m 
 	}
 
 	ch <- prometheus.MustNewConstMetric(
-		mc.DriveInfo,
+		mc.StorageDriveInfo,
 		prometheus.UntypedValue,
 		1.0,
 		m.Id,
@@ -320,13 +344,13 @@ func (mc *Collector) NewDriveInfo(ch chan<- prometheus.Metric, parent string, m 
 	)
 }
 
-func (mc *Collector) NewDriveHealth(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+func (mc *Collector) NewStorageDriveHealth(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	value := health2value(m.Status.Health)
 	if value < 0 {
 		return
 	}
 	ch <- prometheus.MustNewConstMetric(
-		mc.DriveHealth,
+		mc.StorageDriveHealth,
 		prometheus.GaugeValue,
 		float64(value),
 		m.Id,
@@ -335,9 +359,9 @@ func (mc *Collector) NewDriveHealth(ch chan<- prometheus.Metric, parent string, 
 	)
 }
 
-func (mc *Collector) NewDriveCapacity(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+func (mc *Collector) NewStorageDriveCapacity(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	ch <- prometheus.MustNewConstMetric(
-		mc.DriveCapacity,
+		mc.StorageDriveCapacity,
 		prometheus.GaugeValue,
 		float64(m.CapacityBytes),
 		m.Id,
@@ -345,9 +369,12 @@ func (mc *Collector) NewDriveCapacity(ch chan<- prometheus.Metric, parent string
 	)
 }
 
-func (mc *Collector) NewDriveLifeLeft(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+func (mc *Collector) NewStorageDriveLifeLeft(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+	if m.PredictedLifeLeft == 0 && m.MediaType == "HDD" {
+		return
+	}
 	ch <- prometheus.MustNewConstMetric(
-		mc.DriveLifeLeft,
+		mc.StorageDriveLifeLeft,
 		prometheus.GaugeValue,
 		m.PredictedLifeLeft,
 		m.Id,
@@ -355,7 +382,7 @@ func (mc *Collector) NewDriveLifeLeft(ch chan<- prometheus.Metric, parent string
 	)
 }
 
-func (mc *Collector) NewDriveIndicatorActive(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+func (mc *Collector) NewStorageDriveIndicatorActive(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
 	state := false
 	value := 0
 
@@ -372,9 +399,106 @@ func (mc *Collector) NewDriveIndicatorActive(ch chan<- prometheus.Metric, parent
 	}
 
 	ch <- prometheus.MustNewConstMetric(
-		mc.DriveIndicatorActive,
+		mc.StorageDriveIndicatorActive,
 		prometheus.GaugeValue,
 		float64(value),
+		m.Id,
+		parent,
+	)
+}
+
+func (mc *Collector) NewStorageControllerInfo(ch chan<- prometheus.Metric, parent string, m *StorageController) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageControllerInfo,
+		prometheus.UntypedValue,
+		1.0,
+		m.Id,
+		parent,
+		m.Manufacturer,
+		m.Model,
+		m.Name,
+		m.FirmwareVersion,
+	)
+}
+
+func (mc *Collector) NewStorageControllerSpeed(ch chan<- prometheus.Metric, parent string, m *StorageController) {
+	if m.SpeedGbps == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageControllerSpeed,
+		prometheus.GaugeValue,
+		float64(1000*m.SpeedGbps),
+		m.Id,
+		parent,
+	)
+}
+
+func (mc *Collector) NewStorageControllerHealth(ch chan<- prometheus.Metric, parent string, m *StorageController) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageControllerHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		parent,
+		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewStorageVolumeInfo(ch chan<- prometheus.Metric, parent string, m *StorageVolume) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageVolumeInfo,
+		prometheus.UntypedValue,
+		1.0,
+		m.Id,
+		parent,
+		strings.TrimSpace(m.Name),
+		m.VolumeType,
+		m.RAIDType,
+	)
+}
+
+func (mc *Collector) NewStorageVolumeHealth(ch chan<- prometheus.Metric, parent string, m *StorageVolume) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageVolumeHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		parent,
+		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewStorageVolumeMediaSpan(ch chan<- prometheus.Metric, parent string, m *StorageVolume) {
+	value := m.MediaSpanCount
+	if value == 0 {
+		value = m.Links.DrivesCount
+	}
+	if value == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageVolumeMediaSpan,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		parent,
+	)
+}
+
+func (mc *Collector) NewStorageVolumeCapacity(ch chan<- prometheus.Metric, parent string, m *StorageVolume) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageVolumeCapacity,
+		prometheus.GaugeValue,
+		float64(m.CapacityBytes),
 		m.Id,
 		parent,
 	)

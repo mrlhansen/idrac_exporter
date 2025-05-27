@@ -449,6 +449,10 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			storage.Drives = grp.Members
 		}
 
+		mc.NewStorageInfo(ch, &storage)
+		mc.NewStorageHealth(ch, &storage)
+
+		// Drives
 		for _, c := range storage.Drives.GetLinks() {
 			drive := StorageDrive{}
 			ok = client.redfish.Get(c, &drive)
@@ -467,11 +471,59 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
 			}
 
-			mc.NewDriveInfo(ch, storage.Id, &drive)
-			mc.NewDriveHealth(ch, storage.Id, &drive)
-			mc.NewDriveCapacity(ch, storage.Id, &drive)
-			mc.NewDriveLifeLeft(ch, storage.Id, &drive)
-			mc.NewDriveIndicatorActive(ch, storage.Id, &drive)
+			mc.NewStorageDriveInfo(ch, storage.Id, &drive)
+			mc.NewStorageDriveHealth(ch, storage.Id, &drive)
+			mc.NewStorageDriveCapacity(ch, storage.Id, &drive)
+			mc.NewStorageDriveLifeLeft(ch, storage.Id, &drive)
+			mc.NewStorageDriveIndicatorActive(ch, storage.Id, &drive)
+		}
+
+		// iLO 4
+		if (client.vendor == HPE) && (client.version == 4) {
+			continue
+		}
+
+		// Controllers
+		if c := storage.Controllers.OdataId; len(c) > 0 {
+			grp := GroupResponse{}
+			ok = client.redfish.Get(c, &grp)
+			if !ok {
+				return false
+			}
+
+			for _, c := range grp.Members.GetLinks() {
+				ctlr := StorageController{}
+				ok = client.redfish.Get(c, &ctlr)
+				if !ok {
+					return false
+				}
+
+				mc.NewStorageControllerInfo(ch, storage.Id, &ctlr)
+				mc.NewStorageControllerSpeed(ch, storage.Id, &ctlr)
+				mc.NewStorageControllerHealth(ch, storage.Id, &ctlr)
+			}
+		}
+
+		// Volumes
+		if c := storage.Volumes.OdataId; len(c) > 0 {
+			grp := GroupResponse{}
+			ok = client.redfish.Get(c, &grp)
+			if !ok {
+				return false
+			}
+
+			for _, c := range grp.Members.GetLinks() {
+				vol := StorageVolume{}
+				ok = client.redfish.Get(c, &vol)
+				if !ok {
+					return false
+				}
+
+				mc.NewStorageVolumeInfo(ch, storage.Id, &vol)
+				mc.NewStorageVolumeHealth(ch, storage.Id, &vol)
+				mc.NewStorageVolumeCapacity(ch, storage.Id, &vol)
+				mc.NewStorageVolumeMediaSpan(ch, storage.Id, &vol)
+			}
 		}
 	}
 

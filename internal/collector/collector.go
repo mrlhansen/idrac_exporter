@@ -63,12 +63,21 @@ type Collector struct {
 	// System event log
 	EventLogEntry *prometheus.Desc
 
-	// Disk drives
-	DriveInfo            *prometheus.Desc
-	DriveHealth          *prometheus.Desc
-	DriveCapacity        *prometheus.Desc
-	DriveLifeLeft        *prometheus.Desc
-	DriveIndicatorActive *prometheus.Desc
+	// Storage
+	StorageInfo                 *prometheus.Desc
+	StorageHealth               *prometheus.Desc
+	StorageDriveInfo            *prometheus.Desc
+	StorageDriveHealth          *prometheus.Desc
+	StorageDriveCapacity        *prometheus.Desc
+	StorageDriveLifeLeft        *prometheus.Desc
+	StorageDriveIndicatorActive *prometheus.Desc
+	StorageControllerInfo       *prometheus.Desc
+	StorageControllerHealth     *prometheus.Desc
+	StorageControllerSpeed      *prometheus.Desc
+	StorageVolumeInfo           *prometheus.Desc
+	StorageVolumeHealth         *prometheus.Desc
+	StorageVolumeMediaSpan      *prometheus.Desc
+	StorageVolumeCapacity       *prometheus.Desc
 
 	// Memory modules
 	MemoryModuleInfo     *prometheus.Desc
@@ -233,30 +242,75 @@ func NewCollector() *Collector {
 			"Entry from the system event log",
 			[]string{"id", "message", "severity"}, nil,
 		),
-		DriveInfo: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "drive", "info"),
+		StorageInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage", "info"),
+			"Information about storage sub systems",
+			[]string{"id", "name"}, nil,
+		),
+		StorageHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage", "health"),
+			"Health status for storage sub systems",
+			[]string{"id", "status"}, nil,
+		),
+		StorageDriveInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_drive", "info"),
 			"Information about disk drives",
-			[]string{"id", "controller_id", "manufacturer", "mediatype", "model", "name", "protocol", "serial", "slot"}, nil,
+			[]string{"id", "storage_id", "manufacturer", "mediatype", "model", "name", "protocol", "serial", "slot"}, nil,
 		),
-		DriveHealth: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "drive", "health"),
+		StorageDriveHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_drive", "health"),
 			"Health status for disk drives",
-			[]string{"id", "controller_id", "status"}, nil,
+			[]string{"id", "storage_id", "status"}, nil,
 		),
-		DriveCapacity: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "drive", "capacity_bytes"),
+		StorageDriveCapacity: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_drive", "capacity_bytes"),
 			"Capacity of disk drives in bytes",
-			[]string{"id", "controller_id"}, nil,
+			[]string{"id", "storage_id"}, nil,
 		),
-		DriveLifeLeft: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "drive", "life_left_percent"),
+		StorageDriveLifeLeft: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_drive", "life_left_percent"),
 			"Predicted life left in percent",
-			[]string{"id", "controller_id"}, nil,
+			[]string{"id", "storage_id"}, nil,
 		),
-		DriveIndicatorActive: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "drive", "indicator_active"),
+		StorageDriveIndicatorActive: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_drive", "indicator_active"),
 			"State of the drive location indicator",
-			[]string{"id", "controller_id"}, nil,
+			[]string{"id", "storage_id"}, nil,
+		),
+		StorageControllerInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_controller", "info"),
+			"Information about storage controllers",
+			[]string{"id", "storage_id", "manufacturer", "model", "name", "firmware"}, nil,
+		),
+		StorageControllerHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_controller", "health"),
+			"Health status for storage controllers",
+			[]string{"id", "storage_id", "status"}, nil,
+		),
+		StorageControllerSpeed: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_controller", "speed_mbps"),
+			"Speed of storage controllers in Mbps",
+			[]string{"id", "storage_id"}, nil,
+		),
+		StorageVolumeInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_volume", "info"),
+			"Information about virtual volumes",
+			[]string{"id", "storage_id", "name", "volumetype", "raidtype"}, nil,
+		),
+		StorageVolumeHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_volume", "health"),
+			"Health status for virtual volumes",
+			[]string{"id", "storage_id", "status"}, nil,
+		),
+		StorageVolumeMediaSpan: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_volume", "media_span_count"),
+			"Number of media spanned by virtual volumes",
+			[]string{"id", "storage_id"}, nil,
+		),
+		StorageVolumeCapacity: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_volume", "capacity_bytes"),
+			"Capacity of virtual volumes in bytes",
+			[]string{"id", "storage_id"}, nil,
 		),
 		MemoryModuleInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "info"),
@@ -375,11 +429,20 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.PowerControlAvgConsumedWatts
 	ch <- collector.PowerControlInterval
 	ch <- collector.EventLogEntry
-	ch <- collector.DriveInfo
-	ch <- collector.DriveHealth
-	ch <- collector.DriveCapacity
-	ch <- collector.DriveLifeLeft
-	ch <- collector.DriveIndicatorActive
+	ch <- collector.StorageInfo
+	ch <- collector.StorageHealth
+	ch <- collector.StorageDriveInfo
+	ch <- collector.StorageDriveHealth
+	ch <- collector.StorageDriveCapacity
+	ch <- collector.StorageDriveLifeLeft
+	ch <- collector.StorageDriveIndicatorActive
+	ch <- collector.StorageControllerInfo
+	ch <- collector.StorageControllerHealth
+	ch <- collector.StorageControllerSpeed
+	ch <- collector.StorageVolumeInfo
+	ch <- collector.StorageVolumeHealth
+	ch <- collector.StorageVolumeMediaSpan
+	ch <- collector.StorageVolumeCapacity
 	ch <- collector.MemoryModuleInfo
 	ch <- collector.MemoryModuleHealth
 	ch <- collector.MemoryModuleCapacity
