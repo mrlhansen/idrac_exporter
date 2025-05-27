@@ -44,11 +44,13 @@ func getEnvUint(env string, val *uint) {
 func readConfigEnv() {
 	var username string
 	var password string
+	var scheme string
 
 	getEnvString("CONFIG_ADDRESS", &Config.Address)
 	getEnvString("CONFIG_METRICS_PREFIX", &Config.MetricsPrefix)
 	getEnvString("CONFIG_DEFAULT_USERNAME", &username)
 	getEnvString("CONFIG_DEFAULT_PASSWORD", &password)
+	getEnvString("CONFIG_DEFAULT_SCHEME", &scheme)
 	getEnvString("CONFIG_EVENTS_SEVERITY", &Config.Event.Severity)
 	getEnvString("CONFIG_EVENTS_MAXAGE", &Config.Event.MaxAge)
 	getEnvString("CONFIG_TLS_CERT_FILE", &Config.TLS.CertFile)
@@ -80,6 +82,11 @@ func readConfigEnv() {
 
 	if len(password) > 0 {
 		def.Password = password
+		ok = true
+	}
+
+	if len(scheme) > 0 {
+		def.Scheme = scheme
 		ok = true
 	}
 

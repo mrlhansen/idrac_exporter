@@ -24,6 +24,7 @@ func GetDiscover() string {
 	b, err := json.Marshal(list)
 	if err != nil {
 		log.Printf("failed to marshal json: %v", err)
+		return "[]"
 	}
 
 	return string(b)

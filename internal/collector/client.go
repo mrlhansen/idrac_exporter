@@ -34,12 +34,13 @@ type Client struct {
 	procPath    string
 }
 
-func NewClient(hostConfig *config.HostConfig) *Client {
+func NewClient(h *config.HostConfig) *Client {
 	client := &Client{
 		redfish: NewRedfish(
-			hostConfig.Hostname,
-			hostConfig.Username,
-			hostConfig.Password,
+			h.Scheme,
+			h.Hostname,
+			h.Username,
+			h.Password,
 		),
 	}
 

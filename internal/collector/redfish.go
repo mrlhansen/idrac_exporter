@@ -18,6 +18,7 @@ import (
 
 type Redfish struct {
 	http     *http.Client
+	baseurl  string
 	hostname string
 	username string
 	password string
@@ -30,8 +31,9 @@ type Redfish struct {
 
 const redfishRootPath = "/redfish/v1"
 
-func NewRedfish(hostname, username, password string) *Redfish {
+func NewRedfish(scheme, hostname, username, password string) *Redfish {
 	return &Redfish{
+		baseurl:  fmt.Sprintf("%s://%s", scheme, hostname),
 		hostname: hostname,
 		username: username,
 		password: password,
@@ -46,7 +48,7 @@ func NewRedfish(hostname, username, password string) *Redfish {
 }
 
 func (r *Redfish) CreateSession() bool {
-	url := fmt.Sprintf("https://%s/redfish/v1/SessionService/Sessions", r.hostname)
+	url := fmt.Sprintf("%s/redfish/v1/SessionService/Sessions", r.baseurl)
 	session := Session{
 		Username: r.username,
 		Password: r.password,
@@ -93,7 +95,7 @@ func (r *Redfish) DeleteSession() bool {
 		return true
 	}
 
-	url := fmt.Sprintf("https://%s%s", r.hostname, r.session.id)
+	url := fmt.Sprintf("%s%s", r.baseurl, r.session.id)
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return false
@@ -142,7 +144,7 @@ func (r *Redfish) RefreshSession() bool {
 		return ok
 	}
 
-	url := fmt.Sprintf("https://%s%s", r.hostname, r.session.id)
+	url := fmt.Sprintf("%s%s", r.baseurl, r.session.id)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return false
@@ -178,7 +180,7 @@ func (r *Redfish) Get(path string, res any) bool {
 		return false
 	}
 
-	url := fmt.Sprintf("https://%s%s", r.hostname, path)
+	url := fmt.Sprintf("%s%s", r.baseurl, path)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return false
@@ -230,7 +232,7 @@ func (r *Redfish) Exists(path string) bool {
 		return false
 	}
 
-	url := fmt.Sprintf("https://%s%s", r.hostname, path)
+	url := fmt.Sprintf("%s%s", r.baseurl, path)
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
 		return false

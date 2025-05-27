@@ -38,7 +38,9 @@ tls:
 
 # The hosts section is used to define login information for the different targets.
 # Hosts can be referenced either via their IP address or their hostname, as long
-# as it matches the "target" parameter when scraping metrics.
+# as it matches the "target" parameter when scraping the metrics. Optionally you
+# can also specify a scheme (http or https) for accessing the Redfish API, which
+# automatically defaults to https.
 #
 # When the "target" does not match any host, the exporter will attempt to use the
 # login information under "default".
@@ -52,6 +54,7 @@ hosts:
   192.168.1.1:
     username: user
     password: pass
+    scheme: http
   host01.example.com:
     username: user
     password: pass

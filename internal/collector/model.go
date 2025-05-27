@@ -255,8 +255,8 @@ type Storage struct {
 	Name               string     `json:"Name"`
 	Description        string     `json:"Description"`
 	Drives             OdataSlice `json:"Drives"`
-	Controllers        OdataSlice `json:"Controllers"`
-	Volumes            OdataSlice `json:"Volumes"`
+	Controllers        Odata      `json:"Controllers"`
+	Volumes            Odata      `json:"Volumes"`
 	Status             Status     `json:"Status"`
 	StorageControllers []struct { // deprecated
 		FirmwareVersion string  `json:"FirmwareVersion"`

@@ -27,6 +27,7 @@ func (c *RootConfig) GetHostCfg(target string) *HostConfig {
 		}
 		hostCfg = &HostConfig{
 			Hostname: target,
+			Scheme:   def.Scheme,
 			Username: def.Username,
 			Password: def.Password,
 		}
@@ -94,6 +95,15 @@ func ReadConfig(filename string) {
 		if v.Password == "" {
 			log.Fatal("Invalid configuration: missing password for host: %s", k)
 		}
+
+		switch v.Scheme {
+		case "":
+			v.Scheme = "https"
+		case "http", "https":
+		default:
+			log.Fatal("Invalid configuration: invalid scheme for host: %s", k)
+		}
+
 		v.Hostname = k
 	}
 
