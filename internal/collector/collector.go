@@ -92,12 +92,13 @@ type Collector struct {
 	NetworkPortLinkUp      *prometheus.Desc
 
 	// Processors
-	CpuInfo           *prometheus.Desc
-	CpuMaxSpeed       *prometheus.Desc
-	CpuOperatingSpeed *prometheus.Desc
-	CpuHealth         *prometheus.Desc
-	CpuTotalCores     *prometheus.Desc
-	CpuTotalThreads   *prometheus.Desc
+	CpuInfo         *prometheus.Desc
+	CpuHealth       *prometheus.Desc
+	CpuVoltage      *prometheus.Desc
+	CpuMaxSpeed     *prometheus.Desc
+	CpuCurrentSpeed *prometheus.Desc
+	CpuTotalCores   *prometheus.Desc
+	CpuTotalThreads *prometheus.Desc
 
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
@@ -357,20 +358,25 @@ func NewCollector() *Collector {
 			"Information about the CPU",
 			[]string{"id", "socket", "manufacturer", "model", "arch"}, nil,
 		),
+		CpuHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "health"),
+			"Health status of the CPU",
+			[]string{"id", "status"}, nil,
+		),
+		CpuVoltage: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "voltage"),
+			"Current voltage of the CPU",
+			[]string{"id"}, nil,
+		),
 		CpuMaxSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "max_speed_mhz"),
 			"Maximum speed of the CPU in Mhz",
 			[]string{"id"}, nil,
 		),
-		CpuOperatingSpeed: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "cpu", "operating_speed_mhz"),
-			"Operating speed of the CPU in Mhz",
+		CpuCurrentSpeed: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "cpu", "current_speed_mhz"),
+			"Current speed of the CPU in Mhz",
 			[]string{"id"}, nil,
-		),
-		CpuHealth: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "cpu", "health"),
-			"Health status of the CPU",
-			[]string{"id", "status"}, nil,
 		),
 		CpuTotalCores: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "total_cores"),
@@ -452,9 +458,10 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.NetworkPortSpeed
 	ch <- collector.NetworkPortLinkUp
 	ch <- collector.CpuInfo
-	ch <- collector.CpuMaxSpeed
-	ch <- collector.CpuOperatingSpeed
 	ch <- collector.CpuHealth
+	ch <- collector.CpuVoltage
+	ch <- collector.CpuMaxSpeed
+	ch <- collector.CpuCurrentSpeed
 	ch <- collector.CpuTotalCores
 	ch <- collector.CpuTotalThreads
 	ch <- collector.DellBatteryRollupHealth

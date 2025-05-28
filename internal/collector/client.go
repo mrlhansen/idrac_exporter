@@ -246,8 +246,9 @@ func (client *Client) RefreshProcessors(mc *Collector, ch chan<- prometheus.Metr
 
 		mc.NewCpuInfo(ch, &resp)
 		mc.NewCpuHealth(ch, &resp)
+		mc.NewCpuVoltage(ch, &resp)
 		mc.NewCpuMaxSpeed(ch, &resp)
-		mc.NewCpuOperatingSpeed(ch, &resp)
+		mc.NewCpuCurrentSpeed(ch, &resp)
 		mc.NewCpuTotalCores(ch, &resp)
 		mc.NewCpuTotalThreads(ch, &resp)
 	}

@@ -121,6 +121,19 @@ type Processor struct {
 	TotalThreads      int     `json:"TotalThreads"`
 	TurboState        string  `json:"TurboState"`
 	Version           string  `json:"Version"`
+	Oem               struct {
+		Lenovo *struct {
+			CurrentClockSpeedMHz int `json:"CurrentClockSpeedMHz"`
+		} `json:"Lenovo"`
+		Hpe *struct {
+			VoltageVoltsX10 int `json:"VoltageVoltsX10"`
+		} `json:"Hpe"`
+		Dell *struct {
+			DellProcessor struct {
+				Volts string `json:"Volts"`
+			} `json:"DellProcessor"`
+		} `json:"Dell"`
+	} `json:"Oem"`
 }
 
 type ChassisResponse struct {
@@ -265,7 +278,18 @@ type Storage struct {
 		Name            string  `json:"Name"`
 		SpeedGbps       float64 `json:"SpeedGbps"`
 		Status          Status  `json:"Status"`
-	}
+	} `json:"StorageControllers"`
+	Oem struct {
+		Dell *struct {
+			DellControllerBattery struct {
+				Id            string `json:"Id"`
+				Name          string `json:"Name"`
+				Description   string `json:"Description"`
+				PrimaryStatus string `json:"PrimaryStatus"`
+				RAIDState     string `json:"RAIDState"`
+			} `json:"DellControllerBattery"`
+		} `json:"Dell"`
+	} `json:"Oem"`
 }
 
 type StorageController struct {

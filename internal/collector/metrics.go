@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -622,6 +623,10 @@ func (mc *Collector) NewNetworkPortLinkUp(ch chan<- prometheus.Metric, parent st
 }
 
 func (mc *Collector) NewCpuInfo(ch chan<- prometheus.Metric, m *Processor) {
+	arch := m.InstructionSet
+	if arch == "" {
+		arch = m.ProcessorArchitecture
+	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.CpuInfo,
 		prometheus.UntypedValue,
@@ -630,7 +635,29 @@ func (mc *Collector) NewCpuInfo(ch chan<- prometheus.Metric, m *Processor) {
 		m.Socket,
 		strings.TrimSpace(m.Manufacturer),
 		strings.TrimSpace(m.Model),
-		m.InstructionSet,
+		arch,
+	)
+}
+
+func (mc *Collector) NewCpuVoltage(ch chan<- prometheus.Metric, m *Processor) {
+	value := -1.0
+	if m.Oem.Dell != nil {
+		volt, err := strconv.ParseFloat(m.Oem.Dell.DellProcessor.Volts, 64)
+		if err != nil {
+			return
+		}
+		value = volt
+	} else if m.Oem.Hpe != nil {
+		value = 0.1 * float64(m.Oem.Hpe.VoltageVoltsX10)
+	}
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.CpuVoltage,
+		prometheus.GaugeValue,
+		value,
+		m.Id,
 	)
 }
 
@@ -646,14 +673,20 @@ func (mc *Collector) NewCpuMaxSpeed(ch chan<- prometheus.Metric, m *Processor) {
 	)
 }
 
-func (mc *Collector) NewCpuOperatingSpeed(ch chan<- prometheus.Metric, m *Processor) {
-	if m.OperatingSpeedMHz == nil {
+func (mc *Collector) NewCpuCurrentSpeed(ch chan<- prometheus.Metric, m *Processor) {
+	value := -1
+	if m.OperatingSpeedMHz != nil {
+		value = *m.OperatingSpeedMHz
+	} else if m.Oem.Lenovo != nil {
+		value = m.Oem.Lenovo.CurrentClockSpeedMHz
+	}
+	if value < 0 {
 		return
 	}
 	ch <- prometheus.MustNewConstMetric(
-		mc.CpuOperatingSpeed,
+		mc.CpuCurrentSpeed,
 		prometheus.GaugeValue,
-		float64(*m.OperatingSpeedMHz),
+		float64(value),
 		m.Id,
 	)
 }
