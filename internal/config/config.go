@@ -139,6 +139,6 @@ func ReadConfig(filename string) {
 		Config.Collect.Memory = true
 		Config.Collect.Network = true
 		Config.Collect.Processors = true
-		Config.Collect.OEM = true
+		Config.Collect.Extra = true
 	}
 }

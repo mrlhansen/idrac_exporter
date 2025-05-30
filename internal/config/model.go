@@ -19,7 +19,7 @@ type CollectConfig struct {
 	Memory     bool `yaml:"memory"`
 	Network    bool `yaml:"network"`
 	Processors bool `yaml:"processors"`
-	OEM        bool `yaml:"oem"`
+	Extra      bool `yaml:"extra"`
 }
 
 type EventConfig struct {

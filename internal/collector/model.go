@@ -624,7 +624,9 @@ type EventLogResponse struct {
 	} `json:"Members"`
 }
 
-// Dell OEM: /redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1
+// Dell OEM
+const DellSystemPath string = "/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1"
+
 type DellSystem struct {
 	BIOSReleaseDate                    string `json:"BIOSReleaseDate"`
 	BatteryRollupStatus                string `json:"BatteryRollupStatus"`

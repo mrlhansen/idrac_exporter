@@ -569,7 +569,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if collect.OEM {
+	if collect.Extra {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshDell(collector, ch)

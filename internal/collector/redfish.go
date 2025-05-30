@@ -253,7 +253,7 @@ func (r *Redfish) Exists(path string) bool {
 		return false
 	}
 
-	if resp.StatusCode == http.StatusNotFound {
+	if resp.StatusCode >= 400 && resp.StatusCode <= 499 {
 		return false
 	}
 

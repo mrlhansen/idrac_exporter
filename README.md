@@ -197,8 +197,8 @@ idrac_network_port_link_up{id,interface_id,status}
 idrac_network_port_speed_mbps{id,interface_id}
 ```
 
-### OEM
-These metrics are OEM specific and thus only available on the supported systems. At the moment only two Dell specific metrics are exported.
+### Extra
+These metrics do not belong anywhere else and they might be OEM specific. At the moment only two Dell specific metrics are exported.
 
 ```text
 idrac_dell_battery_rollup_health{status}
@@ -242,7 +242,7 @@ scrape_configs:
         replacement: exporter:9348
 ```
 
-You can also use the service discovery mechanism in Promtheus to automatically discover all the targets configured in the configuration file for the exporter. The configuration is quite similar, but instead of static targets we query the discovery endpoint.
+You can also use the service discovery mechanism in Prometheus to automatically discover all the targets configured in the configuration file for the exporter. The configuration is quite similar, but instead of static targets we query the discovery endpoint.
 
 ```yaml
 scrape_configs:

@@ -32,6 +32,7 @@ type Client struct {
 	networkPath string
 	eventPath   string
 	procPath    string
+	dellPath    string
 }
 
 func NewClient(h *config.HostConfig) *Client {
@@ -134,6 +135,15 @@ func (client *Client) findAllEndpoints() bool {
 			client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
 		case FUJITSU:
 			client.eventPath = "/redfish/v1/Managers/iRMC/LogServices/SystemEventLog/Entries"
+		}
+	}
+
+	// Dell OEM
+	if config.Config.Collect.Extra {
+		if client.vendor == DELL {
+			if client.redfish.Exists(DellSystemPath) {
+				client.dellPath = DellSystemPath
+			}
 		}
 	}
 
@@ -569,12 +579,12 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 }
 
 func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bool {
-	if client.vendor != DELL {
+	if client.dellPath == "" {
 		return true
 	}
 
 	resp := DellSystem{}
-	ok := client.redfish.Get("/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1", &resp)
+	ok := client.redfish.Get(client.dellPath, &resp)
 	if !ok {
 		return false
 	}

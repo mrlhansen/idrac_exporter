@@ -73,7 +73,7 @@ metrics:
   storage: false     # CONFIG_METRICS_STORAGE=false
   memory: false      # CONFIG_METRICS_MEMORY=false
   network: false     # CONFIG_METRICS_NETWORK=false
-  oem: false         # CONFIG_METRICS_OEM=false
+  extra: false       # CONFIG_METRICS_EXTRA=false
 
 # The events section is used for filtering events when the "events" metrics group
 # is enabled. Events can be filtered based on minimum severity and maximum age.

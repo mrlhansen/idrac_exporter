@@ -5,14 +5,7 @@ hosts:
     username: root
     password: calvin
 metrics:
-  processors: true
-  system: true
-  sensors: true
-  power: true
-  events: true
-  storage: true
-  memory: true
-  network: true
+  all: true
 events:
   severity: warning
   maxage: 7d
