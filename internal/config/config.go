@@ -128,4 +128,17 @@ func ReadConfig(filename string) {
 		log.Fatal("Invalid configuration: unable to parse duration: %v", err)
 	}
 	Config.Event.MaxAgeSeconds = t.Seconds()
+
+	// metrics
+	if Config.Collect.All {
+		Config.Collect.System = true
+		Config.Collect.Sensors = true
+		Config.Collect.Events = true
+		Config.Collect.Power = true
+		Config.Collect.Storage = true
+		Config.Collect.Memory = true
+		Config.Collect.Network = true
+		Config.Collect.Processors = true
+		Config.Collect.OEM = true
+	}
 }

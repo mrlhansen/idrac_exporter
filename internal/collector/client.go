@@ -452,6 +452,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 
 		mc.NewStorageInfo(ch, &storage)
 		mc.NewStorageHealth(ch, &storage)
+		mc.NewDellControllerBatteryHealth(ch, &storage)
 
 		// Drives
 		for _, c := range storage.Drives.GetLinks() {

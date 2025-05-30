@@ -103,6 +103,7 @@ type Collector struct {
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
+	DellControllerBatteryHealth   *prometheus.Desc
 }
 
 func NewCollector() *Collector {
@@ -398,6 +399,11 @@ func NewCollector() *Collector {
 			"Estimated system airflow in cubic feet per minute",
 			nil, nil,
 		),
+		DellControllerBatteryHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "dell", "controller_battery_health"),
+			"Health status of storage controller battery",
+			[]string{"id", "storage_id", "name", "status"}, nil,
+		),
 	}
 
 	collector.builder = new(strings.Builder)
@@ -466,13 +472,16 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.CpuTotalThreads
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
+	ch <- collector.DellControllerBatteryHealth
 }
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	var wg sync.WaitGroup
-	collector.client.redfish.RefreshSession()
 
-	if config.Config.Collect.System {
+	collector.client.redfish.RefreshSession()
+	collect := &config.Config.Collect
+
+	if collect.System {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshSystem(collector, ch)
@@ -483,7 +492,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.Sensors {
+	if collect.Sensors {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshSensors(collector, ch)
@@ -494,7 +503,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.Power {
+	if collect.Power {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshPower(collector, ch)
@@ -505,7 +514,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.Network {
+	if collect.Network {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshNetwork(collector, ch)
@@ -516,7 +525,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.Events {
+	if collect.Events {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshEventLog(collector, ch)
@@ -527,7 +536,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.Storage {
+	if collect.Storage {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshStorage(collector, ch)
@@ -538,7 +547,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.Memory {
+	if collect.Memory {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshMemory(collector, ch)
@@ -549,7 +558,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.Processors {
+	if collect.Processors {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshProcessors(collector, ch)
@@ -560,7 +569,7 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if config.Config.Collect.OEM {
+	if collect.OEM {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshDell(collector, ch)

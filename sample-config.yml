@@ -61,17 +61,19 @@ hosts:
 
 # The metrics section is used to select different groups of metrics.
 # See the README file for a detailed list of metrics in each group.
-# Each section can also be enabled using an environment variable.
+# Each section can also be enabled using the shown environment variable.
+# The group "all" overrides all other groups and enables all metrics.
 metrics:
-  processors: true  # CONFIG_METRICS_PROCESSORS=true
-  system: true      # CONFIG_METRICS_SYSTEM=true
-  sensors: true     # CONFIG_METRICS_SENSORS=true
-  power: false      # CONFIG_METRICS_POWER=false
-  events: false     # CONFIG_METRICS_EVENTS=false
-  storage: false    # CONFIG_METRICS_STORAGE=false
-  memory: false     # CONFIG_METRICS_MEMORY=false
-  network: false    # CONFIG_METRICS_NETWORK=false
-  oem: false        # CONFIG_METRICS_OEM=false
+  all: false         # CONFIG_METRICS_ALL=false
+  processors: false  # CONFIG_METRICS_PROCESSORS=false
+  system: false      # CONFIG_METRICS_SYSTEM=false
+  sensors: false     # CONFIG_METRICS_SENSORS=false
+  power: false       # CONFIG_METRICS_POWER=false
+  events: false      # CONFIG_METRICS_EVENTS=false
+  storage: false     # CONFIG_METRICS_STORAGE=false
+  memory: false      # CONFIG_METRICS_MEMORY=false
+  network: false     # CONFIG_METRICS_NETWORK=false
+  oem: false         # CONFIG_METRICS_OEM=false
 
 # The events section is used for filtering events when the "events" metrics group
 # is enabled. Events can be filtered based on minimum severity and maximum age.

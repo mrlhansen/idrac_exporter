@@ -747,3 +747,22 @@ func (mc *Collector) NewDellEstimatedSystemAirflowCFM(ch chan<- prometheus.Metri
 		float64(value),
 	)
 }
+
+func (mc *Collector) NewDellControllerBatteryHealth(ch chan<- prometheus.Metric, m *Storage) {
+	if m.Oem.Dell == nil {
+		return
+	}
+	value := health2value(m.Oem.Dell.DellControllerBattery.PrimaryStatus)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.DellControllerBatteryHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Oem.Dell.DellControllerBattery.Id,
+		m.Id,
+		m.Oem.Dell.DellControllerBattery.Name,
+		m.Oem.Dell.DellControllerBattery.PrimaryStatus,
+	)
+}

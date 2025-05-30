@@ -10,6 +10,7 @@ type HostConfig struct {
 }
 
 type CollectConfig struct {
+	All        bool `yaml:"all"`
 	System     bool `yaml:"system"`
 	Sensors    bool `yaml:"sensors"`
 	Events     bool `yaml:"events"`

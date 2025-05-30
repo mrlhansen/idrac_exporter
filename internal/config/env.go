@@ -60,6 +60,7 @@ func readConfigEnv() {
 	getEnvUint("CONFIG_TIMEOUT", &Config.Timeout)
 
 	getEnvBool("CONFIG_TLS_ENABLED", &Config.TLS.Enabled)
+	getEnvBool("CONFIG_METRICS_ALL", &Config.Collect.All)
 	getEnvBool("CONFIG_METRICS_SYSTEM", &Config.Collect.System)
 	getEnvBool("CONFIG_METRICS_SENSORS", &Config.Collect.Sensors)
 	getEnvBool("CONFIG_METRICS_EVENTS", &Config.Collect.Events)
