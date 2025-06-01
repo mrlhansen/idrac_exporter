@@ -89,13 +89,7 @@ idracConfig: |
       username: USERNAME
       password: PASSWORD
   metrics:
-    system: true
-    sensors: true
-    power: true
-    events: true
-    storage: true
-    memory: true
-    network: true
+    all: true
 
 env: []
 # - name: CONFIG_DEFAULT_USERNAME

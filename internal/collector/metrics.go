@@ -217,6 +217,9 @@ func (mc *Collector) NewPowerSupplyCapacityWatts(ch chan<- prometheus.Metric, va
 }
 
 func (mc *Collector) NewPowerSupplyEfficiencyPercent(ch chan<- prometheus.Metric, value float64, id string) {
+	if value == 0 {
+		return
+	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.PowerSupplyEfficiencyPercent,
 		prometheus.GaugeValue,

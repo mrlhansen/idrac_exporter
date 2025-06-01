@@ -1116,7 +1116,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "count(idrac_drive_info{instance=\"$instance\", job=~\"$job\"})",
+          "expr": "count(idrac_storage_drive_info{instance=\"$instance\", job=~\"$job\"})",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -1518,7 +1518,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_drive_info{job=~\"$job\", instance=~\"$instance\"}",
+          "expr": "idrac_storage_drive_info{job=~\"$job\", instance=~\"$instance\"}",
           "format": "table",
           "instant": false,
           "range": true,
@@ -1530,7 +1530,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_drive_health{job=~\"$job\", instance=~\"$instance\"}",
+          "expr": "idrac_storage_drive_health{job=~\"$job\", instance=~\"$instance\"}",
           "format": "table",
           "hide": false,
           "instant": false,
@@ -1543,7 +1543,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_drive_capacity_bytes{job=~\"$job\", instance=~\"$instance\"}",
+          "expr": "idrac_storage_drive_capacity_bytes{job=~\"$job\", instance=~\"$instance\"}",
           "format": "table",
           "hide": false,
           "instant": false,
