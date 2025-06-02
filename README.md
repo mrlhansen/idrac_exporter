@@ -129,11 +129,11 @@ idrac_power_control_interval_in_minutes{id,name}
 These metrics include information about the CPUs in the system.
 
 ```text
-idrac_cpu_health{id,status}
 idrac_cpu_info{arch,id,manufacturer,model,socket}
+idrac_cpu_health{id,status}
 idrac_cpu_voltage{id}
 idrac_cpu_max_speed_mhz{id}
-idrac_cpu_operating_speed_mhz{id}
+idrac_cpu_current_speed_mhz{id}
 idrac_cpu_total_cores{id}
 idrac_cpu_total_threads{id}
 ```
