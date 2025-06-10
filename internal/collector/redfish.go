@@ -64,6 +64,12 @@ func (r *Redfish) CreateSession() bool {
 		return false
 	}
 
+	// iDRAC 8 (see #125 and #132)
+	if resp.StatusCode == http.StatusMethodNotAllowed {
+		r.session.disabled = true
+		return false
+	}
+
 	if resp.StatusCode != http.StatusCreated {
 		log.Error("Unexpected status code from %q: %s", url, resp.Status)
 		return false
