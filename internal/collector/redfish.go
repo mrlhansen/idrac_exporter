@@ -56,18 +56,32 @@ func (r *Redfish) CreateSession() bool {
 	body, _ := json.Marshal(&session)
 
 	resp, err := r.http.Post(url, "application/json", bytes.NewBuffer(body))
-	if resp != nil {
-		defer resp.Body.Close()
-	}
+	defer func() {
+		if resp != nil {
+			resp.Body.Close()
+		}
+	}()
 	if err != nil {
 		log.Error("Failed to query %q: %v", url, err)
 		return false
 	}
 
-	// iDRAC 8 (see #125 and #132)
+	// iDRAC 8
+	// https://dl.dell.com/topicspdf/idrac9-lifecycle-controller-v4x-series_api-guide_en-us.pdf
+	// mentions that old URL for session management was /redfish/v1/Sessions and
+	// the new URL is /redfish/v1/SessionService/Sessions which implies earlier iDRAC
+	// versions used the former.
 	if resp.StatusCode == http.StatusMethodNotAllowed {
-		r.session.disabled = true
-		return false
+		if resp != nil {
+			resp.Body.Close()
+		}
+
+		url = fmt.Sprintf("%s/redfish/v1/Sessions", r.baseurl)
+		resp, err = r.http.Post(url, "application/json", bytes.NewBuffer(body))
+		if err != nil {
+			r.session.disabled = true
+			return false
+		}
 	}
 
 	if resp.StatusCode != http.StatusCreated {
