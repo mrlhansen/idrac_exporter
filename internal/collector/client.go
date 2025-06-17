@@ -159,6 +159,12 @@ func (client *Client) findAllEndpoints() bool {
 			client.storagePath = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
 			client.eventPath = ""
 			client.version = 4
+		} else if strings.Contains(root.Name, "HPE RESTful") {
+			// iLO 5
+			client.memoryPath = "/redfish/v1/Systems/1/Memory/"
+			client.storagePath = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
+			client.eventPath = ""
+			client.version = 5
 		}
 	}
 
@@ -450,8 +456,8 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			return false
 		}
 
-		// iLO 4
-		if (client.vendor == HPE) && (client.version == 4) {
+		// iLO 4 || iLO 5
+		if (client.vendor == HPE) && (client.version == 4 || client.version == 5) {
 			grp := GroupResponse{}
 			ok = client.redfish.Get(c+"DiskDrives/", &grp)
 			if !ok {
@@ -476,8 +482,8 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				continue
 			}
 
-			// iLO 4
-			if (client.vendor == HPE) && (client.version == 4) {
+			// iLO 4 || iLO 5
+			if (client.vendor == HPE) && (client.version == 4 || client.version == 5) {
 				drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
 				drive.Protocol = drive.InterfaceType
 				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
@@ -490,8 +496,8 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			mc.NewStorageDriveIndicatorActive(ch, storage.Id, &drive)
 		}
 
-		// iLO 4
-		if (client.vendor == HPE) && (client.version == 4) {
+		// iLO 4 || iLO 5
+		if (client.vendor == HPE) && (client.version == 4 || client.version == 5) {
 			continue
 		}
 
@@ -560,8 +566,8 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 			continue
 		}
 
-		// iLO 4
-		if (client.vendor == HPE) && (client.version == 4) {
+		// iLO 4 || iLO 5
+		if (client.vendor == HPE) && (client.version == 4 || client.version == 5) {
 			m.Manufacturer = strings.TrimSpace(m.Manufacturer)
 			m.RankCount = m.Rank
 			m.MemoryDeviceType = m.DIMMType
