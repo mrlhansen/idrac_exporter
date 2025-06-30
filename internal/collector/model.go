@@ -653,3 +653,18 @@ type DellSystem struct {
 	TempRollupStatus                   string `json:"TempRollupStatus"`
 	TempStatisticsRollupStatus         string `json:"TempStatisticsRollupStatus"`
 }
+
+type UpdateServiceResponse struct {
+	FirmwareInventory struct {
+		OdataId string `json:"@odata.id"`
+	} `json:"FirmwareInventory"`
+}
+
+type FirmwareInventory struct {
+	Name   string `json:"Name"`
+	Status struct {
+		Health string `json:"Health"`
+		State  string `json:"State"`
+	} `json:"Status"`
+	Version string `json:"Version"`
+}

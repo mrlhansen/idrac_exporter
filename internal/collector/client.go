@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -21,18 +22,19 @@ const (
 )
 
 type Client struct {
-	redfish     *Redfish
-	vendor      int
-	version     int
-	systemPath  string
-	thermalPath string
-	powerPath   string
-	storagePath string
-	memoryPath  string
-	networkPath string
-	eventPath   string
-	procPath    string
-	dellPath    string
+	redfish         *Redfish
+	vendor          int
+	version         int
+	systemPath      string
+	thermalPath     string
+	powerPath       string
+	storagePath     string
+	memoryPath      string
+	networkPath     string
+	eventPath       string
+	procPath        string
+	dellPath        string
+	fwInventoryPath string
 }
 
 func NewClient(h *config.HostConfig) *Client {
@@ -60,6 +62,7 @@ func (client *Client) findAllEndpoints() bool {
 	var group GroupResponse
 	var chassis ChassisResponse
 	var system SystemResponse
+	var service UpdateServiceResponse
 	var ok bool
 
 	// Root
@@ -93,12 +96,18 @@ func (client *Client) findAllEndpoints() bool {
 		return false
 	}
 
+	ok = client.redfish.Get(root.UpdateService.OdataId, &service)
+	if !ok {
+		return false
+	}
+
 	client.storagePath = system.Storage.OdataId
 	client.memoryPath = system.Memory.OdataId
 	client.networkPath = system.NetworkInterfaces.OdataId
 	client.thermalPath = chassis.Thermal.OdataId
 	client.powerPath = chassis.Power.OdataId
 	client.procPath = system.Processors.OdataId
+	client.fwInventoryPath = service.FirmwareInventory.OdataId
 
 	// Vendor
 	m := strings.ToLower(system.Manufacturer)
@@ -591,6 +600,44 @@ func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bo
 
 	mc.NewDellBatteryRollupHealth(ch, &resp)
 	mc.NewDellEstimatedSystemAirflowCFM(ch, &resp)
+
+	return true
+}
+
+func (client *Client) RefreshService(mc *Collector, ch chan<- prometheus.Metric) bool {
+	resp := GroupResponse{}
+	ok := client.redfish.Get(client.fwInventoryPath, &resp)
+	if !ok {
+		return false
+	}
+
+	pattern := regexp.MustCompile(`/(?P<state>.*)-(\d+)-(?P<ident>[\w\d\.]+)__(?P<name>[\w\d\.\-\:]+)`)
+	fwInfo := make(map[FirmwareInventory]bool)
+	for _, link := range resp.Members.GetLinks() {
+		suffix, ok := strings.CutPrefix(link, client.fwInventoryPath)
+		if !ok {
+			return false
+		}
+
+		matches := pattern.FindStringSubmatch(suffix)
+		if len(matches) != 5 {
+			continue
+		}
+
+		if strings.HasPrefix(suffix, "/Previous") {
+			continue
+		}
+
+		fwInventory := FirmwareInventory{
+			Name:    matches[4],
+			Version: matches[3],
+		}
+		fwInfo[fwInventory] = true
+	}
+
+	for fwInventory := range fwInfo {
+		mc.NewServiceInfo(ch, &fwInventory)
+	}
 
 	return true
 }

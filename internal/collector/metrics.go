@@ -769,3 +769,13 @@ func (mc *Collector) NewDellControllerBatteryHealth(ch chan<- prometheus.Metric,
 		m.Oem.Dell.DellControllerBattery.PrimaryStatus,
 	)
 }
+
+func (mc *Collector) NewServiceInfo(ch chan<- prometheus.Metric, m *FirmwareInventory) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.ServiceInfo,
+		prometheus.UntypedValue,
+		1.0,
+		m.Name,
+		m.Version,
+	)
+}
