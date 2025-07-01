@@ -770,12 +770,13 @@ func (mc *Collector) NewDellControllerBatteryHealth(ch chan<- prometheus.Metric,
 	)
 }
 
-func (mc *Collector) NewServiceInfo(ch chan<- prometheus.Metric, m *FirmwareInventory) {
+func (mc *Collector) NewFirmwareInfo(ch chan<- prometheus.Metric, m *FirmwareInventory) {
 	ch <- prometheus.MustNewConstMetric(
-		mc.ServiceInfo,
+		mc.FirmwareInfo,
 		prometheus.UntypedValue,
 		1.0,
 		m.Name,
 		m.Version,
+		m.State,
 	)
 }

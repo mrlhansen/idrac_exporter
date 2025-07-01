@@ -140,6 +140,6 @@ func ReadConfig(filename string) {
 		Config.Collect.Network = true
 		Config.Collect.Processors = true
 		Config.Collect.Extra = true
-		Config.Collect.Service = true
+		Config.Collect.Firmware = true
 	}
 }

@@ -106,8 +106,7 @@ type Collector struct {
 	DellControllerBatteryHealth   *prometheus.Desc
 
 	// Update Service
-	ServiceInfo   *prometheus.Desc
-	ServiceHealth *prometheus.Desc
+	FirmwareInfo *prometheus.Desc
 }
 
 func NewCollector() *Collector {
@@ -408,10 +407,10 @@ func NewCollector() *Collector {
 			"Health status of storage controller battery",
 			[]string{"id", "storage_id", "name", "status"}, nil,
 		),
-		ServiceInfo: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "service", "info"),
-			"The version of the service",
-			[]string{"name", "version"}, nil,
+		FirmwareInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "firmware", "info"),
+			"The version of the firmware",
+			[]string{"name", "version", "state"}, nil,
 		),
 	}
 
@@ -589,10 +588,10 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		}()
 	}
 
-	if collect.Service {
+	if collect.Firmware {
 		wg.Add(1)
 		go func() {
-			ok := collector.client.RefreshService(collector, ch)
+			ok := collector.client.RefreshFirmware(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}

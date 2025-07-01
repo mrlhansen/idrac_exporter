@@ -604,39 +604,41 @@ func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bo
 	return true
 }
 
-func (client *Client) RefreshService(mc *Collector, ch chan<- prometheus.Metric) bool {
+func (client *Client) RefreshFirmware(mc *Collector, ch chan<- prometheus.Metric) bool {
 	resp := GroupResponse{}
 	ok := client.redfish.Get(client.fwInventoryPath, &resp)
 	if !ok {
 		return false
 	}
 
-	pattern := regexp.MustCompile(`/(?P<state>.*)-(\d+)-(?P<ident>[\w\d\.]+)__(?P<name>[\w\d\.\-\:]+)`)
-	fwInfo := make(map[FirmwareInventory]bool)
+	// ex: Current-113224-28.44.10.36__InfiniBand.Slot.32-1
+	fwInventoryPattern := regexp.MustCompile(`(?i)/(?P<state>\w*)-(\d+)-(?P<version>[\w\d\.]+)__(?P<name>[\w\d\.\-\:]+)`)
 	for _, link := range resp.Members.GetLinks() {
 		suffix, ok := strings.CutPrefix(link, client.fwInventoryPath)
 		if !ok {
 			return false
 		}
 
-		matches := pattern.FindStringSubmatch(suffix)
+		matches := fwInventoryPattern.FindStringSubmatch(suffix)
 		if len(matches) != 5 {
 			continue
 		}
 
-		if strings.HasPrefix(suffix, "/Previous") {
+		state := strings.ToLower(matches[1])
+		version := matches[3]
+		name := matches[4]
+
+		if strings.HasPrefix(state, "previous") {
 			continue
 		}
 
 		fwInventory := FirmwareInventory{
-			Name:    matches[4],
-			Version: matches[3],
+			Name:    name,
+			Version: version,
+			State:   state,
 		}
-		fwInfo[fwInventory] = true
-	}
 
-	for fwInventory := range fwInfo {
-		mc.NewServiceInfo(ch, &fwInventory)
+		mc.NewFirmwareInfo(ch, &fwInventory)
 	}
 
 	return true

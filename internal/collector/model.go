@@ -662,6 +662,7 @@ type UpdateServiceResponse struct {
 
 type FirmwareInventory struct {
 	Name   string `json:"Name"`
+	State  string `json:"State"`
 	Status struct {
 		Health string `json:"Health"`
 		State  string `json:"State"`
