@@ -18,6 +18,7 @@ const (
 	H3C
 	INVENTEC
 	FUJITSU
+	SUPERMICRO
 )
 
 type Client struct {
@@ -116,6 +117,8 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = INVENTEC
 	} else if strings.Contains(m, "fujitsu") {
 		client.vendor = FUJITSU
+	} else if strings.Contains(m, "supermicro") {
+		client.vendor = SUPERMICRO
 	}
 
 	// Path for event log
@@ -135,6 +138,8 @@ func (client *Client) findAllEndpoints() bool {
 			client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
 		case FUJITSU:
 			client.eventPath = "/redfish/v1/Managers/iRMC/LogServices/SystemEventLog/Entries"
+		case SUPERMICRO:
+			client.eventPath = "/redfish/v1/Systems/1/LogServices/Log1/Entries"
 		}
 	}
 
