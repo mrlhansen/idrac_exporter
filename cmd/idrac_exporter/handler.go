@@ -8,10 +8,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mrlhansen/idrac_exporter/internal/collector"
-	"github.com/mrlhansen/idrac_exporter/internal/config"
-	"github.com/mrlhansen/idrac_exporter/internal/log"
-	"github.com/mrlhansen/idrac_exporter/internal/version"
+	"github.com/mrlhansen/idrac_exporter/v2/internal/collector"
+	"github.com/mrlhansen/idrac_exporter/v2/internal/config"
+	"github.com/mrlhansen/idrac_exporter/v2/internal/log"
+	"github.com/mrlhansen/idrac_exporter/v2/internal/version"
 )
 
 const (
