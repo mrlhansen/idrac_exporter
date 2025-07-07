@@ -1,4 +1,4 @@
-module github.com/mrlhansen/idrac_exporter
+module github.com/mrlhansen/idrac_exporter/v2
 
 go 1.21
 
