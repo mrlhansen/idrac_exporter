@@ -20,7 +20,9 @@ The program supports several different systems, because they all follow the Redf
 The exporter is written in [Go](https://golang.org) and it can be downloaded and compiled using:
 
 ```sh
-go install github.com/mrlhansen/idrac_exporter/cmd/idrac_exporter@latest
+git clone https://github.com/mrlhansen/idrac_exporter.git
+cd idrac_exporter
+make
 ```
 
 ### Docker
