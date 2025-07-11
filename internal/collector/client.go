@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mrlhansen/idrac_exporter/v2/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
 )
 

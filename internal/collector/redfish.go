@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mrlhansen/idrac_exporter/v2/internal/config"
-	"github.com/mrlhansen/idrac_exporter/v2/internal/log"
+	"github.com/mrlhansen/idrac_exporter/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/log"
 )
 
 type Redfish struct {

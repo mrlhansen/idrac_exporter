@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mrlhansen/idrac_exporter/v2/internal/config"
-	"github.com/mrlhansen/idrac_exporter/v2/internal/log"
-	"github.com/mrlhansen/idrac_exporter/v2/internal/version"
+	"github.com/mrlhansen/idrac_exporter/internal/config"
+	"github.com/mrlhansen/idrac_exporter/internal/log"
+	"github.com/mrlhansen/idrac_exporter/internal/version"
 )
 
 func main() {
