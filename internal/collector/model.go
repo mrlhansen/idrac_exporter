@@ -397,20 +397,28 @@ type Memory struct {
 	SizeMB              int    `json:"SizeMB"`
 }
 
-type NetworkInterface struct {
+type NetworkAdapter struct {
 	Id           string `json:"Id"`
 	Name         string `json:"Name"`
 	Description  string `json:"Description"`
+	Manufacturer string `json:"Manufacturer"`
+	Model        string `json:"Model"`
+	PartNumber   string `json:"PartNumber"`
+	SerialNumber string `json:"SerialNumber"`
+	SKU          string `json:"SKU"`
 	Status       Status `json:"Status"`
-	NetworkPorts Odata  `json:"NetworkPorts"`
+	NetworkPorts Odata  `json:"NetworkPorts"` // deprecated
 	Ports        Odata  `json:"Ports"`
+	Controllers  []struct {
+		FirmwarePackageVersion string `json:"FirmwarePackageVersion"`
+	} `json:"Controllers"`
 }
 
-func (n *NetworkInterface) GetPorts() string {
-	if n.NetworkPorts.OdataId != "" {
-		return n.NetworkPorts.OdataId
-	} else {
+func (n *NetworkAdapter) GetPorts() string {
+	if n.Ports.OdataId != "" {
 		return n.Ports.OdataId
+	} else {
+		return n.NetworkPorts.OdataId
 	}
 }
 
@@ -421,7 +429,10 @@ type NetworkPort struct {
 	LinkStatus                string  `json:"LinkStatus"`
 	CurrentLinkSpeedMbps      float64 `json:"CurrentLinkSpeedMbps"`
 	CurrentSpeedGbps          float64 `json:"CurrentSpeedGbps"`
+	MaxSpeedGbps              float64 `json:"MaxSpeedGbps"`
+	MaxFrameSize              int     `json:"MaxFrameSize"`
 	Status                    Status  `json:"Status"`
+	LinkNetworkTechnology     string  `json:"LinkNetworkTechnology"`
 	SupportedLinkCapabilities []struct {
 		LinkNetworkTechnology string  `json:"LinkNetworkTechnology"`
 		LinkSpeedMbps         float64 `json:"LinkSpeedMbps"`

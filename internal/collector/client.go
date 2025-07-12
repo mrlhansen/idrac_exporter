@@ -96,7 +96,7 @@ func (client *Client) findAllEndpoints() bool {
 
 	client.storagePath = system.Storage.OdataId
 	client.memoryPath = system.Memory.OdataId
-	client.networkPath = system.NetworkInterfaces.OdataId
+	client.networkPath = chassis.NetworkAdapters.OdataId
 	client.thermalPath = chassis.Thermal.OdataId
 	client.powerPath = chassis.Power.OdataId
 	client.procPath = system.Processors.OdataId
@@ -279,17 +279,14 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 	}
 
 	for _, c := range group.Members.GetLinks() {
-		ni := NetworkInterface{}
+		ni := NetworkAdapter{}
 		ok = client.redfish.Get(c, &ni)
 		if !ok {
 			return false
 		}
 
-		if ni.Status.State != StateEnabled {
-			continue
-		}
-
-		mc.NewNetworkInterfaceHealth(ch, &ni)
+		mc.NewNetworkAdapterInfo(ch, &ni)
+		mc.NewNetworkAdapterHealth(ch, &ni)
 
 		ports := GroupResponse{}
 		ok = client.redfish.Get(ni.GetPorts(), &ports)
@@ -313,7 +310,8 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 			}
 
 			mc.NewNetworkPortHealth(ch, ni.Id, &port)
-			mc.NewNetworkPortSpeed(ch, ni.Id, &port)
+			mc.NewNetworkPortCurrentSpeed(ch, ni.Id, &port)
+			mc.NewNetworkPortMaxSpeed(ch, ni.Id, &port)
 			mc.NewNetworkPortLinkUp(ch, ni.Id, &port)
 		}
 	}

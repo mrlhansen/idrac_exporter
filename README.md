@@ -60,7 +60,7 @@ hosts:
   default:
     username: user
     password: pass
-  123.45.6.78:
+  192.168.1.1:
     username: user
     password: pass
 metrics:
@@ -193,10 +193,12 @@ idrac_memory_module_speed_mhz{id}
 These metrics include health of network interfaces, as well as health, link speed, and link status for each of the network ports.
 
 ```text
-idrac_network_interface_health{id,status}
-idrac_network_port_health{id,interface_id,status}
-idrac_network_port_link_up{id,interface_id,status}
-idrac_network_port_speed_mbps{id,interface_id}
+idrac_network_adapter_info{id,manufacturer,model,serial}
+idrac_network_adapter_health{id,status}
+idrac_network_port_health{id,adapter_id,status}
+idrac_network_port_max_speed_mbps{id,adapter_id}
+idrac_network_port_current_speed_mbps{id,adapter_id}
+idrac_network_port_link_up{id,adapter_id,status}
 ```
 
 ### Extra

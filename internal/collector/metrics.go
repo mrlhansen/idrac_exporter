@@ -562,13 +562,25 @@ func (mc *Collector) NewMemoryModuleSpeed(ch chan<- prometheus.Metric, m *Memory
 	)
 }
 
-func (mc *Collector) NewNetworkInterfaceHealth(ch chan<- prometheus.Metric, m *NetworkInterface) {
+func (mc *Collector) NewNetworkAdapterInfo(ch chan<- prometheus.Metric, m *NetworkAdapter) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.NetworkAdapterInfo,
+		prometheus.UntypedValue,
+		1.0,
+		m.Id,
+		m.Manufacturer,
+		m.Model,
+		m.SerialNumber,
+	)
+}
+
+func (mc *Collector) NewNetworkAdapterHealth(ch chan<- prometheus.Metric, m *NetworkAdapter) {
 	value := health2value(m.Status.Health)
 	if value < 0 {
 		return
 	}
 	ch <- prometheus.MustNewConstMetric(
-		mc.NetworkInterfaceHealth,
+		mc.NetworkAdapterHealth,
 		prometheus.GaugeValue,
 		float64(value),
 		m.Id,
@@ -591,7 +603,7 @@ func (mc *Collector) NewNetworkPortHealth(ch chan<- prometheus.Metric, parent st
 	)
 }
 
-func (mc *Collector) NewNetworkPortSpeed(ch chan<- prometheus.Metric, parent string, m *NetworkPort) {
+func (mc *Collector) NewNetworkPortCurrentSpeed(ch chan<- prometheus.Metric, parent string, m *NetworkPort) {
 	var speed float64
 
 	if m.CurrentLinkSpeedMbps > 0 {
@@ -605,9 +617,22 @@ func (mc *Collector) NewNetworkPortSpeed(ch chan<- prometheus.Metric, parent str
 	}
 
 	ch <- prometheus.MustNewConstMetric(
-		mc.NetworkPortSpeed,
+		mc.NetworkPortCurrentSpeed,
 		prometheus.GaugeValue,
 		speed,
+		m.Id,
+		parent,
+	)
+}
+
+func (mc *Collector) NewNetworkPortMaxSpeed(ch chan<- prometheus.Metric, parent string, m *NetworkPort) {
+	if m.MaxSpeedGbps == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.NetworkPortMaxSpeed,
+		prometheus.GaugeValue,
+		m.MaxSpeedGbps*1000,
 		m.Id,
 		parent,
 	)

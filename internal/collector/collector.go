@@ -86,10 +86,12 @@ type Collector struct {
 	MemoryModuleSpeed    *prometheus.Desc
 
 	// Network
-	NetworkInterfaceHealth *prometheus.Desc
-	NetworkPortHealth      *prometheus.Desc
-	NetworkPortSpeed       *prometheus.Desc
-	NetworkPortLinkUp      *prometheus.Desc
+	NetworkAdapterInfo      *prometheus.Desc
+	NetworkAdapterHealth    *prometheus.Desc
+	NetworkPortHealth       *prometheus.Desc
+	NetworkPortMaxSpeed     *prometheus.Desc
+	NetworkPortCurrentSpeed *prometheus.Desc
+	NetworkPortLinkUp       *prometheus.Desc
 
 	// Processors
 	CpuInfo         *prometheus.Desc
@@ -334,25 +336,35 @@ func NewCollector() *Collector {
 			"Speed of memory modules in Mhz",
 			[]string{"id"}, nil,
 		),
-		NetworkInterfaceHealth: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "network_interface", "health"),
-			"Health status for network interfaces",
+		NetworkAdapterInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_adapter", "info"),
+			"Information about network adapters",
+			[]string{"id", "manufacturer", "model", "serial"}, nil,
+		),
+		NetworkAdapterHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_adapter", "health"),
+			"Health status for network adapters",
 			[]string{"id", "status"}, nil,
 		),
 		NetworkPortHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "health"),
 			"Health status for network ports",
-			[]string{"id", "interface_id", "status"}, nil,
+			[]string{"id", "adapter_id", "status"}, nil,
 		),
-		NetworkPortSpeed: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "network_port", "speed_mbps"),
-			"Link speed of network ports in Mbps",
-			[]string{"id", "interface_id"}, nil,
+		NetworkPortMaxSpeed: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_port", "max_speed_mbps"),
+			"Max link speed of network ports in Mbps",
+			[]string{"id", "adapter_id"}, nil,
+		),
+		NetworkPortCurrentSpeed: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "network_port", "current_speed_mbps"),
+			"Current link speed of network ports in Mbps",
+			[]string{"id", "adapter_id"}, nil,
 		),
 		NetworkPortLinkUp: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "link_up"),
 			"Link status of network ports (up or down)",
-			[]string{"id", "interface_id", "status"}, nil,
+			[]string{"id", "adapter_id", "status"}, nil,
 		),
 		CpuInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "info"),
@@ -459,9 +471,11 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.MemoryModuleHealth
 	ch <- collector.MemoryModuleCapacity
 	ch <- collector.MemoryModuleSpeed
-	ch <- collector.NetworkInterfaceHealth
+	ch <- collector.NetworkAdapterInfo
+	ch <- collector.NetworkAdapterHealth
 	ch <- collector.NetworkPortHealth
-	ch <- collector.NetworkPortSpeed
+	ch <- collector.NetworkPortMaxSpeed
+	ch <- collector.NetworkPortCurrentSpeed
 	ch <- collector.NetworkPortLinkUp
 	ch <- collector.CpuInfo
 	ch <- collector.CpuHealth
