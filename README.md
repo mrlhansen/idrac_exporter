@@ -190,15 +190,15 @@ idrac_memory_module_speed_mhz{id}
 ```
 
 ### Network
-These metrics include health of network interfaces, as well as health, link speed, and link status for each of the network ports.
+These metrics include information about network adapters and network ports.
 
 ```text
 idrac_network_adapter_info{id,manufacturer,model,serial}
 idrac_network_adapter_health{id,status}
-idrac_network_port_health{id,adapter_id,status}
-idrac_network_port_max_speed_mbps{id,adapter_id}
-idrac_network_port_current_speed_mbps{id,adapter_id}
-idrac_network_port_link_up{id,adapter_id,status}
+idrac_network_port_health{adapter_id,id,status}
+idrac_network_port_max_speed_mbps{adapter_id,id}
+idrac_network_port_current_speed_mbps{adapter_id,id}
+idrac_network_port_link_up{adapter_id,id,status}
 ```
 
 ### Extra

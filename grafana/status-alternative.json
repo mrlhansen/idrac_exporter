@@ -1698,6 +1698,10 @@
               {
                 "id": "unit",
                 "value": "Mbits"
+              },
+              {
+                "id": "custom.width",
+                "value": 125
               }
             ]
           },
@@ -1726,6 +1730,10 @@
                     "type": "value"
                   }
                 ]
+              },
+              {
+                "id": "custom.width",
+                "value": 125
               }
             ]
           },
@@ -1742,6 +1750,26 @@
               {
                 "id": "noValue",
                 "value": "N/A"
+              },
+              {
+                "id": "custom.width",
+                "value": 125
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Health"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 125
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
               }
             ]
           }
@@ -1828,6 +1856,21 @@
           "legendFormat": "__auto",
           "range": false,
           "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (manufacturer,model,adapter_id) (label_replace(idrac_network_adapter_info{instance=\"$instance\"}, \"adapter_id\", \"$1\", \"id\", \"(.+)\"))",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "E"
         }
       ],
       "title": "Network Ports",
@@ -1855,18 +1898,23 @@
               "Time": true,
               "Value #A": false,
               "Value #B": true,
+              "Value #E": true,
               "adapter_id": false,
               "id": false
             },
             "includeByName": {},
             "indexByName": {
-              "Time": 1,
-              "Value #A": 4,
-              "Value #B": 5,
+              "Time": 8,
+              "Value #A": 5,
+              "Value #B": 10,
+              "Value #C": 7,
               "Value #D": 6,
+              "Value #E": 9,
               "adapter_id": 0,
-              "id": 2,
-              "status": 3
+              "id": 3,
+              "manufacturer": 1,
+              "model": 2,
+              "status": 4
             },
             "renameByName": {
               "Value #A": "Link Status",
@@ -1877,6 +1925,7 @@
               "id": "Port",
               "interface_id": "Interface",
               "manufacturer": "Vendor",
+              "model": "Model",
               "name": "Name",
               "serial": "Serial Number",
               "status": "Health",
@@ -1977,7 +2026,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,manufacturer,mediatype,model,name,protocol,serial) (idrac_storage_drive_info{instance=\"$instance\"})",
+          "expr": "sum by (id,storage_id,manufacturer,mediatype,model,name,protocol,serial) (idrac_storage_drive_info{instance=\"$instance\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1991,7 +2040,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,status) (idrac_storage_drive_health{instance=\"$instance\"})",
+          "expr": "sum by (id,storage_id,status) (idrac_storage_drive_health{instance=\"$instance\"})",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2006,7 +2055,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id) (idrac_storage_drive_capacity_bytes{instance=\"$instance\"})",
+          "expr": "sum by (id,storage_id) (idrac_storage_drive_capacity_bytes{instance=\"$instance\"})",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2021,7 +2070,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id) (idrac_storage_drive_life_left_percent{instance=\"$instance\"})",
+          "expr": "sum by (id,storage_id) (idrac_storage_drive_life_left_percent{instance=\"$instance\"})",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2043,23 +2092,25 @@
               "Time": true,
               "Value #A": true,
               "Value #B": true,
-              "id": true
+              "id": true,
+              "storage_id": true
             },
             "includeByName": {},
             "indexByName": {
               "Time": 0,
-              "Value #A": 7,
-              "Value #B": 8,
-              "Value #C": 9,
-              "Value #D": 10,
-              "id": 2,
+              "Value #A": 9,
+              "Value #B": 10,
+              "Value #C": 11,
+              "Value #D": 12,
+              "id": 1,
               "manufacturer": 3,
-              "mediatype": 11,
+              "mediatype": 6,
               "model": 4,
-              "name": 1,
-              "protocol": 12,
+              "name": 2,
+              "protocol": 7,
               "serial": 5,
-              "status": 6
+              "status": 8,
+              "storage_id": 13
             },
             "renameByName": {
               "Value #A": "",
@@ -2152,7 +2203,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Status"
+              "options": "Health"
             },
             "properties": [
               {
@@ -2384,7 +2435,7 @@
               "manufacturer": "Manufacturer",
               "model": "Model",
               "socket": "Socket",
-              "status": "Status"
+              "status": "Health"
             }
           }
         }
@@ -2430,13 +2481,9 @@
       }
     ]
   },
-  "time": {
-    "from": "now-12h",
-    "to": "now"
-  },
   "timepicker": {},
   "timezone": "browser",
   "title": "BMC Status",
   "uid": "ae1q0f1m5ys5cc",
-  "version": 9
+  "version": 17
 }
