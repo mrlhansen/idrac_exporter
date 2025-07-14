@@ -1798,7 +1798,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_network_port_speed_mbps{job=~\"$job\", instance=~\"$instance\"}",
+          "expr": "idrac_network_port_current_speed_mbps{job=~\"$job\", instance=~\"$instance\"}",
           "format": "table",
           "hide": false,
           "instant": false,
@@ -1811,7 +1811,7 @@
             "uid": "${datasource}"
           },
           "editorMode": "code",
-          "expr": "idrac_network_interface_health{job=~\"$job\", instance=~\"$instance\"}",
+          "expr": "idrac_network_adapter_health{job=~\"$job\", instance=~\"$instance\"}",
           "format": "table",
           "hide": false,
           "instant": false,
@@ -1832,7 +1832,7 @@
           "id": "filterFieldsByName",
           "options": {
             "include": {
-              "pattern": "(id|name|status.+|mediatype|model|protocol|serial|slot|status|Value #CAPACITY|Value #SPEED|Value #HEALTH|Value #LINK_UP|Value #PORT_HEALTH|Value #INTERFACE_HEALTH)"
+              "pattern": "(id|name|status.+|status|Value #SPEED|Value #HEALTH|Value #LINK_UP|Value #PORT_HEALTH|Value #INTERFACE_HEALTH)"
             }
           }
         },

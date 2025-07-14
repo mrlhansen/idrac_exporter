@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 59,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -50,8 +50,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -86,7 +85,7 @@
         "textMode": "name",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -96,6 +95,7 @@
           "editorMode": "code",
           "exemplar": false,
           "expr": "idrac_system_machine_info{instance=\"$instance\"}",
+          "format": "time_series",
           "instant": true,
           "legendFormat": "{{manufacturer}}",
           "range": false,
@@ -142,8 +142,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -178,7 +177,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -234,8 +233,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -270,7 +268,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -326,8 +324,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -362,7 +359,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -371,7 +368,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "max(idrac_network_interface_health{instance=\"$instance\"} < 10)",
+          "expr": "max(idrac_network_adapter_health{instance=\"$instance\"} < 10)",
           "instant": true,
           "legendFormat": "Health",
           "range": false,
@@ -403,8 +400,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -464,7 +460,7 @@
         "showHeader": false,
         "sortBy": []
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -524,8 +520,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -560,7 +555,7 @@
         "textMode": "name",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -595,8 +590,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -631,7 +625,7 @@
         "textMode": "name",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -687,8 +681,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -723,7 +716,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -779,8 +772,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -815,7 +807,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -871,8 +863,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -907,7 +898,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -942,8 +933,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -978,7 +968,7 @@
         "textMode": "name",
         "wideLayout": true
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1027,6 +1017,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1057,8 +1048,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1089,10 +1079,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1127,6 +1119,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1157,8 +1150,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1189,10 +1181,12 @@
           "showLegend": true
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1227,6 +1221,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1257,8 +1252,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1285,10 +1279,12 @@
           "showLegend": false
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1323,6 +1319,7 @@
             "axisLabel": "",
             "axisPlacement": "auto",
             "barAlignment": 0,
+            "barWidthFactor": 0.6,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -1353,8 +1350,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1381,10 +1377,12 @@
           "showLegend": false
         },
         "tooltip": {
+          "hideZeros": false,
           "mode": "single",
           "sort": "none"
         }
       },
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1439,8 +1437,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1529,7 +1526,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1673,6 +1670,236 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Current Speed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "Mbits"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Link Status"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "red",
+                        "index": 0,
+                        "text": "Down"
+                      },
+                      "1": {
+                        "color": "green",
+                        "index": 1,
+                        "text": "Up"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Max Speed"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "Mbits"
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 37
+      },
+      "id": 20,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 3,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (id,adapter_id) (idrac_network_port_link_up{instance=\"$instance\"})",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (id,adapter_id,status) (idrac_network_port_health{instance=\"$instance\"})",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (id,adapter_id) (idrac_network_port_max_speed_mbps{instance=\"$instance\"})",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (id,adapter_id) (idrac_network_port_current_speed_mbps{instance=\"$instance\"})",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "D"
+        }
+      ],
+      "title": "Network Ports",
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "desc": false,
+                "field": "adapter_id"
+              }
+            ]
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "Value #A": false,
+              "Value #B": true,
+              "adapter_id": false,
+              "id": false
+            },
+            "includeByName": {},
+            "indexByName": {
+              "Time": 1,
+              "Value #A": 4,
+              "Value #B": 5,
+              "Value #D": 6,
+              "adapter_id": 0,
+              "id": 2,
+              "status": 3
+            },
+            "renameByName": {
+              "Value #A": "Link Status",
+              "Value #B": "",
+              "Value #C": "Max Speed",
+              "Value #D": "Current Speed",
+              "adapter_id": "Adapter",
+              "id": "Port",
+              "interface_id": "Interface",
+              "manufacturer": "Vendor",
+              "name": "Name",
+              "serial": "Serial Number",
+              "status": "Health",
+              "type": "Type"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
               "type": "auto",
               "wrapText": false
             },
@@ -1684,8 +1911,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1722,10 +1948,10 @@
         ]
       },
       "gridPos": {
-        "h": 10,
-        "w": 12,
-        "x": 12,
-        "y": 37
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 47
       },
       "id": 21,
       "options": {
@@ -1742,7 +1968,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1867,7 +2093,8 @@
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "type": "auto"
+              "type": "auto",
+              "wrapText": false
             },
             "inspect": false
           },
@@ -1876,8 +2103,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1890,56 +2116,117 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "Speed"
+              "options": "Max Speed"
             },
             "properties": [
               {
                 "id": "unit",
-                "value": "Mbits"
+                "value": "rotmhz"
+              },
+              {
+                "id": "custom.width",
+                "value": 150
               }
             ]
           },
           {
             "matcher": {
               "id": "byName",
-              "options": "Link Status"
+              "options": "Current Speed"
             },
             "properties": [
               {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "0": {
-                        "color": "red",
-                        "index": 0,
-                        "text": "Down"
-                      },
-                      "1": {
-                        "color": "green",
-                        "index": 1,
-                        "text": "Up"
-                      }
-                    },
-                    "type": "value"
-                  }
-                ]
+                "id": "unit",
+                "value": "rotmhz"
+              },
+              {
+                "id": "custom.width",
+                "value": 150
+              },
+              {
+                "id": "noValue",
+                "value": "N/A"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
+            "properties": [
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cores"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Threads"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Socket"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Architecture"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 6,
+        "w": 24,
         "x": 0,
-        "y": 47
+        "y": 55
       },
-      "id": 20,
+      "id": 22,
       "options": {
         "cellHeight": "sm",
         "footer": {
           "countRows": false,
+          "enablePagination": false,
           "fields": "",
           "reducer": [
             "sum"
@@ -1950,7 +2237,7 @@
         "showHeader": true,
         "sortBy": []
       },
-      "pluginVersion": "11.1.4",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1959,7 +2246,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,interface_id) (idrac_network_port_link_up{instance=\"$instance\"})",
+          "expr": "sum by (arch,id,manufacturer,model,socket) (idrac_cpu_info{instance=\"$instance\"})",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
@@ -1973,7 +2260,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,interface_id,status) (idrac_network_port_health{instance=\"$instance\"})",
+          "expr": "sum by (id,status) (idrac_cpu_health{instance=\"$instance\"})",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -1988,16 +2275,61 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum by (id,interface_id) (idrac_network_port_speed_mbps{instance=\"$instance\"})",
+          "expr": "sum by (id) (idrac_cpu_total_cores{instance=\"$instance\"})",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (id) (idrac_cpu_total_threads{instance=\"$instance\"})",
           "format": "table",
           "hide": false,
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
           "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (id) (idrac_cpu_max_speed_mhz{instance=\"$instance\"})",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by (id) (idrac_cpu_current_speed_mhz{instance=\"$instance\"})",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "F"
         }
       ],
-      "title": "Network Ports",
+      "title": "CPUs",
       "transformations": [
         {
           "id": "merge",
@@ -2010,7 +2342,7 @@
             "sort": [
               {
                 "desc": false,
-                "field": "interface_id"
+                "field": "id"
               }
             ]
           }
@@ -2020,32 +2352,39 @@
           "options": {
             "excludeByName": {
               "Time": true,
-              "Value #A": false,
+              "Value #A": true,
               "Value #B": true,
-              "id": false
+              "id": true,
+              "socket": false
             },
             "includeByName": {},
             "indexByName": {
               "Time": 0,
-              "Value #A": 4,
-              "Value #B": 5,
-              "Value #D": 6,
-              "id": 2,
-              "interface_id": 1,
-              "status": 3
+              "Value #A": 6,
+              "Value #B": 8,
+              "Value #C": 9,
+              "Value #D": 10,
+              "Value #E": 11,
+              "Value #F": 12,
+              "arch": 2,
+              "id": 5,
+              "manufacturer": 3,
+              "model": 4,
+              "socket": 1,
+              "status": 7
             },
             "renameByName": {
-              "Value #A": "Link Status",
-              "Value #B": "",
-              "Value #C": "Capacity",
-              "Value #D": "Speed",
-              "id": "Port",
-              "interface_id": "Interface",
-              "manufacturer": "Vendor",
-              "name": "Name",
-              "serial": "Serial Number",
-              "status": "Health",
-              "type": "Type"
+              "Value #A": "",
+              "Value #C": "Cores",
+              "Value #D": "Threads",
+              "Value #E": "Max Speed",
+              "Value #F": "Current Speed",
+              "arch": "Architecture",
+              "id": "",
+              "manufacturer": "Manufacturer",
+              "model": "Model",
+              "socket": "Socket",
+              "status": "Status"
             }
           }
         }
@@ -2053,28 +2392,20 @@
       "type": "table"
     }
   ],
+  "preload": false,
   "refresh": "5m",
-  "schemaVersion": 39,
+  "schemaVersion": 41,
   "tags": [],
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "Infrastructure",
-          "value": "000000006"
-        },
-        "hide": 0,
         "includeAll": false,
         "label": "Datasource",
-        "multi": false,
         "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
-        "queryValue": "",
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "type": "datasource"
       },
       {
@@ -2083,10 +2414,8 @@
           "uid": "${DS_PROMETHEUS}"
         },
         "definition": "label_values(idrac_exporter_build_info,instance)",
-        "hide": 0,
         "includeAll": false,
         "label": "Instance",
-        "multi": false,
         "name": "instance",
         "options": [],
         "query": {
@@ -2096,20 +2425,18 @@
         },
         "refresh": 1,
         "regex": "",
-        "skipUrlSync": false,
         "sort": 7,
         "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-12h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "BMC Status",
   "uid": "ae1q0f1m5ys5cc",
-  "version": 3,
-  "weekStart": ""
+  "version": 9
 }
