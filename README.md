@@ -266,8 +266,16 @@ scrape_configs:
 
 
 ## Grafana Dashboard
-There are two Grafana Dashboards in the `grafana` folder, one that shows an overview of all systems and one that shows information for a specific machine. Thanks to [@7840vz](https://www.github.com/7840vz)  for creating these!
+There are some different Grafana Dashboards in the `grafana` folder.
+
+Example of [grafana/idrac.json](grafana/idrac.json) which shows detailed information about individual machines. Made by [@7840vz](https://www.github.com/7840vz).
 
 ![bmc1.png](grafana/bmc1.png)
 
+Example of [grafana/idrac_overview.json](grafana/idrac_overview.json) which shows a global overview of all machines. Made by [@7840vz](https://www.github.com/7840vz).
+
 ![bmc2.png](grafana/bmc2.png)
+
+Example of [grafana/status-alternative.json](grafana/status-alternative.json) which shows detailed information for individual machines.
+
+![alternative.png](grafana/alternative.png)

@@ -1873,7 +1873,7 @@
           "refId": "E"
         }
       ],
-      "title": "Network Ports",
+      "title": "Networking",
       "transformations": [
         {
           "id": "merge",
