@@ -616,6 +616,7 @@ func (psu *PowerSupplyUnit) GetOutputPower() float64 {
 }
 
 type EventLogResponse struct {
+	Id          string `json:"Id"`
 	Name        string `json:"Name"`
 	Description string `json:"Description"`
 	Members     []struct {

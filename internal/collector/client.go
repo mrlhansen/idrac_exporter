@@ -414,6 +414,14 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 		return false
 	}
 
+	// iDRAC 8 (issue #143)
+	if client.vendor == DELL {
+		if resp.Id == "SEL" && strings.Contains(client.eventPath, "LogServices") {
+			client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
+			return client.RefreshEventLog(mc, ch)
+		}
+	}
+
 	level := config.Config.Event.SeverityLevel
 	maxage := config.Config.Event.MaxAgeSeconds
 
