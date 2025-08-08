@@ -20,6 +20,7 @@ type CollectConfig struct {
 	Network    bool `yaml:"network"`
 	Processors bool `yaml:"processors"`
 	Extra      bool `yaml:"extra"`
+	Firmware   bool `yaml:"firmware"`
 }
 
 type EventConfig struct {
