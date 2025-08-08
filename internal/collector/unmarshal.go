@@ -41,3 +41,7 @@ func (w *xstring) UnmarshalJSON(data []byte) error {
 	*w = xstring("")
 	return nil
 }
+
+func (w *xstring) String() string {
+	return string(*w)
+}

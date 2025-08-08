@@ -92,17 +92,17 @@ type GroupResponse struct {
 }
 
 type Processor struct {
-	Id                    string `json:"Id"`
-	Name                  string `json:"Name"`
-	Description           string `json:"Description"`
-	InstructionSet        string `json:"InstructionSet"`
-	Manufacturer          string `json:"Manufacturer"`
-	MaxSpeedMHz           *int   `json:"MaxSpeedMHz"`
-	Model                 string `json:"Model"`
-	Family                string `json:"Family"`
-	OperatingSpeedMHz     *int   `json:"OperatingSpeedMHz"`
-	PartNumber            string `json:"PartNumber"`
-	ProcessorArchitecture string `json:"ProcessorArchitecture"`
+	Id                    string  `json:"Id"`
+	Name                  string  `json:"Name"`
+	Description           string  `json:"Description"`
+	InstructionSet        xstring `json:"InstructionSet"`
+	Manufacturer          string  `json:"Manufacturer"`
+	MaxSpeedMHz           *int    `json:"MaxSpeedMHz"`
+	Model                 string  `json:"Model"`
+	Family                string  `json:"Family"`
+	OperatingSpeedMHz     *int    `json:"OperatingSpeedMHz"`
+	PartNumber            string  `json:"PartNumber"`
+	ProcessorArchitecture xstring `json:"ProcessorArchitecture"`
 	ProcessorId           struct {
 		EffectiveFamily               string `json:"EffectiveFamily"`
 		EffectiveModel                string `json:"EffectiveModel"`

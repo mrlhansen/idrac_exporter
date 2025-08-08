@@ -663,7 +663,7 @@ func (mc *Collector) NewCpuInfo(ch chan<- prometheus.Metric, m *Processor) {
 		m.Socket,
 		strings.TrimSpace(m.Manufacturer),
 		strings.TrimSpace(m.Model),
-		arch,
+		arch.String(),
 	)
 }
 
