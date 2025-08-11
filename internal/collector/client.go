@@ -411,7 +411,20 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 	resp := EventLogResponse{}
 	ok := client.redfish.Get(client.eventPath, &resp)
 	if !ok {
-		return false
+		// For Dell iDRAC, try alternative path on failure (but only once)
+		if client.vendor == DELL && strings.Contains(client.eventPath, "LogServices") {
+			// Try iDRAC9 path (Logs/Sel) instead of iDRAC8 path (LogServices/Sel/Entries)
+			alternativePath := "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
+			ok = client.redfish.Get(alternativePath, &resp)
+			if ok {
+				// Update the path for future calls
+				client.eventPath = alternativePath
+			} else {
+				return false
+			}
+		} else {
+			return false
+		}
 	}
 
 	// iDRAC 8 (issue #143)
