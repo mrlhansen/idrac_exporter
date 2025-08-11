@@ -125,13 +125,23 @@ func (client *Client) findAllEndpoints() bool {
 	if config.Config.Collect.Events {
 		switch client.vendor {
 		case DELL:
-			client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
+			{
+				pathA := "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
+				pathB := "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
+				if client.redfish.Exists(pathA) {
+					client.eventPath = pathA
+				} else if client.redfish.Exists(pathB) {
+					client.eventPath = pathB
+				}
+			}
 		case LENOVO:
 			{
-				if client.redfish.Exists("/redfish/v1/Systems/1/LogServices/PlatformLog/Entries") {
-					client.eventPath = "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
-				} else if client.redfish.Exists("/redfish/v1/Systems/1/LogServices/StandardLog/Entries") {
-					client.eventPath = "/redfish/v1/Systems/1/LogServices/StandardLog/Entries"
+				pathA := "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
+				pathB := "/redfish/v1/Systems/1/LogServices/StandardLog/Entries"
+				if client.redfish.Exists(pathA) {
+					client.eventPath = pathA
+				} else if client.redfish.Exists(pathB) {
+					client.eventPath = pathB
 				}
 			}
 		case HPE:
