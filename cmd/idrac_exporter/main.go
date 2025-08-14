@@ -24,7 +24,9 @@ func main() {
 	flag.Parse()
 
 	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
-	config.ReadConfig(configFile)
+	// Start config watcher for dynamic reloads
+	configFilePath = configFile // set global for watcher
+	startConfigWatcher()
 
 	if debug {
 		config.Debug = true
