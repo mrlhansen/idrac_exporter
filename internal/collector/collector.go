@@ -662,7 +662,7 @@ func GetCollector(target string) (*Collector, error) {
 
 	// Try to instantiate a new Redfish host
 	if collector.client == nil {
-		host := config.Config.GetHostCfg(target)
+		host := config.GetHostConfig(target)
 		if host == nil {
 			return nil, fmt.Errorf("failed to get host information")
 		}

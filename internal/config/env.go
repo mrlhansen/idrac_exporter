@@ -41,37 +41,37 @@ func getEnvUint(env string, val *uint) {
 	}
 }
 
-func readConfigEnv() {
+func (c *RootConfig) FromEnvironment() {
 	var username string
 	var password string
 	var scheme string
 
-	getEnvString("CONFIG_ADDRESS", &Config.Address)
-	getEnvString("CONFIG_METRICS_PREFIX", &Config.MetricsPrefix)
+	getEnvString("CONFIG_ADDRESS", &c.Address)
+	getEnvString("CONFIG_METRICS_PREFIX", &c.MetricsPrefix)
 	getEnvString("CONFIG_DEFAULT_USERNAME", &username)
 	getEnvString("CONFIG_DEFAULT_PASSWORD", &password)
 	getEnvString("CONFIG_DEFAULT_SCHEME", &scheme)
-	getEnvString("CONFIG_EVENTS_SEVERITY", &Config.Event.Severity)
-	getEnvString("CONFIG_EVENTS_MAXAGE", &Config.Event.MaxAge)
-	getEnvString("CONFIG_TLS_CERT_FILE", &Config.TLS.CertFile)
-	getEnvString("CONFIG_TLS_KEY_FILE", &Config.TLS.KeyFile)
+	getEnvString("CONFIG_EVENTS_SEVERITY", &c.Event.Severity)
+	getEnvString("CONFIG_EVENTS_MAXAGE", &c.Event.MaxAge)
+	getEnvString("CONFIG_TLS_CERT_FILE", &c.TLS.CertFile)
+	getEnvString("CONFIG_TLS_KEY_FILE", &c.TLS.KeyFile)
 
-	getEnvUint("CONFIG_PORT", &Config.Port)
-	getEnvUint("CONFIG_TIMEOUT", &Config.Timeout)
+	getEnvUint("CONFIG_PORT", &c.Port)
+	getEnvUint("CONFIG_TIMEOUT", &c.Timeout)
 
-	getEnvBool("CONFIG_TLS_ENABLED", &Config.TLS.Enabled)
-	getEnvBool("CONFIG_METRICS_ALL", &Config.Collect.All)
-	getEnvBool("CONFIG_METRICS_SYSTEM", &Config.Collect.System)
-	getEnvBool("CONFIG_METRICS_SENSORS", &Config.Collect.Sensors)
-	getEnvBool("CONFIG_METRICS_EVENTS", &Config.Collect.Events)
-	getEnvBool("CONFIG_METRICS_POWER", &Config.Collect.Power)
-	getEnvBool("CONFIG_METRICS_STORAGE", &Config.Collect.Storage)
-	getEnvBool("CONFIG_METRICS_MEMORY", &Config.Collect.Memory)
-	getEnvBool("CONFIG_METRICS_NETWORK", &Config.Collect.Network)
-	getEnvBool("CONFIG_METRICS_PROCESSORS", &Config.Collect.Processors)
-	getEnvBool("CONFIG_METRICS_EXTRA", &Config.Collect.Extra)
+	getEnvBool("CONFIG_TLS_ENABLED", &c.TLS.Enabled)
+	getEnvBool("CONFIG_METRICS_ALL", &c.Collect.All)
+	getEnvBool("CONFIG_METRICS_SYSTEM", &c.Collect.System)
+	getEnvBool("CONFIG_METRICS_SENSORS", &c.Collect.Sensors)
+	getEnvBool("CONFIG_METRICS_EVENTS", &c.Collect.Events)
+	getEnvBool("CONFIG_METRICS_POWER", &c.Collect.Power)
+	getEnvBool("CONFIG_METRICS_STORAGE", &c.Collect.Storage)
+	getEnvBool("CONFIG_METRICS_MEMORY", &c.Collect.Memory)
+	getEnvBool("CONFIG_METRICS_NETWORK", &c.Collect.Network)
+	getEnvBool("CONFIG_METRICS_PROCESSORS", &c.Collect.Processors)
+	getEnvBool("CONFIG_METRICS_EXTRA", &c.Collect.Extra)
 
-	def, ok := Config.Hosts["default"]
+	def, ok := c.Hosts["default"]
 	if !ok {
 		def = &HostConfig{}
 	}
@@ -92,6 +92,6 @@ func readConfigEnv() {
 	}
 
 	if ok {
-		Config.Hosts["default"] = def
+		c.Hosts["default"] = def
 	}
 }

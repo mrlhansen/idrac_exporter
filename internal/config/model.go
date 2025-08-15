@@ -36,7 +36,7 @@ type TLSConfig struct {
 }
 
 type RootConfig struct {
-	mutex         sync.Mutex
+	Mutex         sync.Mutex
 	Address       string                 `yaml:"address"`
 	Port          uint                   `yaml:"port"`
 	HttpsProxy    string                 `yaml:"https_proxy"`

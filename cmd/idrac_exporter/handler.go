@@ -1,60 +1,18 @@
 package main
 
 import (
-	"sync/atomic"
 	"compress/gzip"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
-	"time"
-	"github.com/fsnotify/fsnotify"
+
 	"github.com/mrlhansen/idrac_exporter/internal/collector"
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"github.com/mrlhansen/idrac_exporter/internal/version"
 )
-var configFilePath = "/etc/prometheus/idrac.yml" // Default path, can be made configurable
-var configLastLoaded int64
-
-func startConfigWatcher() {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Error("Failed to start config watcher: %v", err)
-		return
-	}
-	go func() {
-		defer watcher.Close()
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				if event.Op&fsnotify.Write == fsnotify.Write || event.Op&fsnotify.Create == fsnotify.Create {
-					log.Info("Config file changed, reloading: %s", configFilePath)
-					config.ReadConfig(configFilePath)
-					atomic.StoreInt64(&configLastLoaded, time.Now().Unix())
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				log.Error("Config watcher error: %v", err)
-			}
-		}
-	}()
-	err = watcher.Add(configFilePath)
-	if err != nil {
-		log.Error("Failed to watch config file: %v", err)
-	}
-	// Initial load
-	config.ReadConfig(configFilePath)
-	atomic.StoreInt64(&configLastLoaded, time.Now().Unix())
-}
-// Call this once at startup (e.g. in main.go)
-// startConfigWatcher()
 
 const (
 	contentTypeHeader     = "Content-Type"
