@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/mrlhansen/idrac_exporter/internal/collector"
 	"github.com/mrlhansen/idrac_exporter/internal/config"
@@ -16,7 +18,7 @@ func ReloadConfig(filename string) {
 	if len(filename) > 0 {
 		err := cfg.FromFile(filename)
 		if err != nil {
-			log.Error("Failed to %s", err)
+			log.Error("Failed to %v", err)
 			return
 		}
 	}
@@ -46,10 +48,12 @@ func ReloadConfig(filename string) {
 		}
 	}
 
-	log.Info("Configuration reload was successfull")
+	log.Info("Configuration reload was successful")
 }
 
 func WatchConfig(filename string) {
+	lastReload := time.Now()
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Error("Failed to start file watcher: %v", err)
@@ -69,8 +73,11 @@ func WatchConfig(filename string) {
 			if !ok {
 				return
 			}
+			if time.Since(lastReload) < time.Second {
+				break // needed to deduplicate e.g. multiple write events
+			}
 			reload := false
-			if event.Has(fsnotify.Write) || event.Has(fsnotify.Create) {
+			if event.Has(fsnotify.Write) {
 				reload = true
 			} else if event.Has(fsnotify.Remove) {
 				watcher.Remove(event.Name)
@@ -81,6 +88,7 @@ func WatchConfig(filename string) {
 				reload = true
 			}
 			if reload {
+				lastReload = time.Now()
 				ReloadConfig(filename)
 			}
 		case err, ok := <-watcher.Errors:
@@ -98,7 +106,7 @@ func LoadConfig(filename string) {
 	if len(filename) > 0 {
 		err := cfg.FromFile(filename)
 		if err != nil {
-			log.Fatal("Failed to %s", err)
+			log.Fatal("Failed to %v", err)
 		}
 		log.Info("Loaded configuration file: %s", filename)
 	}

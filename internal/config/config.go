@@ -52,13 +52,13 @@ func SetConfig(c *RootConfig) {
 func (c *RootConfig) FromFile(filename string) error {
 	yamlFile, err := os.Open(filename)
 	if err != nil {
-		return fmt.Errorf("open configuration file: %s: %s", filename, err)
+		return fmt.Errorf("open configuration file: %v", err)
 	}
 
 	err = yaml.NewDecoder(yamlFile).Decode(c)
 	yamlFile.Close()
 	if err != nil {
-		return fmt.Errorf("parse configuration file: %s: %s", filename, err.Error())
+		return fmt.Errorf("parse configuration file: %v", err)
 	}
 
 	return nil
