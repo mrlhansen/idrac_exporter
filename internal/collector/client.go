@@ -22,18 +22,22 @@ const (
 )
 
 type Client struct {
-	redfish     *Redfish
-	vendor      int
-	version     int
-	systemPath  string
-	thermalPath string
-	powerPath   string
-	storagePath string
-	memoryPath  string
-	networkPath string
-	eventPath   string
-	procPath    string
-	dellPath    string
+	redfish *Redfish
+	vendor  int
+	version int
+	path    struct {
+		System           string
+		Thermal          string
+		ThermalSubsystem string
+		Power            string
+		PowerSubsystem   string
+		Storage          string
+		Memory           string
+		Network          string
+		Event            string
+		Processors       string
+		DellOEM          string
+	}
 }
 
 func NewClient(h *config.HostConfig) *Client {
@@ -75,7 +79,7 @@ func (client *Client) findAllEndpoints() bool {
 		return false
 	}
 
-	client.systemPath = group.Members[0].OdataId
+	client.path.System = group.Members[0].OdataId
 
 	// Chassis
 	ok = client.redfish.Get(root.Chassis.OdataId, &group)
@@ -89,17 +93,19 @@ func (client *Client) findAllEndpoints() bool {
 		return false
 	}
 
-	ok = client.redfish.Get(client.systemPath, &system)
+	ok = client.redfish.Get(client.path.System, &system)
 	if !ok {
 		return false
 	}
 
-	client.storagePath = system.Storage.OdataId
-	client.memoryPath = system.Memory.OdataId
-	client.networkPath = chassis.NetworkAdapters.OdataId
-	client.thermalPath = chassis.Thermal.OdataId
-	client.powerPath = chassis.Power.OdataId
-	client.procPath = system.Processors.OdataId
+	client.path.Storage = system.Storage.OdataId
+	client.path.Memory = system.Memory.OdataId
+	client.path.Network = chassis.NetworkAdapters.OdataId
+	client.path.Thermal = chassis.Thermal.OdataId
+	client.path.ThermalSubsystem = chassis.ThermalSubsystem.OdataId
+	client.path.Power = chassis.Power.OdataId
+	client.path.PowerSubsystem = chassis.PowerSubsystem.OdataId
+	client.path.Processors = system.Processors.OdataId
 
 	// Vendor
 	m := strings.ToLower(system.Manufacturer)
@@ -129,9 +135,9 @@ func (client *Client) findAllEndpoints() bool {
 				pathA := "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
 				pathB := "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
 				if client.redfish.Exists(pathA) {
-					client.eventPath = pathA
+					client.path.Event = pathA
 				} else if client.redfish.Exists(pathB) {
-					client.eventPath = pathB
+					client.path.Event = pathB
 				}
 			}
 		case LENOVO:
@@ -139,17 +145,17 @@ func (client *Client) findAllEndpoints() bool {
 				pathA := "/redfish/v1/Systems/1/LogServices/PlatformLog/Entries"
 				pathB := "/redfish/v1/Systems/1/LogServices/StandardLog/Entries"
 				if client.redfish.Exists(pathA) {
-					client.eventPath = pathA
+					client.path.Event = pathA
 				} else if client.redfish.Exists(pathB) {
-					client.eventPath = pathB
+					client.path.Event = pathB
 				}
 			}
 		case HPE:
-			client.eventPath = "/redfish/v1/Systems/1/LogServices/IML/Entries"
+			client.path.Event = "/redfish/v1/Systems/1/LogServices/IML/Entries"
 		case FUJITSU:
-			client.eventPath = "/redfish/v1/Managers/iRMC/LogServices/SystemEventLog/Entries"
+			client.path.Event = "/redfish/v1/Managers/iRMC/LogServices/SystemEventLog/Entries"
 		case SUPERMICRO:
-			client.eventPath = "/redfish/v1/Systems/1/LogServices/Log1/Entries"
+			client.path.Event = "/redfish/v1/Systems/1/LogServices/Log1/Entries"
 		}
 	}
 
@@ -157,22 +163,22 @@ func (client *Client) findAllEndpoints() bool {
 	if config.Config.Collect.Extra {
 		if client.vendor == DELL {
 			if client.redfish.Exists(DellSystemPath) {
-				client.dellPath = DellSystemPath
+				client.path.DellOEM = DellSystemPath
 			}
 		}
 	}
 
 	// Issue #50
 	if client.vendor == INSPUR {
-		client.storagePath = strings.ReplaceAll(client.storagePath, "Storages", "Storage")
+		client.path.Storage = strings.ReplaceAll(client.path.Storage, "Storages", "Storage")
 	}
 
 	// Fix for iLO 4 machines
 	if client.vendor == HPE {
 		if strings.Contains(root.Name, "HP RESTful") {
-			client.memoryPath = "/redfish/v1/Systems/1/Memory/"
-			client.storagePath = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
-			client.eventPath = ""
+			client.path.Memory = "/redfish/v1/Systems/1/Memory/"
+			client.path.Storage = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
+			client.path.Event = ""
 			client.version = 4
 		}
 	}
@@ -180,9 +186,77 @@ func (client *Client) findAllEndpoints() bool {
 	return true
 }
 
-func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) bool {
+func (client *Client) RefreshSensorsNew(mc *Collector, ch chan<- prometheus.Metric) bool {
+	thermal := ThermalSubsystem{}
+	ok := client.redfish.Get(client.path.ThermalSubsystem, &thermal)
+	if !ok {
+		return false
+	}
+
+	if thermal.Fans.OdataId != "" {
+		group := GroupResponse{}
+		ok := client.redfish.Get(thermal.Fans.OdataId, &group)
+		if !ok {
+			return false
+		}
+
+		for _, c := range group.Members.GetLinks() {
+			fan := ThermalFan{}
+			ok = client.redfish.Get(c, &fan)
+			if !ok {
+				return false
+			}
+
+			units := "percent"
+			value := 0.0
+
+			if fan.SpeedPercent.SpeedRPM != nil {
+				units = "rpm"
+				value = *fan.SpeedPercent.SpeedRPM
+			} else if fan.SpeedPercent.Reading != nil {
+				value = *fan.SpeedPercent.Reading
+			} else {
+				continue
+			}
+
+			mc.NewSensorsFanHealth(ch, fan.Id, fan.Name, fan.Status.Health)
+			mc.NewSensorsFanSpeed(ch, value, fan.Id, fan.Name, strings.ToLower(units))
+		}
+
+	}
+
+	if thermal.ThermalMetrics.OdataId != "" {
+		temp := ThermalMetrics{}
+		ok := client.redfish.Get(thermal.ThermalMetrics.OdataId, &temp)
+		if !ok {
+			return false
+		}
+
+		for n, c := range temp.TemperatureReadingsCelsius {
+			if c.Reading != nil {
+				name := ""
+				if client.vendor == DELL {
+					c.DeviceName = ""
+				}
+
+				if c.DeviceName != "" {
+					name = c.DeviceName
+				} else if c.DataSourceUri != "" {
+					s := strings.Split(c.DataSourceUri, "/")
+					name = s[len(s)-1]
+				}
+
+				mc.NewSensorsTemperature(ch, *c.Reading, strconv.Itoa(n), name, "celsius")
+			}
+		}
+	}
+
+	return true
+}
+
+func (client *Client) RefreshSensorsOld(mc *Collector, ch chan<- prometheus.Metric) bool {
 	resp := ThermalResponse{}
-	ok := client.redfish.Get(client.thermalPath, &resp)
+	ok := client.redfish.Get(client.path.Thermal, &resp)
 	if !ok {
 		return false
 	}
@@ -223,9 +297,19 @@ func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric)
 	return true
 }
 
+func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.path.Thermal != "" {
+		return client.RefreshSensorsOld(mc, ch)
+	}
+	if client.path.ThermalSubsystem != "" {
+		return client.RefreshSensorsNew(mc, ch)
+	}
+	return true
+}
+
 func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) bool {
 	resp := SystemResponse{}
-	ok := client.redfish.Get(client.systemPath, &resp)
+	ok := client.redfish.Get(client.path.System, &resp)
 	if !ok {
 		return false
 	}
@@ -249,7 +333,7 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 
 func (client *Client) RefreshProcessors(mc *Collector, ch chan<- prometheus.Metric) bool {
 	group := GroupResponse{}
-	ok := client.redfish.Get(client.procPath, &group)
+	ok := client.redfish.Get(client.path.Processors, &group)
 	if !ok {
 		return false
 	}
@@ -283,7 +367,7 @@ func (client *Client) RefreshProcessors(mc *Collector, ch chan<- prometheus.Metr
 
 func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric) bool {
 	group := GroupResponse{}
-	ok := client.redfish.Get(client.networkPath, &group)
+	ok := client.redfish.Get(client.path.Network, &group)
 	if !ok {
 		return false
 	}
@@ -329,9 +413,62 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 	return true
 }
 
-func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) bool {
+func (client *Client) RefreshPowerNew(mc *Collector, ch chan<- prometheus.Metric) bool {
+	power := PowerSubsystem{}
+	ok := client.redfish.Get(client.path.PowerSubsystem, &power)
+	if !ok {
+		return false
+	}
+
+	// global CapacityWatts?
+
+	if power.PowerSupplies.OdataId == "" {
+		return true
+	}
+
+	group := GroupResponse{}
+	ok = client.redfish.Get(power.PowerSupplies.OdataId, &group)
+	if !ok {
+		return false
+	}
+
+	for _, c := range group.Members.GetLinks() {
+		psu := PowerSupply{}
+		ok = client.redfish.Get(c, &psu)
+		if !ok {
+			return false
+		}
+
+		mc.NewPowerSupplyHealth(ch, psu.Status.Health, psu.Id)
+		mc.NewPowerSupplyCapacityWatts(ch, psu.PowerCapacityWatts, psu.Id)
+
+		if psu.Metrics.OdataId != "" {
+			m := PowerSupplyMetrics{}
+			ok = client.redfish.Get(psu.Metrics.OdataId, &m)
+			if !ok {
+				return false
+			}
+
+			if m.InputVoltage != nil {
+				mc.NewPowerSupplyInputVoltage(ch, m.InputVoltage.Reading, psu.Id)
+			}
+
+			if m.InputPowerWatts != nil {
+				mc.NewPowerSupplyInputWatts(ch, m.InputPowerWatts.Reading, psu.Id)
+			}
+
+			if m.OutputPowerWatts != nil {
+				mc.NewPowerSupplyOutputWatts(ch, m.OutputPowerWatts.Reading, psu.Id)
+			}
+		}
+	}
+
+	return true
+}
+
+func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric) bool {
 	resp := PowerResponse{}
-	ok := client.redfish.Get(client.powerPath, &resp)
+	ok := client.redfish.Get(client.path.Power, &resp)
 	if !ok {
 		return false
 	}
@@ -413,21 +550,31 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 	return true
 }
 
+func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.path.Power != "" {
+		return client.RefreshPowerOld(mc, ch)
+	}
+	if client.path.PowerSubsystem != "" {
+		return client.RefreshPowerNew(mc, ch)
+	}
+	return true
+}
+
 func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric) bool {
-	if client.eventPath == "" {
+	if client.path.Event == "" {
 		return true
 	}
 
 	resp := EventLogResponse{}
-	ok := client.redfish.Get(client.eventPath, &resp)
+	ok := client.redfish.Get(client.path.Event, &resp)
 	if !ok {
 		return false
 	}
 
 	// iDRAC 8 (issue #143)
 	if client.vendor == DELL {
-		if resp.Id == "SEL" && strings.Contains(client.eventPath, "LogServices") {
-			client.eventPath = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
+		if resp.Id == "SEL" && strings.Contains(client.path.Event, "LogServices") {
+			client.path.Event = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
 			return client.RefreshEventLog(mc, ch)
 		}
 	}
@@ -459,7 +606,7 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 
 func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric) bool {
 	group := GroupResponse{}
-	ok := client.redfish.Get(client.storagePath, &group)
+	ok := client.redfish.Get(client.path.Storage, &group)
 	if !ok {
 		return false
 	}
@@ -565,7 +712,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 
 func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) bool {
 	group := GroupResponse{}
-	ok := client.redfish.Get(client.memoryPath, &group)
+	ok := client.redfish.Get(client.path.Memory, &group)
 	if !ok {
 		return false
 	}
@@ -600,12 +747,12 @@ func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) 
 }
 
 func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bool {
-	if client.dellPath == "" {
+	if client.path.DellOEM == "" {
 		return true
 	}
 
 	resp := DellSystem{}
-	ok := client.redfish.Get(client.dellPath, &resp)
+	ok := client.redfish.Get(client.path.DellOEM, &resp)
 	if !ok {
 		return false
 	}

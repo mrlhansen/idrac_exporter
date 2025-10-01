@@ -63,7 +63,6 @@ func discoverHandler(rsp http.ResponseWriter, req *http.Request) {
 }
 
 func metricsHandler(rsp http.ResponseWriter, req *http.Request) {
-	// Config is reloaded in the background watcher, just use current config
 	target := req.URL.Query().Get("target")
 	if target == "" {
 		log.Error("Received request from %s without 'target' parameter", req.Host)

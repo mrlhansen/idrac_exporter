@@ -167,9 +167,11 @@ type ChassisResponse struct {
 	NetworkAdapters  Odata  `json:"NetworkAdapters"`
 	PCIeSlots        Odata  `json:"PCIeSlots"`
 	Power            Odata  `json:"Power"`
+	PowerSubsystem   Odata  `json:"PowerSubsystem"`
 	Sensors          Odata  `json:"Sensors"`
 	Status           Status `json:"Status"`
 	Thermal          Odata  `json:"Thermal"`
+	ThermalSubsystem Odata  `json:"ThermalSubsystem"`
 	PhysicalSecurity *struct {
 		IntrusionSensor       string `json:"IntrusionSensor"`
 		IntrusionSensorNumber int    `json:"IntrusionSensorNumber"`
@@ -261,6 +263,46 @@ func (t *Temperature) GetId(fallback int) string {
 		return strconv.Itoa(t.Number)
 	}
 	return strconv.Itoa(fallback)
+}
+
+type ThermalSubsystem struct {
+	Id             string `json:"Id"`
+	Name           string `json:"Name"`
+	Description    string `json:"Description"`
+	Fans           Odata  `json:"Fans"`
+	Pumps          Odata  `json:"Pumps"`
+	ThermalMetrics Odata  `json:"ThermalMetrics"`
+}
+
+type ThermalFan struct {
+	Id              string `json:"Id"`
+	Name            string `json:"Name"`
+	Description     string `json:"Description"`
+	HotPluggable    bool   `json:"HotPluggable"`
+	PhysicalContext string `json:"PhysicalContext"`
+	Status          Status `json:"Status"`
+	SpeedPercent    struct {
+		SpeedRPM *float64 `json:"SpeedRPM"`
+		Reading  *float64 `json:"Reading"`
+	} `json:"SpeedPercent"`
+}
+
+type ThermalMetrics struct {
+	Id          string `json:"Id"`
+	Name        string `json:"Name"`
+	Description string `json:"Description"`
+	PowerWatts  struct {
+		Reading float64 `json:"Reading"`
+	} `json:"PowerWatts"`
+	TemperatureReadingsCelsius []struct {
+		DeviceName      string   `json:"DeviceName"`
+		PhysicalContext string   `json:"PhysicalContext"`
+		DataSourceUri   string   `json:"DataSourceUri"`
+		Reading         *float64 `json:"Reading"`
+	} `json:"TemperatureReadingsCelsius"`
+	TemperatureSummaryCelsius map[string]struct {
+		Reading float64 `json:"Reading"`
+	} `json:"TemperatureSummaryCelsius"`
 }
 
 type Storage struct {
@@ -613,6 +655,55 @@ func (psu *PowerSupplyUnit) GetOutputPower() float64 {
 		return psu.PowerOutputWatts
 	}
 	return psu.LastPowerOutputWatts
+}
+
+type PowerSubsystem struct {
+	Id            string  `json:"Id"`
+	Name          string  `json:"Name"`
+	Description   string  `json:"Description"`
+	CapacityWatts float64 `json:"CapacityWatts"`
+	PowerSupplies Odata   `json:"PowerSupplies"`
+	Batteries     Odata   `json:"Batteries"`
+	Status        Status  `json:"Status"`
+}
+
+type PowerSupply struct {
+	Id                 string  `json:"Id"`
+	Name               string  `json:"Name"`
+	Description        string  `json:"Description"`
+	FirmwareVersion    string  `json:"FirmwareVersion"`
+	HotPluggable       bool    `json:"HotPluggable"`
+	Manufacturer       string  `json:"Manufacturer"`
+	Metrics            Odata   `json:"Metrics"`
+	Model              string  `json:"Model"`
+	PartNumber         string  `json:"PartNumber"`
+	PowerCapacityWatts float64 `json:"PowerCapacityWatts"`
+	PowerSupplyType    string  `json:"PowerSupplyType"`
+	SerialNumber       string  `json:"SerialNumber"`
+	SparePartNumber    string  `json:"SparePartNumber"`
+	Status             Status  `json:"Status"`
+}
+
+type PowerSupplyMetrics struct {
+	Id           string `json:"Id"`
+	Name         string `json:"Name"`
+	Description  string `json:"Description"`
+	Status       Status `json:"Status"`
+	InputVoltage *struct {
+		Reading float64 `json:"Reading"`
+	} `json:"InputVoltage"`
+	InputCurrentAmps *struct {
+		Reading float64 `json:"Reading"`
+	} `json:"InputCurrentAmps"`
+	InputPowerWatts *struct {
+		Reading float64 `json:"Reading"`
+	} `json:"InputPowerWatts"`
+	OutputPowerWatts *struct {
+		Reading float64 `json:"Reading"`
+	} `json:"OutputPowerWatts"`
+	FrequencyHz *struct {
+		Reading int `json:"Reading"`
+	} `json:"FrequencyHz"`
 }
 
 type EventLogResponse struct {
