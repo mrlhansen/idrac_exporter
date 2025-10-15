@@ -100,7 +100,7 @@ func WatchConfig(filename string) {
 	}
 }
 
-func LoadConfig(filename string) {
+func LoadConfig(filename string, watch bool) {
 	cfg := config.NewConfig()
 
 	if len(filename) > 0 {
@@ -119,7 +119,7 @@ func LoadConfig(filename string) {
 
 	config.SetConfig(cfg)
 
-	if len(filename) > 0 {
+	if watch && len(filename) > 0 {
 		go WatchConfig(filename)
 	}
 }
