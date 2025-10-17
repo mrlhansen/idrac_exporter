@@ -128,7 +128,7 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = FUJITSU
 	} else if strings.Contains(m, "supermicro") {
 		client.vendor = SUPERMICRO
-	} else if strings.Contains("advantech") {
+	} else if strings.Contains(m, "advantech") {
 		client.vendor = ADVANTECH
 	}
 

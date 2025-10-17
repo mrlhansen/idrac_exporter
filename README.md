@@ -26,16 +26,19 @@ make
 ```
 
 ### Docker
+> [!IMPORTANT]
+> Starting with v2.3.0 the container images are released on GHCR instead of Docker Hub. For those using Helm, the images are automatically pulled from the new repository. However, users running the container manually will have to switch to the new repository.
+
 There is a `Dockerfile` in the repository for building a container image. To build it locally use:
 
 ```sh
 docker build -t idrac_exporter .
 ```
 
-There are also pre-built images available on [Docker Hub](https://hub.docker.com/r/mrlhansen/idrac_exporter). To download and run these images, simply use the following command.
+There are also pre-built images available. To download these images, simply use the following command.
 
 ```sh
-docker run -v /host-path/config.yml:/etc/prometheus/idrac.yml -p 9348:9348 mrlhansen/idrac_exporter
+docker pull ghcr.io/mrlhansen/idrac_exporter
 ```
 
 Remember to set the listen address to `0.0.0.0` when running inside a container.
