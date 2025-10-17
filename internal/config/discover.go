@@ -2,7 +2,8 @@ package config
 
 import (
 	"encoding/json"
-	"log"
+
+	"github.com/mrlhansen/idrac_exporter/internal/log"
 )
 
 type DiscoverItem struct {
@@ -27,7 +28,7 @@ func GetDiscover() string {
 
 	b, err := json.Marshal(list)
 	if err != nil {
-		log.Printf("failed to marshal json: %v", err)
+		log.Error("Failed to marshal json: %v", err)
 		return "[]"
 	}
 

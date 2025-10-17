@@ -19,6 +19,7 @@ const (
 	INVENTEC
 	FUJITSU
 	SUPERMICRO
+	ADVANTECH
 )
 
 type Client struct {
@@ -127,6 +128,8 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = FUJITSU
 	} else if strings.Contains(m, "supermicro") {
 		client.vendor = SUPERMICRO
+	} else if strings.Contains("advantech") {
+		client.vendor = ADVANTECH
 	}
 
 	// Path for event log
@@ -158,6 +161,8 @@ func (client *Client) findAllEndpoints() bool {
 			client.path.Event = "/redfish/v1/Managers/iRMC/LogServices/SystemEventLog/Entries"
 		case SUPERMICRO:
 			client.path.Event = "/redfish/v1/Systems/1/LogServices/Log1/Entries"
+		case ADVANTECH:
+			client.path.Event = "/redfish/v1/Systems/0/LogServices/Log/Entries"
 		}
 	}
 

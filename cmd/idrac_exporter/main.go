@@ -23,8 +23,8 @@ func main() {
 
 	flag.BoolVar(&verbose, "verbose", false, "Enable more verbose logging")
 	flag.BoolVar(&debug, "debug", false, "Dump JSON response from Redfish requests (only for debugging purpose)")
-	flag.StringVar(&file, "config", "/etc/prometheus/idrac.yml", "Path to idrac exporter configuration file")
-	flag.BoolVar(&watch, "config-watch", false, "Watch configuration file for changes and enable automatic reloading")
+	flag.StringVar(&file, "config", "/etc/prometheus/idrac.yml", "Path to the configuration file")
+	flag.BoolVar(&watch, "config-watch", false, "Watch the configuration file for changes and enable automatic reloading")
 	flag.Parse()
 
 	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
