@@ -31,9 +31,13 @@ type Redfish struct {
 
 const redfishRootPath = "/redfish/v1"
 
-func NewRedfish(scheme, hostname, username, password string) *Redfish {
+func NewRedfish(scheme, hostname, username, password string, port uint) *Redfish {
+	baseurl := fmt.Sprintf("%s://%s", scheme, hostname)
+	if port > 0 {
+		baseurl = fmt.Sprintf("%s:%d", baseurl, port)
+	}
 	return &Redfish{
-		baseurl:  fmt.Sprintf("%s://%s", scheme, hostname),
+		baseurl:  baseurl,
 		hostname: hostname,
 		username: username,
 		password: password,

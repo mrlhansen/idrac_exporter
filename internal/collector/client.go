@@ -48,6 +48,7 @@ func NewClient(h *config.HostConfig) *Client {
 			h.Hostname,
 			h.Username,
 			h.Password,
+			h.Port,
 		),
 	}
 
