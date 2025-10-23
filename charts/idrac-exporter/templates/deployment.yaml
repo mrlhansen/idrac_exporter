@@ -58,10 +58,10 @@ spec:
           env:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or (.Values.idracConfig) (.Values.volumeMounts) }}
+          {{- if or (.Values.idracConfig) (.Values.existingSecret) (.Values.volumeMounts) }}
           volumeMounts:
           {{- end }}
-            {{- if .Values.idracConfig }}
+            {{- if or .Values.idracConfig .Values.existingSecret }}
             - mountPath: "/etc/prometheus"
               name: config
               readOnly: true
@@ -69,13 +69,13 @@ spec:
           {{- range .Values.volumeMounts }}
             - {{ toYaml . | indent 14 | trim }}
           {{- end -}}
-      {{- if or (.Values.idracConfig) (.Values.volumes) }}
+      {{- if or (.Values.idracConfig) (.Values.existingSecret) (.Values.volumes) }}
       volumes:
       {{- end }}
-      {{- if or .Values.idracConfig }}
+      {{- if or .Values.idracConfig .Values.existingSecret }}
         - name: config
           secret:
-            secretName: {{ include "idrac-exporter.fullname" . }}-config
+            secretName: {{ .Values.existingSecret | default (printf "%s-config" (include "idrac-exporter.fullname" .)) }}
       {{- end }}
       {{- range .Values.volumes }}
         - {{ toYaml . | indent 10 | trim }}
