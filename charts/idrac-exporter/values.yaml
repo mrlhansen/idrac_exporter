@@ -120,3 +120,12 @@ prometheus:
     additionalLabels: {}
     namespace: ""
     additionalRules: []
+
+  scrapeConfig:
+    enabled: false
+    additionalLabels: {}
+    namespace: ""
+    interval: 60s
+    scrapeTimeout: 55s
+    metricRelabelings: []
+    relabelings: []
