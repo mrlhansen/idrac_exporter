@@ -43,23 +43,27 @@ tls:
 # automatically defaults to https. You can also specify a custom port if the server
 # is not using the default port (443 for https, 80 for http).
 #
-# When the "target" does not match any host, the exporter will attempt to use the
-# login information under "default".
+# The option "use_basic_auth" can be used to disable session authentication (which
+# is used by default) and always use HTTP basic auth. This is NOT recommended and
+# it should only be used if there is an actual reason.
 #
-# The default username and password can be configured using the two environment
-# variables CONFIG_DEFAULT_USERNAME and CONFIG_DEFAULT_PASSWORD
+# When the "target" does not match any host, the exporter will attempt to use the
+# login information under "default". The information in the default section can also
+# be configured using environment variables, but this is not possible for any of the
+# other targets.
 hosts:
   default:
-    username: user
-    password: pass
+    username: user         # CONFIG_DEFAULT_USERNAME=user
+    password: pass         # CONFIG_DEFAULT_PASSWORD=pass
+    scheme: https          # CONFIG_DEFAULT_SCHEME=https
+    port: 8443             # CONFIG_DEFAULT_PORT=8443
+    use_basic_auth: true   # CONFIG_DEFAULT_USE_BASIC_AUTH=true
   192.168.1.1:
     username: user
     password: pass
-    scheme: http
   192.168.1.2:
     username: user
     password: pass
-    port: 8443
   host01.example.com:
     username: user
     password: pass

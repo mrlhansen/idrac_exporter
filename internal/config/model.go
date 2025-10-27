@@ -3,11 +3,12 @@ package config
 import "sync"
 
 type HostConfig struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Scheme   string `yaml:"scheme"`
-	Port     uint   `yaml:"port"`
-	Hostname string
+	Username  string `yaml:"username"`
+	Password  string `yaml:"password"`
+	Scheme    string `yaml:"scheme"`
+	Port      uint   `yaml:"port"`
+	BasicAuth bool   `yaml:"use_basic_auth"`
+	Hostname  string
 }
 
 type CollectConfig struct {

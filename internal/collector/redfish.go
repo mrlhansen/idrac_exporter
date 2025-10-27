@@ -16,31 +16,36 @@ import (
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 )
 
+type RedfishSession struct {
+	disabled bool
+	id       string
+	token    string
+}
+
 type Redfish struct {
 	http     *http.Client
 	baseurl  string
 	hostname string
 	username string
 	password string
-	session  struct {
-		disabled bool
-		id       string
-		token    string
-	}
+	session  RedfishSession
 }
 
 const redfishRootPath = "/redfish/v1"
 
-func NewRedfish(scheme, hostname, username, password string, port uint) *Redfish {
-	baseurl := fmt.Sprintf("%s://%s", scheme, hostname)
-	if port > 0 {
-		baseurl = fmt.Sprintf("%s:%d", baseurl, port)
+func NewRedfish(h *config.HostConfig) *Redfish {
+	baseurl := fmt.Sprintf("%s://%s", h.Scheme, h.Hostname)
+	if h.Port > 0 {
+		baseurl = fmt.Sprintf("%s:%d", baseurl, h.Port)
 	}
 	return &Redfish{
 		baseurl:  baseurl,
-		hostname: hostname,
-		username: username,
-		password: password,
+		hostname: h.Hostname,
+		username: h.Username,
+		password: h.Password,
+		session: RedfishSession{
+			disabled: h.BasicAuth,
+		},
 		http: &http.Client{
 			Transport: &http.Transport{
 				Proxy:           http.ProxyFromEnvironment,
@@ -52,6 +57,10 @@ func NewRedfish(scheme, hostname, username, password string, port uint) *Redfish
 }
 
 func (r *Redfish) CreateSession() bool {
+	if r.session.disabled {
+		return false
+	}
+
 	url := fmt.Sprintf("%s/redfish/v1/SessionService/Sessions", r.baseurl)
 	session := Session{
 		Username: r.username,

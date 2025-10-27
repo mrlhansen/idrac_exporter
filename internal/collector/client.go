@@ -43,13 +43,7 @@ type Client struct {
 
 func NewClient(h *config.HostConfig) *Client {
 	client := &Client{
-		redfish: NewRedfish(
-			h.Scheme,
-			h.Hostname,
-			h.Username,
-			h.Password,
-			h.Port,
-		),
+		redfish: NewRedfish(h),
 	}
 
 	client.redfish.CreateSession()

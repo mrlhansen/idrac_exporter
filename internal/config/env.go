@@ -42,9 +42,13 @@ func getEnvUint(env string, val *uint) {
 }
 
 func (c *RootConfig) FromEnvironment() {
-	var username string
-	var password string
-	var scheme string
+	var (
+		use_basic_auth bool
+		username       string
+		password       string
+		scheme         string
+		port           uint
+	)
 
 	getEnvString("CONFIG_ADDRESS", &c.Address)
 	getEnvString("CONFIG_METRICS_PREFIX", &c.MetricsPrefix)
@@ -58,7 +62,9 @@ func (c *RootConfig) FromEnvironment() {
 
 	getEnvUint("CONFIG_PORT", &c.Port)
 	getEnvUint("CONFIG_TIMEOUT", &c.Timeout)
+	getEnvUint("CONFIG_DEFAULT_PORT", &port)
 
+	getEnvBool("CONFIG_DEFAULT_USE_BASIC_AUTH", &use_basic_auth)
 	getEnvBool("CONFIG_TLS_ENABLED", &c.TLS.Enabled)
 	getEnvBool("CONFIG_METRICS_ALL", &c.Collect.All)
 	getEnvBool("CONFIG_METRICS_SYSTEM", &c.Collect.System)
@@ -88,6 +94,16 @@ func (c *RootConfig) FromEnvironment() {
 
 	if len(scheme) > 0 {
 		def.Scheme = scheme
+		ok = true
+	}
+
+	if port > 0 {
+		def.Port = port
+		ok = true
+	}
+
+	if use_basic_auth {
+		def.BasicAuth = true
 		ok = true
 	}
 
