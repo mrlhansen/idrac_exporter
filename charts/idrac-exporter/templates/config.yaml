@@ -1,4 +1,4 @@
-{{ if .Values.idracConfig }}
+{{- if and (not .Values.existingSecret) .Values.idracConfig }}
 apiVersion: v1
 kind: Secret
 metadata:
@@ -7,4 +7,4 @@ metadata:
     {{- include "idrac-exporter.labels" . | nindent 4 }}
 stringData:
   idrac.yml: {{ tpl .Values.idracConfig . | quote }}
-{{ end }}
+{{- end }}
