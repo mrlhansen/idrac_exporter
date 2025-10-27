@@ -1,0 +1,41 @@
+{{- if .Values.prometheus.scrapeConfig.enabled }}
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: ScrapeConfig
+metadata:
+  name: {{ template "idrac-exporter.fullname" . }}
+{{- with .Values.prometheus.scrapeConfig.namespace }}
+  namespace: {{ . }}
+{{- end }}
+  labels:
+    app: {{ template "idrac-exporter.name" . }}
+    chart: {{ template "idrac-exporter.chart" . }}
+    heritage: {{ .Release.Service }}
+  {{- if .Values.prometheus.scrapeConfig.additionalLabels }}
+{{ toYaml .Values.prometheus.scrapeConfig.additionalLabels | indent 4 }}
+  {{- end }}
+spec:
+  httpSDConfigs:
+    - url: http://{{ include "idrac-exporter.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}/discover
+{{- with .Values.prometheus.scrapeConfig.interval }}
+  scrapeInterval: {{ . }}
+{{- end }}
+{{- with .Values.prometheus.scrapeConfig.scrapeTimeout }}
+  scrapeTimeout: {{ . }}
+{{- end }}
+{{- with .Values.prometheus.scrapeConfig.metricRelabelings }}
+  metricRelabelings:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+  relabelings:
+    - sourceLabels: [__address__]
+      targetLabel: __param_target
+    - sourceLabels: [__param_target]
+      targetLabel: instance
+    - sourceLabels: [__meta_url]
+      targetLabel: __address__
+      regex: (https?.{3})([^\/]+)(.+)
+      replacement: $2
+{{- with .Values.prometheus.scrapeConfig.relabelings }}
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
