@@ -27,6 +27,7 @@ func GetHostConfig(target string) *HostConfig {
 		host = &HostConfig{
 			Hostname: target,
 			Scheme:   def.Scheme,
+			Port:     def.Port,
 			Username: def.Username,
 			Password: def.Password,
 		}

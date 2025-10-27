@@ -40,7 +40,8 @@ tls:
 # Hosts can be referenced either via their IP address or their hostname, as long
 # as it matches the "target" parameter when scraping the metrics. Optionally you
 # can also specify a scheme (http or https) for accessing the Redfish API, which
-# automatically defaults to https.
+# automatically defaults to https. You can also specify a custom port if the server
+# is not using the default port (443 for https, 80 for http).
 #
 # When the "target" does not match any host, the exporter will attempt to use the
 # login information under "default".
@@ -55,6 +56,10 @@ hosts:
     username: user
     password: pass
     scheme: http
+  192.168.1.2:
+    username: user
+    password: pass
+    port: 8443
   host01.example.com:
     username: user
     password: pass
