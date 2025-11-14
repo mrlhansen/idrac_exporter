@@ -384,6 +384,12 @@ type StorageDrive struct {
 			LocationOrdinalValue int `json:"LocationOrdinalValue"`
 		} `json:"PartLocation"`
 	} `json:"PhysicalLocation"`
+	// Inspur
+	Oem struct {
+		Public struct {
+			TimeLeft float64 `json:"TimeLeft"`
+		} `json:"Public"`
+	} `json:"Oem"`
 	// iLO 4
 	CapacityMiB                       int     `json:"CapacityMiB"`
 	InterfaceType                     string  `json:"InterfaceType"`

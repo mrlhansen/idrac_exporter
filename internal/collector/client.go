@@ -653,6 +653,11 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
 			}
 
+			// Inspur
+			if (client.vendor == INSPUR) && drive.Oem.Public.TimeLeft > 0 {
+				drive.PredictedLifeLeft = drive.Oem.Public.TimeLeft
+			}
+
 			mc.NewStorageDriveInfo(ch, storage.Id, &drive)
 			mc.NewStorageDriveHealth(ch, storage.Id, &drive)
 			mc.NewStorageDriveCapacity(ch, storage.Id, &drive)
