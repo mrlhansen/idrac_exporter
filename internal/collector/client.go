@@ -1,6 +1,8 @@
 package collector
 
 import (
+	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -612,6 +614,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 	if !ok {
 		return false
 	}
+	re := regexp.MustCompile(`Chassis\/([^\/]+)`)
 
 	for _, c := range group.Members.GetLinks() {
 		storage := Storage{}
@@ -653,9 +656,17 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
 			}
 
-			// Inspur
-			if (client.vendor == INSPUR) && drive.Oem.Public.TimeLeft > 0 {
+			// Inspur (issue #162)
+			if (client.vendor == INSPUR) && (drive.PredictedLifeLeft == 0) {
 				drive.PredictedLifeLeft = drive.Oem.Public.TimeLeft
+			}
+
+			// Supermicro (issue #164)
+			if client.vendor == SUPERMICRO {
+				match := re.FindStringSubmatch(drive.OdataId)
+				if len(match) == 2 {
+					drive.Id = fmt.Sprintf("%s:%s", match[1], drive.Id)
+				}
 			}
 
 			mc.NewStorageDriveInfo(ch, storage.Id, &drive)

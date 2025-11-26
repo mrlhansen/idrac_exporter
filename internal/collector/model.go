@@ -361,6 +361,7 @@ type StorageController struct {
 }
 
 type StorageDrive struct {
+	Odata
 	Id                      string  `json:"Id"`
 	Name                    string  `json:"Name"`
 	Description             string  `json:"Description"`
