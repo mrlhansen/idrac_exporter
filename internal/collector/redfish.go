@@ -56,6 +56,13 @@ func NewRedfish(h *config.HostConfig) *Redfish {
 	}
 }
 
+func (r *Redfish) DisableSession() {
+	r.session.disabled = true
+	r.session.token = ""
+	r.session.id = ""
+	log.Info("Session authentication disabled for %s due to failed creation or refresh", r.hostname)
+}
+
 func (r *Redfish) CreateSession() bool {
 	if r.session.disabled {
 		return false
@@ -92,7 +99,7 @@ func (r *Redfish) CreateSession() bool {
 		url = fmt.Sprintf("%s/redfish/v1/Sessions", r.baseurl)
 		resp, err = r.http.Post(url, "application/json", bytes.NewBuffer(body))
 		if err != nil {
-			r.session.disabled = true
+			r.DisableSession()
 			return false
 		}
 	}
@@ -163,16 +170,10 @@ func (r *Redfish) RefreshSession() bool {
 		return false
 	}
 
-	defer func() {
-		if r.session.disabled {
-			log.Info("Session authentication disabled for %s due to failed refresh", r.hostname)
-		}
-	}()
-
 	if len(r.session.token) == 0 {
 		ok := r.CreateSession()
 		if !ok {
-			r.session.disabled = true
+			r.DisableSession()
 		}
 		return ok
 	}
@@ -195,14 +196,11 @@ func (r *Redfish) RefreshSession() bool {
 	}
 
 	if resp.StatusCode == http.StatusUnauthorized {
-		if r.CreateSession() {
-			return true
-		} else {
-			r.session.disabled = true
-			r.session.token = ""
-			r.session.id = ""
-			return false
+		ok := r.CreateSession()
+		if !ok {
+			r.DisableSession()
 		}
+		return ok
 	}
 
 	return true
