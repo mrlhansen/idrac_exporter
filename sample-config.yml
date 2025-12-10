@@ -1,7 +1,9 @@
-# This is a sample configuration file for the iDRAC exporter,
+# This is an example configuration file for the iDRAC exporter,
 # including default values and equivalent environment variables.
 # The environment variables take precedence over the values in
 # the configuration file.
+# Environment variables can also be referenced in the configuration
+# file using the syntax ${MY_VARIABLE}
 
 # Listen address
 # Default value: 0.0.0.0
