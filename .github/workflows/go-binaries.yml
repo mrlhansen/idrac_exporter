@@ -40,5 +40,7 @@ jobs:
           md5sum: false
           compress_assets: false
           ldflags: >
+            -w
+            -s
             -X github.com/mrlhansen/idrac_exporter/internal/version.Version=${{ env.VERSION }}
             -X github.com/mrlhansen/idrac_exporter/internal/version.Revision=${{ env.REVISION }}
