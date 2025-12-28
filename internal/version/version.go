@@ -1,6 +1,6 @@
 package version
 
 var (
-	Version  string
-	Revision string
+	Version  string = "unknown"
+	Revision string = "unknown"
 )

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"runtime"
 	"strings"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
@@ -14,18 +15,28 @@ import (
 
 func main() {
 	var (
-		verbose bool
-		debug   bool
-		file    string
-		watch   bool
-		err     error
+		verbose     bool
+		debug       bool
+		file        string
+		watch       bool
+		err         error
+		showVersion bool
 	)
 
 	flag.BoolVar(&verbose, "verbose", false, "Enable more verbose logging")
 	flag.BoolVar(&debug, "debug", false, "Dump JSON response from Redfish requests (only for debugging purpose)")
 	flag.StringVar(&file, "config", "/etc/prometheus/idrac.yml", "Path to the configuration file")
 	flag.BoolVar(&watch, "config-watch", false, "Watch the configuration file for changes and enable automatic reloading")
+	flag.BoolVar(&showVersion, "version", false, "Show version and exit")
 	flag.Parse()
+
+	if showVersion {
+		fmt.Printf("version: %s\n", version.Version)
+		fmt.Printf("revision: %s\n", version.Revision)
+		fmt.Printf("goversion: %s\n", runtime.Version())
+		fmt.Printf("platform: %s/%s\n", runtime.GOOS, runtime.GOARCH)
+		return
+	}
 
 	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
 	LoadConfig(file, watch)
