@@ -33,18 +33,18 @@ type Redfish struct {
 
 const redfishRootPath = "/redfish/v1"
 
-func NewRedfish(h *config.HostConfig) *Redfish {
-	baseurl := fmt.Sprintf("%s://%s", h.Scheme, h.Hostname)
-	if h.Port > 0 {
-		baseurl = fmt.Sprintf("%s:%d", baseurl, h.Port)
+func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
+	baseurl := fmt.Sprintf("%s://%s", auth.Scheme, host)
+	if auth.Port > 0 {
+		baseurl = fmt.Sprintf("%s:%d", baseurl, auth.Port)
 	}
 	return &Redfish{
 		baseurl:  baseurl,
-		hostname: h.Hostname,
-		username: h.Username,
-		password: h.Password,
+		hostname: host,
+		username: auth.Username,
+		password: auth.Password,
 		session: RedfishSession{
-			disabled: h.BasicAuth,
+			disabled: auth.BasicAuth,
 		},
 		http: &http.Client{
 			Transport: &http.Transport{

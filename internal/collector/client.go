@@ -43,9 +43,9 @@ type Client struct {
 	}
 }
 
-func NewClient(h *config.HostConfig) *Client {
+func NewClient(host string, auth *config.AuthConfig) *Client {
 	client := &Client{
-		redfish: NewRedfish(h),
+		redfish: NewRedfish(host, auth),
 	}
 
 	client.redfish.CreateSession()

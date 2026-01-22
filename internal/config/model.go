@@ -2,13 +2,12 @@ package config
 
 import "sync"
 
-type HostConfig struct {
+type AuthConfig struct {
 	Username  string `yaml:"username"`
 	Password  string `yaml:"password"`
 	Scheme    string `yaml:"scheme"`
 	Port      uint   `yaml:"port"`
 	BasicAuth bool   `yaml:"use_basic_auth"`
-	Hostname  string
 }
 
 type CollectConfig struct {
@@ -47,5 +46,6 @@ type RootConfig struct {
 	Event         EventConfig            `yaml:"events"`
 	TLS           TLSConfig              `yaml:"tls"`
 	Timeout       uint                   `yaml:"timeout"`
-	Hosts         map[string]*HostConfig `yaml:"hosts"`
+	Hosts         map[string]*AuthConfig `yaml:"hosts"`
+	Auths         map[string]*AuthConfig `yaml:"auths"`
 }

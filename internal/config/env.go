@@ -79,7 +79,7 @@ func (c *RootConfig) FromEnvironment() {
 
 	def, ok := c.Hosts["default"]
 	if !ok {
-		def = &HostConfig{}
+		def = &AuthConfig{}
 	}
 
 	if len(username) > 0 {

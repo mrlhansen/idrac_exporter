@@ -69,10 +69,11 @@ func metricsHandler(rsp http.ResponseWriter, req *http.Request) {
 		http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
 		return
 	}
+	auth := req.URL.Query().Get("auth")
 
 	log.Debug("Handling request from %s for host %s", req.Host, target)
 
-	c, err := collector.GetCollector(target)
+	c, err := collector.GetCollector(target, auth)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error instantiating metrics collector for host %s: %v", target, err)
 		log.Error("%v", errorMsg)

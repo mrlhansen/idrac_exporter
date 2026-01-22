@@ -13,34 +13,62 @@ import (
 var Debug bool = false
 var Config *RootConfig = nil
 
-func GetHostConfig(target string) *HostConfig {
+func (c *AuthConfig) Validate() error {
+	if c == nil {
+		return fmt.Errorf("empty section")
+	}
+
+	if c.Username == "" {
+		return fmt.Errorf("missing username")
+	}
+
+	if c.Password == "" {
+		return fmt.Errorf("missing password")
+	}
+
+	switch c.Scheme {
+	case "":
+		c.Scheme = "https"
+	case "http", "https":
+	default:
+		return fmt.Errorf("invalid scheme")
+	}
+
+	return nil
+}
+
+func GetAuthConfig(target, auth string) *AuthConfig {
+	var def *AuthConfig
+
 	Config.Mutex.Lock()
 	defer Config.Mutex.Unlock()
 
 	host, ok := Config.Hosts[target]
-	if !ok {
-		def, ok := Config.Hosts["default"]
-		if !ok {
-			log.Error("Could not find login information for host: %s", target)
-			return nil
-		}
-		host = &HostConfig{
-			Hostname:  target,
-			Scheme:    def.Scheme,
-			Port:      def.Port,
-			BasicAuth: def.BasicAuth,
-			Username:  def.Username,
-			Password:  def.Password,
-		}
-		Config.Hosts[target] = host
+	if ok {
+		return host
 	}
 
-	return host
+	if len(auth) > 0 {
+		def, ok = Config.Auths[auth]
+		if !ok {
+			log.Error("Missing login details: auth=%s", auth)
+			return nil
+		}
+		return def
+	}
+
+	def, ok = Config.Hosts["default"]
+	if !ok {
+		log.Error("Missing login details: host=%s", target)
+		return nil
+	}
+	return def
 }
 
 func NewConfig() *RootConfig {
 	return &RootConfig{
-		Hosts: make(map[string]*HostConfig),
+		Hosts: make(map[string]*AuthConfig),
+		Auths: make(map[string]*AuthConfig),
 	}
 }
 
@@ -69,7 +97,7 @@ func (c *RootConfig) FromFile(filename string) error {
 }
 
 func (c *RootConfig) Validate() error {
-	// main section
+	// root
 	if c.Address == "" {
 		c.Address = "0.0.0.0"
 	}
@@ -86,34 +114,23 @@ func (c *RootConfig) Validate() error {
 		c.MetricsPrefix = "idrac"
 	}
 
-	// hosts section
-	if len(c.Hosts) == 0 {
-		return fmt.Errorf("empty section: hosts")
-	}
-
+	// hosts
 	for k, v := range c.Hosts {
-		if v == nil {
-			return fmt.Errorf("missing username and password for host: %s", k)
+		err := v.Validate()
+		if err != nil {
+			return fmt.Errorf("host=%s: %v", k, err)
 		}
-		if v.Username == "" {
-			return fmt.Errorf("missing username for host: %s", k)
-		}
-		if v.Password == "" {
-			return fmt.Errorf("missing password for host: %s", k)
-		}
-
-		switch v.Scheme {
-		case "":
-			v.Scheme = "https"
-		case "http", "https":
-		default:
-			return fmt.Errorf("invalid scheme for host: %s", k)
-		}
-
-		v.Hostname = k
 	}
 
-	// events section
+	// auths
+	for k, v := range c.Auths {
+		err := v.Validate()
+		if err != nil {
+			return fmt.Errorf("auth=%s: %v", k, err)
+		}
+	}
+
+	// events
 	switch strings.ToLower(c.Event.Severity) {
 	case "ok":
 		c.Event.SeverityLevel = 0
