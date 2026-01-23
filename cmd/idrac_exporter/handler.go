@@ -44,6 +44,10 @@ func healthHandler(rsp http.ResponseWriter, req *http.Request) {
 	// just return a simple 200 for now
 }
 
+func reloadHandler(rsp http.ResponseWriter, req *http.Request) {
+	ReloadConfig(flagConfig)
+}
+
 func resetHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {

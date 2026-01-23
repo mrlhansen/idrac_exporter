@@ -14,6 +14,7 @@ The program supports several different systems, because they all follow the Redf
 * HPE iLO
 * Dell iDRAC
 * Lenovo XClarity
+* Supermicro BMC
 
 
 ## Installation
@@ -53,7 +54,7 @@ helm install idrac-exporter idrac-exporter/idrac-exporter
 
 
 ## Configuration
-There are many [configuration options](sample-config.yml) for the exporter, but most importantly you need to provide a username and password for all remote hosts, and you can select which metrics should be exported. By default, the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
+There are many [configuration options](sample-config.yml) for the exporter, but most importantly you must provide credentials for all remote hosts and choose what metrics should be exported. By default, the exporter looks for the configuration file in `/etc/prometheus/idrac.yml` but the path can be specified using the `-config` option.
 
 ```yaml
 address: 127.0.0.1 # Listen address
@@ -66,11 +67,21 @@ hosts:
   192.168.1.1:
     username: user
     password: pass
+auths:
+  mygroup:
+    username: user
+    password: pass
 metrics:
   all: true
 ```
 
-As shown in the above example, under `hosts` you can specify login information for individual hosts via their IP address or hostname, otherwise the exporter will attempt to use the login information under `default`. The login user only needs read-only permissions. Under `metrics` you can select what kind of metrics that should be returned.
+As shown in the example above, under `hosts` you can define credentials for individual hosts via their IP address or hostname. When a matching host cannot be found, the exporter will attempt to use the credentials under `default`. Alternatively you can define credentials for a group of hosts under the `auths` section and reference them in the request using the `auth` query parameter. For example:
+
+```text
+http://localhost:9348/metrics?target=192.168.10.10&auth=mygroup
+```
+
+You may combine `hosts` and `auths` in any way that fits your environment. The login user only needs read-only permissions and it is recommended to create a dedicated unpriviledged user for the exporter.
 
 **For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file. In this file you can also find the corresponding environment variables for the different configuration options.**
 
@@ -222,12 +233,13 @@ idrac_exporter_scrape_errors_total
 
 
 ## Endpoints
-The exporter currently has three different endpoints.
+The exporter has several different endpoints.
 
 | Endpoint     | Parameters | Description                                         |
 | ------------ | ---------- | --------------------------------------------------- |
 | `/metrics`   | `target`   | Metrics for the specified target                    |
 | `/reset`     | `target`   | Reset internal state for the specified target       |
+| `/reload`    |            | Trigger a reload of the configuration file          |
 | `/discover`  |            | Endpoint for Prometheus Service Discovery           |
 | `/health`    |            | Returns http status 200 and nothing else            |
 

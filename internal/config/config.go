@@ -38,31 +38,32 @@ func (c *AuthConfig) Validate() error {
 }
 
 func GetAuthConfig(target, auth string) *AuthConfig {
-	var def *AuthConfig
+	var host *AuthConfig
+	var ok bool
 
 	Config.Mutex.Lock()
 	defer Config.Mutex.Unlock()
 
-	host, ok := Config.Hosts[target]
+	if len(auth) > 0 {
+		host, ok = Config.Auths[auth]
+		if !ok {
+			log.Error("Could not find login credentials: auth=%s", auth)
+			return nil
+		}
+		return host
+	}
+
+	host, ok = Config.Hosts[target]
 	if ok {
 		return host
 	}
 
-	if len(auth) > 0 {
-		def, ok = Config.Auths[auth]
-		if !ok {
-			log.Error("Missing login details: auth=%s", auth)
-			return nil
-		}
-		return def
-	}
-
-	def, ok = Config.Hosts["default"]
+	host, ok = Config.Hosts["default"]
 	if !ok {
-		log.Error("Missing login details: host=%s", target)
+		log.Error("Could not find login credentials: host=%s", target)
 		return nil
 	}
-	return def
+	return host
 }
 
 func NewConfig() *RootConfig {
@@ -85,10 +86,10 @@ func (c *RootConfig) FromFile(filename string) error {
 		return fmt.Errorf("open configuration file: %v", err)
 	}
 
-	// expand environment variables
-	rendered := os.ExpandEnv(string(data))
+	temp := os.ExpandEnv(string(data))
+	data = []byte(temp)
 
-	err = yaml.Unmarshal([]byte(rendered), c)
+	err = yaml.Unmarshal(data, c)
 	if err != nil {
 		return fmt.Errorf("parse configuration file: %v", err)
 	}

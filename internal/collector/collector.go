@@ -664,7 +664,7 @@ func GetCollector(target, auth string) (*Collector, error) {
 	if collector.client == nil {
 		auth := config.GetAuthConfig(target, auth)
 		if auth == nil {
-			return nil, fmt.Errorf("failed to get login details")
+			return nil, fmt.Errorf("could not find login credentials")
 		}
 		c := NewClient(target, auth)
 		if c == nil {

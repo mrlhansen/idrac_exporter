@@ -13,24 +13,25 @@ import (
 	"github.com/mrlhansen/idrac_exporter/internal/version"
 )
 
-func main() {
-	var (
-		verbose     bool
-		debug       bool
-		file        string
-		watch       bool
-		err         error
-		showVersion bool
-	)
+var (
+	flagVerbose bool
+	flagDebug   bool
+	flagConfig  string
+	flagWatch   bool
+	flagVersion bool
+)
 
-	flag.BoolVar(&verbose, "verbose", false, "Enable more verbose logging")
-	flag.BoolVar(&debug, "debug", false, "Dump JSON response from Redfish requests (only for debugging purpose)")
-	flag.StringVar(&file, "config", "/etc/prometheus/idrac.yml", "Path to the configuration file")
-	flag.BoolVar(&watch, "config-watch", false, "Watch the configuration file for changes and enable automatic reloading")
-	flag.BoolVar(&showVersion, "version", false, "Show version and exit")
+func main() {
+	var err error
+
+	flag.BoolVar(&flagVerbose, "verbose", false, "Enable more verbose logging")
+	flag.BoolVar(&flagDebug, "debug", false, "Dump JSON response from Redfish requests (only for debugging purpose)")
+	flag.StringVar(&flagConfig, "config", "/etc/prometheus/idrac.yml", "Path to the configuration file")
+	flag.BoolVar(&flagWatch, "config-watch", false, "Watch the configuration file for changes and enable automatic reloading")
+	flag.BoolVar(&flagVersion, "version", false, "Show version and exit")
 	flag.Parse()
 
-	if showVersion {
+	if flagVersion {
 		fmt.Printf("version: %s\n", version.Version)
 		fmt.Printf("revision: %s\n", version.Revision)
 		fmt.Printf("goversion: %s\n", runtime.Version())
@@ -39,20 +40,21 @@ func main() {
 	}
 
 	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
-	LoadConfig(file, watch)
+	LoadConfig(flagConfig, flagWatch)
 
-	if debug {
+	if flagDebug {
 		config.Debug = true
-		verbose = true
+		flagVerbose = true
 	}
 
-	if verbose {
+	if flagVerbose {
 		log.SetLevel(log.LevelDebug)
 	}
 
 	http.HandleFunc("/discover", discoverHandler)
 	http.HandleFunc("/metrics", metricsHandler)
 	http.HandleFunc("/health", healthHandler)
+	http.HandleFunc("/reload", reloadHandler)
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/", rootHandler)
 

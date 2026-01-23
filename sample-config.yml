@@ -2,6 +2,7 @@
 # including default values and equivalent environment variables.
 # The environment variables take precedence over the values in
 # the configuration file.
+#
 # Environment variables can also be referenced in the configuration
 # file using the syntax ${MY_VARIABLE}
 
@@ -38,7 +39,7 @@ tls:
   cert_file: ""   # CONFIG_TLS_CERT_FILE=
   key_file: ""    # CONFIG_TLS_KEY_FILE=
 
-# The hosts section is used to define login information for the different targets.
+# The hosts section is used to define login credentials for the different targets.
 # Hosts can be referenced either via their IP address or their hostname, as long
 # as it matches the "target" parameter when scraping the metrics. Optionally you
 # can also specify a scheme (http or https) for accessing the Redfish API, which
@@ -49,10 +50,10 @@ tls:
 # is used by default) and always use HTTP basic auth. This is NOT recommended and
 # it should only be used if there is an actual reason.
 #
-# When the "target" does not match any host, the exporter will attempt to use the
-# login information under "default". The information in the default section can also
-# be configured using environment variables, but this is not possible for any of the
-# other targets.
+# When the "target" parameter does not match any host, the exporter will attempt
+# to use the login credentials under "default". The credentials under "default"
+# can also be configured using environment variables, but this is not possible
+# for any of the other targets.
 hosts:
   default:
     username: user         # CONFIG_DEFAULT_USERNAME=user
@@ -67,6 +68,15 @@ hosts:
     username: user
     password: pass
   host01.example.com:
+    username: user
+    password: pass
+
+# The auths section has the same structure as the hosts section. Here you can
+# define credentials for a group of hosts. When scraping a target you can
+# reference the group via the "auth" query parameter. This is similar to what
+# the SNMP exporter does.
+auths:
+  mygroup:
     username: user
     password: pass
 
