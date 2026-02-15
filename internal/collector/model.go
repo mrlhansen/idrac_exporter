@@ -601,6 +601,15 @@ type PowerResponse struct {
 			PsuSmartRedundancyStatusSensor    string  `json:"PsuSmartRedundancyStatusSensor"`
 			PsuSmartRedundancyActivePSUSensor int     `json:"PsuSmartRedundancyActivePSUSensor"`
 		} `json:"ts_fujitsu"`
+		Public *struct {
+			OdataType               string  `json:"@odata.type"`
+			CurrentCPUPowerWatts    float64 `json:"CurrentCPUPowerWatts"`
+			CurrentMemoryPowerWatts float64 `json:"CurrentMemoryPowerWatts"`
+			CurrentFANPowerWatts    float64 `json:"CurrentFANPowerWatts"`
+			TotalPower              float64 `json:"TotalPower"`
+			WarningThreshold        float64 `json:"WarningThreshold"`
+			CriticalThreshold       float64 `json:"CriticalThreshold"`
+		} `json:"Public"`
 	} `json:"Oem"`
 }
 
@@ -655,6 +664,29 @@ type PowerSupplyUnit struct {
 	SparePartNumber      string       `json:"SparePartNumber"`
 	Status               Status       `json:"Status"`
 	Redundancy           []Redundancy `json:"Redundancy"`
+	Oem                  struct {
+		Huawei *struct {
+			Protocol                string  `json:"Protocol"`
+			ActiveStandby           string  `json:"ActiveStandby"`
+			PowerInputWatts         float64 `json:"PowerInputWatts"`
+			InputAmperage           float64 `json:"InputAmperage"`
+			PowerOutputWatts        float64 `json:"PowerOutputWatts"`
+			OutputAmperage          float64 `json:"OutputAmperage"`
+			InletTemperatureCelsius float64 `json:"InletTemperatureCelsius"`
+			InnerTemperatureCelsius float64 `json:"InnerTemperatureCelsius"`
+			OutputVoltage           float64 `json:"OutputVoltage"`
+			DeviceLocator           string  `json:"DeviceLocator"`
+			SlotNumber              int     `json:"SlotNumber"`
+			ManufactureDate         string  `json:"ManufactureDate"`
+			CurrentCapacityAmperage float64 `json:"CurrentCapacityAmperage"`
+			TotalRunningHours       float64 `json:"TotalRunningHours"`
+			InputFrequencyHz        float64 `json:"InputFrequencyHz"`
+			PowerSupplyChannel      string  `json:"PowerSupplyChannel"`
+			VinChannelAVoltage      float64 `json:"VinChannelAVoltage"`
+			VinChannelBVoltage      float64 `json:"VinChannelBVoltage"`
+			Position                string  `json:"Position"`
+		} `json:"Huawei"`
+	}
 }
 
 func (psu *PowerSupplyUnit) GetOutputPower() float64 {
