@@ -39,6 +39,11 @@ tls:
   cert_file: ""   # CONFIG_TLS_CERT_FILE=
   key_file: ""    # CONFIG_TLS_KEY_FILE=
 
+# When setting this variable, the specified target will be used when the metrics
+# endpoint is called without the target parameter. Unset by default.
+# Environment variable: CONFIG_DEFAULT_TARGET=192.168.1.1
+default_target: "192.168.1.1"
+
 # The hosts section is used to define login credentials for the different targets.
 # Hosts can be referenced either via their IP address or their hostname, as long
 # as it matches the "target" parameter when scraping the metrics. Optionally you

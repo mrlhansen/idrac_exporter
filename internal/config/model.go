@@ -42,6 +42,7 @@ type RootConfig struct {
 	Port          uint                   `yaml:"port"`
 	HttpsProxy    string                 `yaml:"https_proxy"`
 	MetricsPrefix string                 `yaml:"metrics_prefix"`
+	DefaultTarget string                 `yaml:"default_target"`
 	Collect       CollectConfig          `yaml:"metrics"`
 	Event         EventConfig            `yaml:"events"`
 	TLS           TLSConfig              `yaml:"tls"`

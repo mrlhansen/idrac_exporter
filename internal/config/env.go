@@ -52,6 +52,7 @@ func (c *RootConfig) FromEnvironment() {
 
 	getEnvString("CONFIG_ADDRESS", &c.Address)
 	getEnvString("CONFIG_METRICS_PREFIX", &c.MetricsPrefix)
+	getEnvString("CONFIG_DEFAULT_TARGET", &c.DefaultTarget)
 	getEnvString("CONFIG_DEFAULT_USERNAME", &username)
 	getEnvString("CONFIG_DEFAULT_PASSWORD", &password)
 	getEnvString("CONFIG_DEFAULT_SCHEME", &scheme)

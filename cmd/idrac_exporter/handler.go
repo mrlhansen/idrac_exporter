@@ -51,12 +51,14 @@ func reloadHandler(rsp http.ResponseWriter, req *http.Request) {
 func resetHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {
-		log.Error("Received request from %s without 'target' parameter", req.Host)
-		http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
-		return
+		target = config.Config.DefaultTarget
+		if target == "" {
+			log.Error("Received request from %s without 'target' parameter", req.Host)
+			http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
+			return
+		}
 	}
-
-	log.Debug("Handling reset-request from %s for host %s", req.Host, target)
+	log.Debug("Handling reset request from %s for host %s", req.Host, target)
 
 	collector.Reset(target)
 }
@@ -69,13 +71,16 @@ func discoverHandler(rsp http.ResponseWriter, req *http.Request) {
 func metricsHandler(rsp http.ResponseWriter, req *http.Request) {
 	target := req.URL.Query().Get("target")
 	if target == "" {
-		log.Error("Received request from %s without 'target' parameter", req.Host)
-		http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
-		return
+		target = config.Config.DefaultTarget
+		if target == "" {
+			log.Error("Received request from %s without 'target' parameter", req.Host)
+			http.Error(rsp, "Query parameter 'target' is mandatory", http.StatusBadRequest)
+			return
+		}
 	}
 	auth := req.URL.Query().Get("auth")
 
-	log.Debug("Handling request from %s for host %s", req.Host, target)
+	log.Debug("Handling metrics request from %s for host %s", req.Host, target)
 
 	c, err := collector.GetCollector(target, auth)
 	if err != nil {
