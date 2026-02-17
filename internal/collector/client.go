@@ -22,6 +22,7 @@ const (
 	FUJITSU
 	SUPERMICRO
 	ADVANTECH
+	HUAWEI
 )
 
 type Client struct {
@@ -113,7 +114,7 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = HPE
 	} else if strings.Contains(m, "lenovo") {
 		client.vendor = LENOVO
-	} else if strings.Contains(m, "inspur") {
+	} else if strings.Contains(m, "inspur") || strings.Contains(m, "ieit") {
 		client.vendor = INSPUR
 	} else if strings.Contains(m, "h3c") {
 		client.vendor = H3C
@@ -127,6 +128,8 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = SUPERMICRO
 	} else if strings.Contains(m, "advantech") {
 		client.vendor = ADVANTECH
+	} else if strings.Contains(m, "huawei") || strings.Contains(m, "kunlun") {
+		client.vendor = HUAWEI
 	}
 
 	// Path for event log
@@ -527,12 +530,25 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 		}
 
 		id := strconv.Itoa(i)
+
 		mc.NewPowerSupplyHealth(ch, psu.Status.Health, id)
-		mc.NewPowerSupplyInputWatts(ch, psu.PowerInputWatts, id)
-		mc.NewPowerSupplyInputVoltage(ch, psu.LineInputVoltage, id)
-		mc.NewPowerSupplyOutputWatts(ch, psu.GetOutputPower(), id)
+		if client.vendor == HUAWEI && psu.Oem.Huawei != nil && psu.Oem.Huawei.PowerInputWatts > 0 {
+			mc.NewPowerSupplyInputWatts(ch, psu.Oem.Huawei.PowerInputWatts, id)
+		} else {
+			mc.NewPowerSupplyInputWatts(ch, psu.PowerInputWatts, id)
+		}
+		if client.vendor == HUAWEI && psu.Oem.Huawei != nil && psu.Oem.Huawei.PowerOutputWatts > 0 {
+			mc.NewPowerSupplyOutputWatts(ch, psu.Oem.Huawei.PowerOutputWatts, id)
+		} else {
+			mc.NewPowerSupplyOutputWatts(ch, psu.GetOutputPower(), id)
+		}
 		mc.NewPowerSupplyCapacityWatts(ch, psu.PowerCapacityWatts, id)
 		mc.NewPowerSupplyEfficiencyPercent(ch, psu.EfficiencyPercent, id)
+
+	}
+
+	if client.vendor == INSPUR && len(resp.PowerControl) == 0 && resp.Oem.Public != nil {
+		mc.NewPowerControlConsumedWatts(ch, resp.Oem.Public.TotalPower, "0", "Chassis Power")
 	}
 
 	for i, pc := range resp.PowerControl {
