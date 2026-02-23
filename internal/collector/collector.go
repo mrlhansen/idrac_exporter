@@ -106,6 +106,7 @@ type Collector struct {
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
 	DellControllerBatteryHealth   *prometheus.Desc
+	DellManagerInfo               *prometheus.Desc
 }
 
 func NewCollector() *Collector {
@@ -415,6 +416,11 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "dell", "controller_battery_health"),
 			"Health status of storage controller battery",
 			[]string{"id", "storage_id", "name", "status"}, nil,
+		),
+		DellManagerInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "dell", "manager_info"),
+			"Information about iDRAC manager",
+			[]string{"type", "version", "model"}, nil,
 		),
 	}
 

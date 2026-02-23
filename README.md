@@ -216,11 +216,12 @@ idrac_network_port_link_up{adapter_id,id,status}
 ```
 
 ### Extra
-These metrics do not belong anywhere else and they might be OEM specific. At the moment only two Dell specific metrics are exported.
+These metrics do not belong anywhere else and they might be OEM specific. At the moment only some Dell specific metrics are exported.
 
 ```text
 idrac_dell_battery_rollup_health{status}
 idrac_dell_estimated_system_airflow_cfm
+idrac_dell_manager_info{model,type,version}
 ```
 
 ### Exporter
