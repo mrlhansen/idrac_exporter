@@ -9,6 +9,8 @@ import (
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 )
 
+// ...existing code...
+
 func ReloadConfig(filename string) {
 	cfg := config.NewConfig()
 	old := config.Config
@@ -67,23 +69,43 @@ func WatchConfig(filename string) {
 		return
 	}
 
+	var retryCount int
+	var lastRetryTime time.Time
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
+				log.Error("Watcher events channel closed unexpectedly. Restarting watcher...")
+				go WatchConfig(filename)
 				return
 			}
 			if time.Since(lastReload) < time.Second {
-				break // needed to deduplicate e.g. multiple write events
+				break // deduplicate multiple write events
 			}
 			reload := false
 			if event.Has(fsnotify.Write) {
 				reload = true
-			} else if event.Has(fsnotify.Remove) {
+			} else if event.Has(fsnotify.Remove) || event.Has(fsnotify.Rename) {
 				watcher.Remove(event.Name)
-				err := watcher.Add(filename)
-				if err != nil {
-					return
+				now := time.Now()
+				if lastRetryTime.IsZero() || now.Sub(lastRetryTime) > 24*time.Hour {
+					retryCount = 0 // Expire retry count after 24 hours
+				}
+				lastRetryTime = now
+				for i := retryCount; i < 5; i++ {
+					err := watcher.Add(filename)
+					if err == nil {
+						retryCount = 0
+						break
+					}
+					log.Error("Failed to re-add watcher for %s (attempt %d): %v", filename, i+1, err)
+					time.Sleep(500 * time.Millisecond)
+					retryCount++
+					if retryCount == 5 {
+						log.Error("Watcher could not be re-added after multiple attempts. Restarting watcher...")
+						go WatchConfig(filename)
+						return
+					}
 				}
 				reload = true
 			}
@@ -93,6 +115,8 @@ func WatchConfig(filename string) {
 			}
 		case err, ok := <-watcher.Errors:
 			if !ok {
+				log.Error("Watcher errors channel closed unexpectedly. Restarting watcher...")
+				go WatchConfig(filename)
 				return
 			}
 			log.Error("File watcher error: %v", err)
