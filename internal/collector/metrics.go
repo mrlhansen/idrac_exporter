@@ -278,11 +278,11 @@ func (mc *Collector) NewPowerControlAvgConsumedWatts(ch chan<- prometheus.Metric
 	)
 }
 
-func (mc *Collector) NewPowerControlInterval(ch chan<- prometheus.Metric, interval int, id, name string) {
+func (mc *Collector) NewPowerControlInterval(ch chan<- prometheus.Metric, interval float64, id, name string) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.PowerControlInterval,
 		prometheus.GaugeValue,
-		float64(interval),
+		interval,
 		id,
 		name,
 	)

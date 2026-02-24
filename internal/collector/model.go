@@ -633,7 +633,7 @@ type PowerMetrics struct {
 	AvgConsumedWatts  float64 `json:"AverageConsumedWatts"`
 	MaxConsumedWatts  float64 `json:"MaxConsumedWatts"`
 	MinConsumedWatts  float64 `json:"MinConsumedWatts"`
-	IntervalInMinutes int     `json:"IntervalInMin"`
+	IntervalInMinutes float64 `json:"IntervalInMin"`
 }
 
 type PowerSupplyUnit struct {
