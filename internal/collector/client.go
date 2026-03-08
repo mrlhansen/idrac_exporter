@@ -3,6 +3,7 @@ package collector
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -40,7 +41,7 @@ type Client struct {
 		Network          string
 		Event            string
 		Processors       string
-		DellOEM          string
+		Extra            []string
 	}
 }
 
@@ -170,7 +171,12 @@ func (client *Client) findAllEndpoints() bool {
 	if config.Config.Collect.Extra {
 		if client.vendor == DELL {
 			if client.redfish.Exists(DellSystemPath) {
-				client.path.DellOEM = DellSystemPath
+				client.path.Extra = append(client.path.Extra, DellSystemPath)
+			}
+			if client.redfish.Exists(DellAttributesPath) {
+				client.path.Extra = append(client.path.Extra, DellAttributesPath)
+			} else if client.redfish.Exists(DellManagerPath) {
+				client.path.Extra = append(client.path.Extra, DellManagerPath)
 			}
 		}
 	}
@@ -787,9 +793,9 @@ func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bo
 
 	result := true
 
-	if client.path.DellOEM != "" {
+	if slices.Contains(client.path.Extra, DellSystemPath) {
 		resp := DellSystem{}
-		ok := client.redfish.Get(client.path.DellOEM, &resp)
+		ok := client.redfish.Get(DellSystemPath, &resp)
 		if ok {
 			mc.NewDellBatteryRollupHealth(ch, &resp)
 			mc.NewDellEstimatedSystemAirflowCFM(ch, &resp)
@@ -798,12 +804,24 @@ func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bo
 		}
 	}
 
-	resp := DellAttributes{}
-	ok := client.redfish.Get(DellAttributesPath, &resp)
-	if ok {
-		mc.NewDellManagerInfo(ch, &resp)
-	} else {
-		result = false
+	if slices.Contains(client.path.Extra, DellAttributesPath) {
+		resp := DellAttributes{}
+		ok := client.redfish.Get(DellAttributesPath, &resp)
+		if ok {
+			mc.NewDellManagerInfo(ch, resp.Attributes.InfoType, resp.Attributes.InfoVersion, resp.Attributes.InfoHWModel)
+		} else {
+			result = false
+		}
+	}
+
+	if slices.Contains(client.path.Extra, DellManagerPath) {
+		resp := DellManager{}
+		ok := client.redfish.Get(DellManagerPath, &resp)
+		if ok {
+			mc.NewDellManagerInfo(ch, resp.ManagerType, resp.FirmwareVersion, resp.Model)
+		} else {
+			result = false
+		}
 	}
 
 	return result

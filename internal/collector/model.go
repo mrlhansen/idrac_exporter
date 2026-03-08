@@ -767,8 +767,11 @@ type EventLogResponse struct {
 }
 
 // Dell OEM
-const DellSystemPath string = "/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1"
-const DellAttributesPath string = "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1"
+const (
+	DellSystemPath     string = "/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1"
+	DellAttributesPath string = "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1"
+	DellManagerPath    string = "/redfish/v1/Managers/iDRAC.Embedded.1"
+)
 
 type DellSystem struct {
 	BIOSReleaseDate                    string `json:"BIOSReleaseDate"`
@@ -807,4 +810,14 @@ type DellAttributes struct {
 		InfoHWModel   string `json:"Info.1.HWModel"`
 		InfoVersion   string `json:"Info.1.Version"`
 	} `json:"Attributes"`
+}
+
+type DellManager struct {
+	Id              string `json:"Id"`
+	Name            string `json:"Name"`
+	Description     string `json:"Description"`
+	ManagerType     string `json:"ManagerType"`
+	Model           string `json:"Model"`
+	FirmwareVersion string `json:"FirmwareVersion"`
+	Status          Status `json:"Status"`
 }
