@@ -115,7 +115,9 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = HPE
 	} else if strings.Contains(m, "lenovo") {
 		client.vendor = LENOVO
-	} else if strings.Contains(m, "inspur") || strings.Contains(m, "ieit") {
+	} else if strings.Contains(m, "inspur") {
+		client.vendor = INSPUR
+	} else if strings.Contains(m, "ieit") {
 		client.vendor = INSPUR
 	} else if strings.Contains(m, "h3c") {
 		client.vendor = H3C
@@ -129,8 +131,13 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = SUPERMICRO
 	} else if strings.Contains(m, "advantech") {
 		client.vendor = ADVANTECH
-	} else if strings.Contains(m, "huawei") || strings.Contains(m, "kunlun") {
+	} else if strings.Contains(m, "huawei") {
 		client.vendor = HUAWEI
+	} else if strings.Contains(m, "kunlun") {
+		client.vendor = HUAWEI
+	} else if system.Oem.Dell != nil {
+		// Issue #175
+		client.vendor = DELL
 	}
 
 	// Path for event log

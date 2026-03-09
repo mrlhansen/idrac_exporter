@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"encoding/json"
 	"strconv"
 )
 
@@ -550,6 +551,7 @@ type SystemResponse struct {
 		Hpe struct {
 			IndicatorLED string `json:"IndicatorLED"`
 		} `json:"Hpe"`
+		Dell *json.RawMessage `json:"Dell"`
 	} `json:"Oem"`
 }
 
