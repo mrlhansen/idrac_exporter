@@ -825,7 +825,7 @@ func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bo
 		resp := DellManager{}
 		ok := client.redfish.Get(DellManagerPath, &resp)
 		if ok {
-			mc.NewDellManagerInfo(ch, resp.ManagerType, resp.FirmwareVersion, resp.Model)
+			mc.NewDellManagerInfo(ch, resp.Model, resp.FirmwareVersion, resp.ManagerType)
 		} else {
 			result = false
 		}
