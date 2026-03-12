@@ -200,6 +200,10 @@ func (r *Redfish) RefreshSession() bool {
 		return false
 	}
 
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusUnauthorized {
+		log.Info("Unexpected status code %d during session refresh", resp.StatusCode)
+	}
+
 	if resp.StatusCode == http.StatusUnauthorized {
 		ok := r.CreateSession()
 		if !ok {
