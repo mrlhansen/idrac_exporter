@@ -207,7 +207,7 @@ func (r *Redfish) RefreshSession() bool {
 		}
 		return ok
 	} else if resp.StatusCode != http.StatusOK {
-		log.Info("Unexpected status code %d during session refresh", resp.StatusCode)
+		log.Error("Unexpected status code %d during session refresh", resp.StatusCode)
 		return false
 	}
 
