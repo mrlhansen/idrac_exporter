@@ -41,6 +41,7 @@ type Client struct {
 		Network          string
 		Event            string
 		Processors       string
+		Manager          string
 		Extra            []string
 	}
 }
@@ -138,6 +139,14 @@ func (client *Client) findAllEndpoints() bool {
 	} else if system.Oem.Dell != nil {
 		// Issue #175
 		client.vendor = DELL
+	}
+
+	// Path for manager (BMC firmware info)
+	if client.vendor == HPE {
+		ok = client.redfish.Get(root.Managers.OdataId, &group)
+		if ok && len(group.Members) > 0 {
+			client.path.Manager = group.Members[0].OdataId
+		}
 	}
 
 	// Path for event log
@@ -347,6 +356,13 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	mc.NewSystemCpuCount(ch, &resp)
 	mc.NewSystemBiosInfo(ch, &resp)
 	mc.NewSystemMachineInfo(ch, &resp)
+
+	if client.path.Manager != "" {
+		mgr := ManagerResponse{}
+		if client.redfish.Get(client.path.Manager, &mgr) {
+			mc.NewBmcInfo(ch, &mgr)
+		}
+	}
 
 	return true
 }

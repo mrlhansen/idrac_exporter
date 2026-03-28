@@ -814,6 +814,15 @@ type DellAttributes struct {
 	} `json:"Attributes"`
 }
 
+type ManagerResponse struct {
+	Id              string `json:"Id"`
+	Name            string `json:"Name"`
+	ManagerType     string `json:"ManagerType"`
+	Model           string `json:"Model"`
+	FirmwareVersion string `json:"FirmwareVersion"`
+	Status          Status `json:"Status"`
+}
+
 type DellManager struct {
 	Id              string `json:"Id"`
 	Name            string `json:"Name"`

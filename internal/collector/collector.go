@@ -102,6 +102,9 @@ type Collector struct {
 	CpuTotalCores   *prometheus.Desc
 	CpuTotalThreads *prometheus.Desc
 
+	// BMC
+	BmcInfo *prometheus.Desc
+
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
@@ -402,6 +405,11 @@ func NewCollector() *Collector {
 			"Total number of CPU threads",
 			[]string{"id"}, nil,
 		),
+		BmcInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "bmc", "info"),
+			"Information about the BMC",
+			[]string{"type", "model", "firmware"}, nil,
+		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
@@ -490,6 +498,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.CpuCurrentSpeed
 	ch <- collector.CpuTotalCores
 	ch <- collector.CpuTotalThreads
+	ch <- collector.BmcInfo
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 	ch <- collector.DellControllerBatteryHealth

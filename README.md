@@ -224,6 +224,13 @@ idrac_dell_estimated_system_airflow_cfm
 idrac_dell_manager_info{model,type,version}
 ```
 
+### BMC
+These metrics contain information about the baseboard management controller (BMC). Currently only exported for HPE systems.
+
+```text
+idrac_bmc_info{firmware,model,type}
+```
+
 ### Exporter
 These metrics contain information about the exporter itself, such as build information and how many errors that have been encountered when scraping the Redfish API.
 
