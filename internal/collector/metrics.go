@@ -9,6 +9,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+var trademarkReplacer = strings.NewReplacer("(R)", "", "(TM)", "", "(C)", "")
+
+func cleanTrademarks(s string) string {
+	return strings.Join(strings.Fields(trademarkReplacer.Replace(s)), " ")
+}
+
 func health2value(health string) int {
 	switch health {
 	case "":
@@ -103,7 +109,7 @@ func (mc *Collector) NewSystemCpuCount(ch chan<- prometheus.Metric, m *SystemRes
 		mc.SystemCpuCount,
 		prometheus.GaugeValue,
 		float64(m.ProcessorSummary.Count),
-		strings.TrimSpace(m.ProcessorSummary.Model),
+		cleanTrademarks(m.ProcessorSummary.Model),
 	)
 }
 
@@ -661,8 +667,8 @@ func (mc *Collector) NewCpuInfo(ch chan<- prometheus.Metric, m *Processor) {
 		1.0,
 		m.Id,
 		m.Socket,
-		strings.TrimSpace(m.Manufacturer),
-		strings.TrimSpace(m.Model),
+		cleanTrademarks(m.Manufacturer),
+		cleanTrademarks(m.Model),
 		arch.String(),
 	)
 }
