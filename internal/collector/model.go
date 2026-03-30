@@ -462,6 +462,13 @@ type NetworkAdapter struct {
 	Controllers  []struct {
 		FirmwarePackageVersion string `json:"FirmwarePackageVersion"`
 	} `json:"Controllers"`
+	PhysicalPorts []PhysicalPort `json:"PhysicalPorts"` // iLO 4
+}
+
+type PhysicalPort struct {
+	MacAddress string  `json:"MacAddress"`
+	SpeedMbps  float64 `json:"SpeedMbps"`
+	FullDuplex bool    `json:"FullDuplex"`
 }
 
 func (n *NetworkAdapter) GetPorts() string {

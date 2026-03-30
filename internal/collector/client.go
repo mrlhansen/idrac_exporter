@@ -198,6 +198,8 @@ func (client *Client) findAllEndpoints() bool {
 		if strings.Contains(root.Name, "HP RESTful") {
 			client.path.Memory = "/redfish/v1/Systems/1/Memory/"
 			client.path.Storage = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
+			client.path.Network = "/redfish/v1/Systems/1/NetworkAdapters/"
+			client.path.Processors = "/redfish/v1/Systems/1/Processors/"
 			client.path.Event = ""
 			client.version = 4
 		}
@@ -369,6 +371,13 @@ func (client *Client) RefreshProcessors(mc *Collector, ch chan<- prometheus.Metr
 			continue
 		}
 
+		// iLO 4
+		if (client.vendor == HPE) && (client.version == 4) {
+			if resp.Status.State == "" && resp.Status.Health != "" {
+				resp.Status.State = StateEnabled
+			}
+		}
+
 		if resp.Status.State != StateEnabled {
 			continue
 		}
@@ -397,6 +406,22 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 		ok = client.redfish.Get(c, &ni)
 		if !ok {
 			return false
+		}
+
+		// iLO 4
+		if (client.vendor == HPE) && (client.version == 4) {
+			if ni.Model == "" {
+				ni.Model = ni.Name
+			}
+			mc.NewNetworkAdapterInfo(ch, &ni)
+			for n, p := range ni.PhysicalPorts {
+				port := NetworkPort{
+					Id:                   strconv.Itoa(n),
+					CurrentLinkSpeedMbps: p.SpeedMbps,
+				}
+				mc.NewNetworkPortCurrentSpeed(ch, ni.Id, &port)
+			}
+			continue
 		}
 
 		mc.NewNetworkAdapterInfo(ch, &ni)
