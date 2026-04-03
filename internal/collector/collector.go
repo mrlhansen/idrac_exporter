@@ -102,11 +102,14 @@ type Collector struct {
 	CpuTotalCores   *prometheus.Desc
 	CpuTotalThreads *prometheus.Desc
 
+	// BMC
+	ManagerInfo   *prometheus.Desc
+	ManagerHealth *prometheus.Desc
+
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
 	DellControllerBatteryHealth   *prometheus.Desc
-	DellManagerInfo               *prometheus.Desc
 }
 
 func NewCollector() *Collector {
@@ -402,6 +405,16 @@ func NewCollector() *Collector {
 			"Total number of CPU threads",
 			[]string{"id"}, nil,
 		),
+		ManagerInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "info"),
+			"Information about the manager",
+			[]string{"id", "type", "model", "firmware"}, nil,
+		),
+		ManagerHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "health"),
+			"Health status of the manager",
+			[]string{"id", "status"}, nil,
+		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
@@ -416,11 +429,6 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "dell", "controller_battery_health"),
 			"Health status of storage controller battery",
 			[]string{"id", "storage_id", "name", "status"}, nil,
-		),
-		DellManagerInfo: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "dell", "manager_info"),
-			"Information about iDRAC manager",
-			[]string{"type", "version", "model"}, nil,
 		),
 	}
 
@@ -490,6 +498,8 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.CpuCurrentSpeed
 	ch <- collector.CpuTotalCores
 	ch <- collector.CpuTotalThreads
+	ch <- collector.ManagerInfo
+	ch <- collector.ManagerHealth
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 	ch <- collector.DellControllerBatteryHealth
@@ -582,6 +592,17 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 		wg.Add(1)
 		go func() {
 			ok := collector.client.RefreshProcessors(collector, ch)
+			if !ok {
+				collector.errors.Add(1)
+			}
+			wg.Done()
+		}()
+	}
+
+	if collect.Manager {
+		wg.Add(1)
+		go func() {
+			ok := collector.client.RefreshManager(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}

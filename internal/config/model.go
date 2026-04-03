@@ -20,6 +20,7 @@ type CollectConfig struct {
 	Memory     bool `yaml:"memory"`
 	Network    bool `yaml:"network"`
 	Processors bool `yaml:"processors"`
+	Manager    bool `yaml:"manager"`
 	Extra      bool `yaml:"extra"`
 }
 

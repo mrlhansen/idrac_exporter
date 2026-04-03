@@ -801,13 +801,28 @@ func (mc *Collector) NewDellControllerBatteryHealth(ch chan<- prometheus.Metric,
 	)
 }
 
-func (mc *Collector) NewDellManagerInfo(ch chan<- prometheus.Metric, mtype, version, model string) {
+func (mc *Collector) NewManagerInfo(ch chan<- prometheus.Metric, m *ManagerResponse) {
 	ch <- prometheus.MustNewConstMetric(
-		mc.DellManagerInfo,
-		prometheus.GaugeValue,
+		mc.ManagerInfo,
+		prometheus.UntypedValue,
 		1.0,
-		mtype,
-		version,
-		model,
+		m.Id,
+		m.ManagerType,
+		m.Model,
+		m.FirmwareVersion,
+	)
+}
+
+func (mc *Collector) NewManagerHealth(ch chan<- prometheus.Metric, m *ManagerResponse) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.ManagerHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		m.Status.Health,
 	)
 }

@@ -99,6 +99,7 @@ metrics:
   storage: false     # CONFIG_METRICS_STORAGE=false
   memory: false      # CONFIG_METRICS_MEMORY=false
   network: false     # CONFIG_METRICS_NETWORK=false
+  manager: false     # CONFIG_METRICS_MANAGER=false
   extra: false       # CONFIG_METRICS_EXTRA=false
 
 # The events section is used for filtering events when the "events" metrics group

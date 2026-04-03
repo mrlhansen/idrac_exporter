@@ -41,6 +41,7 @@ type Client struct {
 		Network          string
 		Event            string
 		Processors       string
+		Manager          string
 		Extra            []string
 	}
 }
@@ -140,6 +141,14 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = DELL
 	}
 
+	// Path for manager
+	if config.Config.Collect.Manager {
+		ok = client.redfish.Get(root.Managers.OdataId, &group)
+		if ok && len(group.Members) > 0 {
+			client.path.Manager = group.Members[0].OdataId
+		}
+	}
+
 	// Path for event log
 	if config.Config.Collect.Events {
 		switch client.vendor {
@@ -174,16 +183,11 @@ func (client *Client) findAllEndpoints() bool {
 		}
 	}
 
-	// Dell OEM
+	// Extra
 	if config.Config.Collect.Extra {
 		if client.vendor == DELL {
 			if client.redfish.Exists(DellSystemPath) {
 				client.path.Extra = append(client.path.Extra, DellSystemPath)
-			}
-			if client.redfish.Exists(DellAttributesPath) {
-				client.path.Extra = append(client.path.Extra, DellAttributesPath)
-			} else if client.redfish.Exists(DellManagerPath) {
-				client.path.Extra = append(client.path.Extra, DellManagerPath)
 			}
 		}
 	}
@@ -349,6 +353,19 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	mc.NewSystemCpuCount(ch, &resp)
 	mc.NewSystemBiosInfo(ch, &resp)
 	mc.NewSystemMachineInfo(ch, &resp)
+
+	return true
+}
+
+func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric) bool {
+	mgr := ManagerResponse{}
+	ok := client.redfish.Get(client.path.Manager, &mgr)
+	if !ok {
+		return false
+	}
+
+	mc.NewManagerInfo(ch, &mgr)
+	mc.NewManagerHealth(ch, &mgr)
 
 	return true
 }
@@ -831,26 +848,6 @@ func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bo
 		if ok {
 			mc.NewDellBatteryRollupHealth(ch, &resp)
 			mc.NewDellEstimatedSystemAirflowCFM(ch, &resp)
-		} else {
-			result = false
-		}
-	}
-
-	if slices.Contains(client.path.Extra, DellAttributesPath) {
-		resp := DellAttributes{}
-		ok := client.redfish.Get(DellAttributesPath, &resp)
-		if ok {
-			mc.NewDellManagerInfo(ch, resp.Attributes.InfoType, resp.Attributes.InfoVersion, resp.Attributes.InfoHWModel)
-		} else {
-			result = false
-		}
-	}
-
-	if slices.Contains(client.path.Extra, DellManagerPath) {
-		resp := DellManager{}
-		ok := client.redfish.Get(DellManagerPath, &resp)
-		if ok {
-			mc.NewDellManagerInfo(ch, resp.Model, resp.FirmwareVersion, resp.ManagerType)
 		} else {
 			result = false
 		}

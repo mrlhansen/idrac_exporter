@@ -215,13 +215,20 @@ idrac_network_port_current_speed_mbps{adapter_id,id}
 idrac_network_port_link_up{adapter_id,id,status}
 ```
 
+### Manager
+These metrics contain information about the baseboard management controller (BMC). Currently only exported for HPE systems.
+
+```text
+idrac_manager_info{id,firmware,model,type}
+idrac_manager_health{id,status}
+```
+
 ### Extra
 These metrics do not belong anywhere else and they might be OEM specific. At the moment only some Dell specific metrics are exported.
 
 ```text
 idrac_dell_battery_rollup_health{status}
 idrac_dell_estimated_system_airflow_cfm
-idrac_dell_manager_info{model,type,version}
 ```
 
 ### Exporter
