@@ -216,7 +216,7 @@ idrac_network_port_link_up{adapter_id,id,status}
 ```
 
 ### Manager
-These metrics contain information about the baseboard management controller (BMC). Currently only exported for HPE systems.
+These metrics contain information about the out-of-band manager.
 
 ```text
 idrac_manager_info{id,firmware,model,type}
