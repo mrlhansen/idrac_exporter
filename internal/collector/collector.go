@@ -507,6 +507,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	var wg sync.WaitGroup
+	sem := make(chan struct{}, int(config.Config.Concurrency))
 
 	collector.client.redfish.RefreshSession()
 	collect := &config.Config.Collect
@@ -514,110 +515,130 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	if collect.System {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshSystem(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Sensors {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshSensors(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Power {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshPower(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Network {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshNetwork(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Events {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshEventLog(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Storage {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshStorage(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Memory {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshMemory(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Processors {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshProcessors(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Manager {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshManager(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
 	if collect.Extra {
 		wg.Add(1)
 		go func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			defer wg.Done()
 			ok := collector.client.RefreshDell(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
 		}()
 	}
 
