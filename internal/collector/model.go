@@ -63,6 +63,17 @@ type Redundancy struct {
 	Status            Status  `json:"Status"`
 }
 
+// Threshold is a common structure for measurements
+// We use the "any" type because values might be reported as N/A
+type Threshold struct {
+	LowerThresholdCritical    any `json:"LowerThresholdCritical"`
+	LowerThresholdFatal       any `json:"LowerThresholdFatal"`
+	LowerThresholdNonCritical any `json:"LowerThresholdNonCritical"`
+	UpperThresholdCritical    any `json:"UpperThresholdCritical"`
+	UpperThresholdFatal       any `json:"UpperThresholdFatal"`
+	UpperThresholdNonCritical any `json:"UpperThresholdNonCritical"`
+}
+
 // V1Response represents structure of the response body from /redfish/v1
 type V1Response struct {
 	RedfishVersion     string `json:"RedfishVersion"`
@@ -189,26 +200,21 @@ type ThermalResponse struct {
 }
 
 type Fan struct {
-	Name                      string       `json:"Name"`
-	FanName                   string       `json:"FanName"`
-	MemberId                  string       `json:"MemberId"`
-	Assembly                  Odata        `json:"Assembly"`
-	HotPluggable              bool         `json:"HotPluggable"`
-	MaxReadingRange           any          `json:"MaxReadingRange"`
-	MinReadingRange           any          `json:"MinReadingRange"`
-	PhysicalContext           string       `json:"PhysicalContext"`
-	Reading                   float64      `json:"Reading"`
-	CurrentReading            float64      `json:"CurrentReading"`
-	Units                     string       `json:"Units"`
-	ReadingUnits              string       `json:"ReadingUnits"`
-	Redundancy                []Redundancy `json:"Redundancy"`
-	Status                    Status       `json:"Status"`
-	LowerThresholdCritical    any          `json:"LowerThresholdCritical"`
-	LowerThresholdFatal       any          `json:"LowerThresholdFatal"`
-	LowerThresholdNonCritical any          `json:"LowerThresholdNonCritical"`
-	UpperThresholdCritical    any          `json:"UpperThresholdCritical"`
-	UpperThresholdFatal       any          `json:"UpperThresholdFatal"`
-	UpperThresholdNonCritical any          `json:"UpperThresholdNonCritical"`
+	Name            string       `json:"Name"`
+	FanName         string       `json:"FanName"`
+	MemberId        string       `json:"MemberId"`
+	Assembly        Odata        `json:"Assembly"`
+	HotPluggable    bool         `json:"HotPluggable"`
+	MaxReadingRange any          `json:"MaxReadingRange"`
+	MinReadingRange any          `json:"MinReadingRange"`
+	PhysicalContext string       `json:"PhysicalContext"`
+	Reading         float64      `json:"Reading"`
+	CurrentReading  float64      `json:"CurrentReading"`
+	Units           string       `json:"Units"`
+	ReadingUnits    string       `json:"ReadingUnits"`
+	Redundancy      []Redundancy `json:"Redundancy"`
+	Status          Status       `json:"Status"`
+	Threshold
 }
 
 func (f *Fan) GetName() string {
@@ -240,20 +246,15 @@ func (f *Fan) GetId(fallback int) string {
 }
 
 type Temperature struct {
-	Name                      string  `json:"Name"`
-	Number                    int     `json:"Number"`
-	MemberId                  string  `json:"MemberId"`
-	ReadingCelsius            float64 `json:"ReadingCelsius"`
-	MaxReadingRangeTemp       float64 `json:"MaxReadingRangeTemp"`
-	MinReadingRangeTemp       float64 `json:"MinReadingRangeTemp"`
-	PhysicalContext           string  `json:"PhysicalContext"`
-	LowerThresholdCritical    float64 `json:"LowerThresholdCritical"`
-	LowerThresholdFatal       float64 `json:"LowerThresholdFatal"`
-	LowerThresholdNonCritical float64 `json:"LowerThresholdNonCritical"`
-	UpperThresholdCritical    float64 `json:"UpperThresholdCritical"`
-	UpperThresholdFatal       float64 `json:"UpperThresholdFatal"`
-	UpperThresholdNonCritical float64 `json:"UpperThresholdNonCritical"`
-	Status                    Status  `json:"Status"`
+	Name                string  `json:"Name"`
+	Number              int     `json:"Number"`
+	MemberId            string  `json:"MemberId"`
+	ReadingCelsius      float64 `json:"ReadingCelsius"`
+	MaxReadingRangeTemp float64 `json:"MaxReadingRangeTemp"`
+	MinReadingRangeTemp float64 `json:"MinReadingRangeTemp"`
+	PhysicalContext     string  `json:"PhysicalContext"`
+	Status              Status  `json:"Status"`
+	Threshold
 }
 
 func (t *Temperature) GetId(fallback int) string {
@@ -573,14 +574,8 @@ type PowerResponse struct {
 		SensorNumber    int    `json:"SensorNumber"`
 		PhysicalContext string `json:"PhysicalContext"`
 		Status          Status `json:"Status"`
-		// These should be float64, but they have been seen reported as "N/A" so we use the any type
-		ReadingVolts              any `json:"ReadingVolts"`
-		LowerThresholdCritical    any `json:"LowerThresholdCritical"`
-		LowerThresholdFatal       any `json:"LowerThresholdFatal"`
-		LowerThresholdNonCritical any `json:"LowerThresholdNonCritical"`
-		UpperThresholdCritical    any `json:"UpperThresholdCritical"`
-		UpperThresholdFatal       any `json:"UpperThresholdFatal"`
-		UpperThresholdNonCritical any `json:"UpperThresholdNonCritical"`
+		ReadingVolts    any    `json:"ReadingVolts"`
+		Threshold
 	} `json:"Voltages"`
 	Oem struct {
 		TsFujitsu *struct {
@@ -623,14 +618,16 @@ type PowerResponse struct {
 }
 
 type PowerControlUnit struct {
-	Id                  string  `json:"Id"`
-	Name                string  `json:"Name"`
-	PowerAllocatedWatts float64 `json:"PowerAllocatedWatts"`
-	PowerAvailableWatts float64 `json:"PowerAvailableWatts"`
-	PowerCapacityWatts  float64 `json:"PowerCapacityWatts"`
-	PowerConsumedWatts  float64 `json:"PowerConsumedWatts"`
-	PowerRequestedWatts float64 `json:"PowerRequestedWatts"`
-	PowerLimit          *struct {
+	Id                      string  `json:"Id"`
+	Name                    string  `json:"Name"`
+	PowerAllocatedWatts     float64 `json:"PowerAllocatedWatts"`
+	PowerAvailableWatts     float64 `json:"PowerAvailableWatts"`
+	PowerCapacityWatts      float64 `json:"PowerCapacityWatts"`
+	PowerConsumedWatts      float64 `json:"PowerConsumedWatts"`
+	PowerRequestedWatts     float64 `json:"PowerRequestedWatts"`
+	ChassisPowerConsumption float64 `json:"ChassisPowerConsumption"`
+	NodePowerConsumption    float64 `json:"NodePowerConsumption"`
+	PowerLimit              *struct {
 		CorrectionInMs int    `json:"CorrectionInMs"`
 		LimitException string `json:"LimitException"`
 		LimitInWatts   int    `json:"LimitInWatts"`
