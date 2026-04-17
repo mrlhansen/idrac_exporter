@@ -50,8 +50,8 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 			Transport: &http.Transport{
 				Proxy:                 http.ProxyFromEnvironment,
 				TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
-				MaxIdleConnsPerHost:   10,                                                 // Allow more concurrent requests per host
-				MaxConnsPerHost:       20,                                                 // Limit total connections per host
+				MaxIdleConnsPerHost:   int(config.Config.Concurrency),                         // Match concurrency setting
+				MaxConnsPerHost:       int(config.Config.Concurrency) + 1,                    // +1 for session management
 				IdleConnTimeout:       30 * time.Second,                                   // Remove stale connections after 30s
 				ResponseHeaderTimeout: time.Duration(config.Config.Timeout) * time.Second, // Timeout waiting for response headers
 				ExpectContinueTimeout: 1 * time.Second,                                    // Timeout for 100-continue responses

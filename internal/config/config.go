@@ -115,6 +115,10 @@ func (c *RootConfig) Validate() error {
 		c.MetricsPrefix = "idrac"
 	}
 
+	if c.Concurrency == 0 {
+		c.Concurrency = 10
+	}
+
 	// hosts
 	for k, v := range c.Hosts {
 		err := v.Validate()
