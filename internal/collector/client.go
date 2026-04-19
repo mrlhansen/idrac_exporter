@@ -43,6 +43,11 @@ type Client struct {
 		Processors       string
 		Manager          string
 		Extra            []string
+		RackPDUs         []string
+	}
+	metrics struct {
+		server bool
+		pdu    bool
 	}
 }
 
@@ -66,6 +71,7 @@ func (client *Client) findAllEndpoints() bool {
 	var group GroupResponse
 	var chassis ChassisResponse
 	var system SystemResponse
+	var path string
 	var ok bool
 
 	// Root
@@ -74,12 +80,38 @@ func (client *Client) findAllEndpoints() bool {
 		return false
 	}
 
+	// PDUs
+	if root.PowerDistribution != nil {
+		client.metrics.pdu = true
+		path = root.PowerDistribution.OdataId
+	}
+
+	if root.PowerEquipment != nil {
+		client.metrics.pdu = true
+		resp := PowerEquipment{}
+		ok = client.redfish.Get(root.PowerEquipment.OdataId, &resp)
+		if !ok {
+			return false
+		}
+		path = resp.RackPDUs.OdataId
+	}
+
+	if client.metrics.pdu {
+		ok = client.redfish.Get(path, &group)
+		if !ok {
+			return false
+		}
+		client.path.RackPDUs = group.Members.GetLinks()
+		return true
+	}
+
 	// System
 	ok = client.redfish.Get(root.Systems.OdataId, &group)
 	if !ok {
 		return false
 	}
 
+	client.metrics.server = true
 	client.path.System = group.Members[0].OdataId
 
 	// Chassis
@@ -851,6 +883,37 @@ func (client *Client) RefreshDell(mc *Collector, ch chan<- prometheus.Metric) bo
 		} else {
 			result = false
 		}
+	}
+
+	return result
+}
+
+func (client *Client) RefreshPDUs(mc *Collector, ch chan<- prometheus.Metric) bool {
+	result := true
+
+	for _, path := range client.path.RackPDUs {
+		pd := PowerDistribution{}
+		ok := client.redfish.Get(path, &pd)
+		if !ok {
+			result = false
+			continue
+		}
+
+		id := pd.GetId()
+		mc.NewPduInfo(ch, id, &pd)
+		mc.NewPduHealth(ch, id, &pd)
+
+		pdm := PowerDistributionMetrics{}
+		ok = client.redfish.Get(pd.Metrics.OdataId, &pdm)
+		if !ok {
+			result = false
+			continue
+		}
+
+		mc.NewPduPowerWatts(ch, id, &pdm)
+		mc.NewPduPowerApparentVA(ch, id, &pdm)
+		mc.NewPduPowerFactor(ch, id, &pdm)
+		mc.NewPduEnergyKWh(ch, id, &pdm)
 	}
 
 	return result

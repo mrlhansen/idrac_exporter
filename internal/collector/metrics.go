@@ -826,3 +826,68 @@ func (mc *Collector) NewManagerHealth(ch chan<- prometheus.Metric, m *ManagerRes
 		m.Status.Health,
 	)
 }
+
+func (mc *Collector) NewPduInfo(ch chan<- prometheus.Metric, id string, m *PowerDistribution) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.PduInfo,
+		prometheus.UntypedValue,
+		1.0,
+		id,
+		m.FirmwareVersion,
+		m.Manufacturer,
+		m.Model,
+		m.Name,
+		m.SerialNumber,
+		m.EquipmentType,
+	)
+}
+
+func (mc *Collector) NewPduHealth(ch chan<- prometheus.Metric, id string, m *PowerDistribution) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.PduHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		id,
+		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewPduPowerWatts(ch chan<- prometheus.Metric, id string, m *PowerDistributionMetrics) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.PduPowerWatts,
+		prometheus.GaugeValue,
+		float64(m.PowerWatts.Reading),
+		id,
+	)
+}
+
+func (mc *Collector) NewPduPowerApparentVA(ch chan<- prometheus.Metric, id string, m *PowerDistributionMetrics) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.PduPowerApparentVA,
+		prometheus.GaugeValue,
+		float64(m.PowerWatts.ApparentVA),
+		id,
+	)
+}
+
+func (mc *Collector) NewPduPowerFactor(ch chan<- prometheus.Metric, id string, m *PowerDistributionMetrics) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.PduPowerFactor,
+		prometheus.GaugeValue,
+		float64(m.PowerWatts.PowerFactor),
+		id,
+	)
+}
+
+func (mc *Collector) NewPduEnergyKWh(ch chan<- prometheus.Metric, id string, m *PowerDistributionMetrics) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.PduEnergyKWh,
+		prometheus.GaugeValue,
+		float64(m.EnergykWh.Reading),
+		id,
+	)
+}

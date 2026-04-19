@@ -110,6 +110,14 @@ type Collector struct {
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
 	DellControllerBatteryHealth   *prometheus.Desc
+
+	// PDU
+	PduInfo            *prometheus.Desc
+	PduHealth          *prometheus.Desc
+	PduPowerWatts      *prometheus.Desc
+	PduPowerApparentVA *prometheus.Desc
+	PduPowerFactor     *prometheus.Desc
+	PduEnergyKWh       *prometheus.Desc
 }
 
 func NewCollector() *Collector {
@@ -430,6 +438,36 @@ func NewCollector() *Collector {
 			"Health status of storage controller battery",
 			[]string{"id", "storage_id", "name", "status"}, nil,
 		),
+		PduInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "pdu", "info"),
+			"Information about the PDU",
+			[]string{"id", "firmware", "manufacturer", "model", "name", "serial", "type"}, nil,
+		),
+		PduHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "pdu", "health"),
+			"Health status of the PDU",
+			[]string{"id", "status"}, nil,
+		),
+		PduPowerWatts: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "pdu", "power_watts"),
+			"Power reading in watts",
+			[]string{"id"}, nil,
+		),
+		PduPowerApparentVA: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "pdu", "power_apparent_va"),
+			"Apparent power reading in VA units",
+			[]string{"id"}, nil,
+		),
+		PduPowerFactor: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "pdu", "power_factor"),
+			"Power factor (efficiency)",
+			[]string{"id"}, nil,
+		),
+		PduEnergyKWh: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "pdu", "energy_kwh"),
+			"Energy consumption in kWh",
+			[]string{"id"}, nil,
+		),
 	}
 
 	collector.builder = new(strings.Builder)
@@ -503,12 +541,16 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 	ch <- collector.DellControllerBatteryHealth
+	ch <- collector.PduInfo
+	ch <- collector.PduHealth
+	ch <- collector.PduPowerWatts
+	ch <- collector.PduPowerApparentVA
+	ch <- collector.PduPowerFactor
+	ch <- collector.PduEnergyKWh
 }
 
-func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
+func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 	var wg sync.WaitGroup
-
-	collector.client.redfish.RefreshSession()
 	collect := &config.Config.Collect
 
 	if collect.System {
@@ -622,6 +664,23 @@ func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	wg.Wait()
+}
+
+func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
+	collector.client.redfish.RefreshSession()
+	metrics := collector.client.metrics
+
+	if metrics.server {
+		collector.CollectServer(ch)
+	}
+
+	if metrics.pdu {
+		ok := collector.client.RefreshPDUs(collector, ch)
+		if !ok {
+			collector.errors.Add(1)
+		}
+	}
+
 	ch <- prometheus.MustNewConstMetric(collector.ExporterBuildInfo, prometheus.UntypedValue, 1)
 	ch <- prometheus.MustNewConstMetric(collector.ExporterScrapeErrorsTotal, prometheus.CounterValue, float64(collector.errors.Load()))
 }

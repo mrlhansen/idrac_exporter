@@ -2,6 +2,7 @@ package collector
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -95,6 +96,8 @@ type V1Response struct {
 	Tasks              Odata  `json:"Tasks"`
 	TelemetryService   Odata  `json:"TelemetryService"`
 	UpdateService      Odata  `json:"UpdateService"`
+	PowerEquipment     *Odata `json:"PowerEquipment"`
+	PowerDistribution  *Odata `json:"PowerDistribution"`
 }
 
 type GroupResponse struct {
@@ -827,4 +830,54 @@ type DellAttributes struct {
 		InfoHWModel   string `json:"Info.1.HWModel"`
 		InfoVersion   string `json:"Info.1.Version"`
 	} `json:"Attributes"`
+}
+
+// PDUs
+type PowerEquipment struct {
+	Id       string `json:"Id"`
+	Name     string `json:"Name"`
+	Status   Status `json:"Status"`
+	RackPDUs Odata  `json:"RackPDUs"`
+}
+
+type PowerDistribution struct {
+	Id              any    `json:"Id"`
+	Name            string `json:"Name"`
+	EquipmentType   string `json:"EquipmentType"`
+	FirmwareVersion string `json:"FirmwareVersion"`
+	Version         string `json:"Version"`
+	ProductionDate  string `json:"ProductionDate"`
+	Manufacturer    string `json:"Manufacturer"`
+	Model           string `json:"Model"`
+	SerialNumber    string `json:"SerialNumber"`
+	PartNumber      string `json:"PartNumber"`
+	UUID            string `json:"UUID"`
+	AssetTag        string `json:"AssetTag"`
+	Status          Status `json:"Status"`
+	Mains           Odata  `json:"Mains"`
+	Branches        Odata  `json:"Branches"`
+	Outlets         Odata  `json:"Outlets"`
+	OutletGroups    Odata  `json:"OutletGroups"`
+	Metrics         Odata  `json:"Metrics"`
+	Sensors         Odata  `json:"Sensors"`
+}
+
+func (m *PowerDistribution) GetId() string {
+	return fmt.Sprintf("%v", m.Id)
+}
+
+type PowerDistributionMetrics struct {
+	Id         string `json:"Id"`
+	Name       string `json:"Name"`
+	PowerWatts struct {
+		DataSourceUri string  `json:"DataSourceUri"`
+		Reading       float64 `json:"Reading"`
+		ApparentVA    float64 `json:"ApparentVA"`
+		ReactiveVAR   float64 `json:"ReactiveVAR"`
+		PowerFactor   float64 `json:"PowerFactor"`
+	} `json:"PowerWatts"`
+	EnergykWh struct {
+		DataSourceUri string  `json:"DataSourceUri"`
+		Reading       float64 `json:"Reading"`
+	} `json:"EnergykWh"`
 }
