@@ -45,10 +45,6 @@ type Client struct {
 		Extra            []string
 		RackPDUs         []string
 	}
-	metrics struct {
-		server bool
-		pdu    bool
-	}
 }
 
 func NewClient(host string, auth *config.AuthConfig) *Client {
@@ -82,12 +78,10 @@ func (client *Client) findAllEndpoints() bool {
 
 	// PDUs
 	if root.PowerDistribution != nil {
-		client.metrics.pdu = true
 		path = root.PowerDistribution.OdataId
 	}
 
 	if root.PowerEquipment != nil {
-		client.metrics.pdu = true
 		resp := PowerEquipment{}
 		ok = client.redfish.Get(root.PowerEquipment.OdataId, &resp)
 		if !ok {
@@ -96,7 +90,7 @@ func (client *Client) findAllEndpoints() bool {
 		path = resp.RackPDUs.OdataId
 	}
 
-	if client.metrics.pdu {
+	if len(path) > 0 {
 		ok = client.redfish.Get(path, &group)
 		if !ok {
 			return false
@@ -111,7 +105,6 @@ func (client *Client) findAllEndpoints() bool {
 		return false
 	}
 
-	client.metrics.server = true
 	client.path.System = group.Members[0].OdataId
 
 	// Chassis
@@ -617,8 +610,8 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 		}
 
 		id := strconv.Itoa(i)
-
 		mc.NewPowerSupplyHealth(ch, psu.Status.Health, id)
+
 		if client.vendor == HUAWEI && psu.Oem.Huawei != nil && psu.Oem.Huawei.PowerInputWatts > 0 {
 			mc.NewPowerSupplyInputWatts(ch, psu.Oem.Huawei.PowerInputWatts, id)
 		} else {
@@ -629,6 +622,8 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 		} else {
 			mc.NewPowerSupplyOutputWatts(ch, psu.GetOutputPower(), id)
 		}
+
+		mc.NewPowerSupplyInputVoltage(ch, psu.LineInputVoltage, id)
 		mc.NewPowerSupplyCapacityWatts(ch, psu.PowerCapacityWatts, id)
 		mc.NewPowerSupplyEfficiencyPercent(ch, psu.EfficiencyPercent, id)
 

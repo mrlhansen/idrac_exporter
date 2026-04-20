@@ -668,17 +668,14 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 
 func (collector *Collector) Collect(ch chan<- prometheus.Metric) {
 	collector.client.redfish.RefreshSession()
-	metrics := collector.client.metrics
 
-	if metrics.server {
-		collector.CollectServer(ch)
-	}
-
-	if metrics.pdu {
+	if len(collector.client.path.RackPDUs) > 0 {
 		ok := collector.client.RefreshPDUs(collector, ch)
 		if !ok {
 			collector.errors.Add(1)
 		}
+	} else {
+		collector.CollectServer(ch)
 	}
 
 	ch <- prometheus.MustNewConstMetric(collector.ExporterBuildInfo, prometheus.UntypedValue, 1)
