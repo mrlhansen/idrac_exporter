@@ -257,6 +257,9 @@ func (r *Redfish) Get(path string, res any) bool {
 		log.Debug("Response from %q: %s", url, body)
 	}
 
+	// Issue #192
+	body = bytes.ReplaceAll(body, []byte("\r"), []byte(""))
+
 	err = json.Unmarshal(body, res)
 	if err != nil {
 		log.Error("Error decoding response from %q: %v", url, err)
