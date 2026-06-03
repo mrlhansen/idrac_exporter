@@ -375,7 +375,7 @@ type StorageDrive struct {
 	MediaType               string  `json:"MediaType"`
 	Manufacturer            string  `json:"Manufacturer"`
 	Model                   string  `json:"Model"`
-	CapacityBytes           int     `json:"CapacityBytes"`
+	CapacityBytes           float64 `json:"CapacityBytes"`
 	BlockSizeBytes          int     `json:"BlockSizeBytes"`
 	CapableSpeedGbs         float64 `json:"CapableSpeedGbs"`
 	Status                  Status  `json:"Status"`
@@ -397,7 +397,7 @@ type StorageDrive struct {
 		} `json:"Public"`
 	} `json:"Oem"`
 	// iLO 4
-	CapacityMiB                       int     `json:"CapacityMiB"`
+	CapacityMiB                       float64 `json:"CapacityMiB"`
 	InterfaceType                     string  `json:"InterfaceType"`
 	SSDEnduranceUtilizationPercentage float64 `json:"SSDEnduranceUtilizationPercentage"`
 }
@@ -407,7 +407,7 @@ type StorageVolume struct {
 	Name               string   `json:"Name"`
 	Description        string   `json:"Description"`
 	BlockSizeBytes     int      `json:"BlockSizeBytes"`
-	CapacityBytes      int      `json:"CapacityBytes"`
+	CapacityBytes      float64  `json:"CapacityBytes"`
 	OptimumIOSizeBytes int      `json:"OptimumIOSizeBytes"`
 	StripSizeBytes     int      `json:"StripSizeBytes"`
 	DisplayName        string   `json:"DisplayName"`

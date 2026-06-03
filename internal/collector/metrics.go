@@ -373,7 +373,7 @@ func (mc *Collector) NewStorageDriveCapacity(ch chan<- prometheus.Metric, parent
 	ch <- prometheus.MustNewConstMetric(
 		mc.StorageDriveCapacity,
 		prometheus.GaugeValue,
-		float64(m.CapacityBytes),
+		m.CapacityBytes,
 		m.Id,
 		parent,
 	)
@@ -508,7 +508,7 @@ func (mc *Collector) NewStorageVolumeCapacity(ch chan<- prometheus.Metric, paren
 	ch <- prometheus.MustNewConstMetric(
 		mc.StorageVolumeCapacity,
 		prometheus.GaugeValue,
-		float64(m.CapacityBytes),
+		m.CapacityBytes,
 		m.Id,
 		parent,
 	)
