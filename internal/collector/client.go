@@ -751,12 +751,12 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			if (client.vendor == HPE) && (client.version == 4) {
 				drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
 				drive.Protocol = drive.InterfaceType
-				drive.PredictedLifeLeft = 100.0 - drive.SSDEnduranceUtilizationPercentage
+				drive.PredictedLifeLeft = asPtr(100.0 - drive.SSDEnduranceUtilizationPercentage)
 			}
 
 			// Inspur (issue #162)
-			if (client.vendor == INSPUR) && (drive.PredictedLifeLeft == 0) {
-				drive.PredictedLifeLeft = drive.Oem.Public.TimeLeft
+			if (client.vendor == INSPUR) && (drive.PredictedLifeLeft == nil) {
+				drive.PredictedLifeLeft = &drive.Oem.Public.TimeLeft
 			}
 
 			// Supermicro (issue #164)

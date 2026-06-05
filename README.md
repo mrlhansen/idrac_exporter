@@ -184,6 +184,8 @@ idrac_storage_drive_indicator_active{id,storage_id}
 idrac_storage_controller_info{firmware,id,manufacturer,model,name,storage_id}
 idrac_storage_controller_health{id,status,storage_id}
 idrac_storage_controller_speed_mbps{id,storage_id}
+idrac_storage_controller_cache_health{id,status,storage_id}
+idrac_storage_controller_cache_size_bytes{id,storage_id}
 
 idrac_storage_volume_info{id,name,raidtype,storage_id,volumetype}
 idrac_storage_volume_health{id,status,storage_id}

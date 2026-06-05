@@ -380,13 +380,13 @@ func (mc *Collector) NewStorageDriveCapacity(ch chan<- prometheus.Metric, parent
 }
 
 func (mc *Collector) NewStorageDriveLifeLeft(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
-	if m.PredictedLifeLeft == 0 && m.MediaType == "HDD" {
+	if m.PredictedLifeLeft == nil {
 		return
 	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.StorageDriveLifeLeft,
 		prometheus.GaugeValue,
-		m.PredictedLifeLeft,
+		*m.PredictedLifeLeft,
 		m.Id,
 		parent,
 	)

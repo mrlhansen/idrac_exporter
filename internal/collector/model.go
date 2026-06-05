@@ -362,24 +362,24 @@ type StorageController struct {
 
 type StorageDrive struct {
 	Odata
-	Id                      string  `json:"Id"`
-	Name                    string  `json:"Name"`
-	Description             string  `json:"Description"`
-	IndicatorLED            string  `json:"IndicatorLED"`
-	LocationIndicatorActive *bool   `json:"LocationIndicatorActive"`
-	MediaType               string  `json:"MediaType"`
-	Manufacturer            string  `json:"Manufacturer"`
-	Model                   string  `json:"Model"`
-	CapacityBytes           float64 `json:"CapacityBytes"`
-	BlockSizeBytes          int     `json:"BlockSizeBytes"`
-	CapableSpeedGbs         float64 `json:"CapableSpeedGbs"`
-	Status                  Status  `json:"Status"`
-	SerialNumber            string  `json:"SerialNumber"`
-	Protocol                string  `json:"Protocol"`
-	Revision                string  `json:"Revision"`
-	PartNumber              string  `json:"PartNumber"`
-	PredictedLifeLeft       float64 `json:"PredictedMediaLifeLeftPercent"`
-	RotationSpeedRPM        float64 `json:"RotationSpeedRPM"`
+	Id                      string   `json:"Id"`
+	Name                    string   `json:"Name"`
+	Description             string   `json:"Description"`
+	IndicatorLED            string   `json:"IndicatorLED"`
+	LocationIndicatorActive *bool    `json:"LocationIndicatorActive"`
+	MediaType               string   `json:"MediaType"`
+	Manufacturer            string   `json:"Manufacturer"`
+	Model                   string   `json:"Model"`
+	CapacityBytes           float64  `json:"CapacityBytes"`
+	BlockSizeBytes          int      `json:"BlockSizeBytes"`
+	CapableSpeedGbs         float64  `json:"CapableSpeedGbs"`
+	Status                  Status   `json:"Status"`
+	SerialNumber            string   `json:"SerialNumber"`
+	Protocol                string   `json:"Protocol"`
+	Revision                string   `json:"Revision"`
+	PartNumber              string   `json:"PartNumber"`
+	PredictedLifeLeft       *float64 `json:"PredictedMediaLifeLeftPercent"`
+	RotationSpeedRPM        float64  `json:"RotationSpeedRPM"`
 	PhysicalLocation        *struct {
 		PartLocation *struct {
 			LocationOrdinalValue int `json:"LocationOrdinalValue"`

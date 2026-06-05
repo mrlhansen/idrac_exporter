@@ -45,3 +45,7 @@ func (w *xstring) UnmarshalJSON(data []byte) error {
 func (w *xstring) String() string {
 	return string(*w)
 }
+
+func asPtr[T any](v T) *T {
+	return &v
+}
