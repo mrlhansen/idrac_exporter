@@ -797,6 +797,26 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 				mc.NewStorageControllerInfo(ch, storage.Id, &ctlr)
 				mc.NewStorageControllerSpeed(ch, storage.Id, &ctlr)
 				mc.NewStorageControllerHealth(ch, storage.Id, &ctlr)
+
+				if ctlr.CacheSummary != nil {
+					mc.NewStorageControllerCacheSize(ch, storage.Id, &ctlr)
+					mc.NewStorageControllerCacheHealth(ch, storage.Id, &ctlr)
+				}
+			}
+		} else {
+			for _, ctlr := range storage.StorageControllers {
+				if len(ctlr.MemberId) > 0 {
+					ctlr.Id = ctlr.MemberId
+				}
+
+				mc.NewStorageControllerInfo(ch, storage.Id, &ctlr)
+				mc.NewStorageControllerSpeed(ch, storage.Id, &ctlr)
+				mc.NewStorageControllerHealth(ch, storage.Id, &ctlr)
+
+				if ctlr.CacheSummary != nil {
+					mc.NewStorageControllerCacheSize(ch, storage.Id, &ctlr)
+					mc.NewStorageControllerCacheHealth(ch, storage.Id, &ctlr)
+				}
 			}
 		}
 

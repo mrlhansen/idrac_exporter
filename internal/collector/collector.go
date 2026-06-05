@@ -64,20 +64,22 @@ type Collector struct {
 	EventLogEntry *prometheus.Desc
 
 	// Storage
-	StorageInfo                 *prometheus.Desc
-	StorageHealth               *prometheus.Desc
-	StorageDriveInfo            *prometheus.Desc
-	StorageDriveHealth          *prometheus.Desc
-	StorageDriveCapacity        *prometheus.Desc
-	StorageDriveLifeLeft        *prometheus.Desc
-	StorageDriveIndicatorActive *prometheus.Desc
-	StorageControllerInfo       *prometheus.Desc
-	StorageControllerHealth     *prometheus.Desc
-	StorageControllerSpeed      *prometheus.Desc
-	StorageVolumeInfo           *prometheus.Desc
-	StorageVolumeHealth         *prometheus.Desc
-	StorageVolumeMediaSpan      *prometheus.Desc
-	StorageVolumeCapacity       *prometheus.Desc
+	StorageInfo                  *prometheus.Desc
+	StorageHealth                *prometheus.Desc
+	StorageDriveInfo             *prometheus.Desc
+	StorageDriveHealth           *prometheus.Desc
+	StorageDriveCapacity         *prometheus.Desc
+	StorageDriveLifeLeft         *prometheus.Desc
+	StorageDriveIndicatorActive  *prometheus.Desc
+	StorageControllerInfo        *prometheus.Desc
+	StorageControllerHealth      *prometheus.Desc
+	StorageControllerSpeed       *prometheus.Desc
+	StorageControllerCacheSize   *prometheus.Desc
+	StorageControllerCacheHealth *prometheus.Desc
+	StorageVolumeInfo            *prometheus.Desc
+	StorageVolumeHealth          *prometheus.Desc
+	StorageVolumeMediaSpan       *prometheus.Desc
+	StorageVolumeCapacity        *prometheus.Desc
 
 	// Memory modules
 	MemoryModuleInfo     *prometheus.Desc
@@ -308,6 +310,16 @@ func NewCollector() *Collector {
 			"Speed of storage controllers in Mbps",
 			[]string{"id", "storage_id"}, nil,
 		),
+		StorageControllerCacheSize: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_controller", "cache_size_bytes"),
+			"Size of the controller cache in bytes",
+			[]string{"id", "storage_id"}, nil,
+		),
+		StorageControllerCacheHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "storage_controller", "cache_health"),
+			"Health status for the storage controller cache",
+			[]string{"id", "storage_id", "status"}, nil,
+		),
 		StorageVolumeInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_volume", "info"),
 			"Information about virtual volumes",
@@ -515,6 +527,8 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.StorageControllerInfo
 	ch <- collector.StorageControllerHealth
 	ch <- collector.StorageControllerSpeed
+	ch <- collector.StorageControllerCacheSize
+	ch <- collector.StorageControllerCacheHealth
 	ch <- collector.StorageVolumeInfo
 	ch <- collector.StorageVolumeHealth
 	ch <- collector.StorageVolumeMediaSpan

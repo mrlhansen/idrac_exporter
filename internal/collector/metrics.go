@@ -459,6 +459,34 @@ func (mc *Collector) NewStorageControllerHealth(ch chan<- prometheus.Metric, par
 	)
 }
 
+func (mc *Collector) NewStorageControllerCacheSize(ch chan<- prometheus.Metric, parent string, m *StorageController) {
+	if m.CacheSummary.TotalCacheSizeMiB == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageControllerCacheSize,
+		prometheus.GaugeValue,
+		float64(1024*1024*m.CacheSummary.TotalCacheSizeMiB),
+		m.Id,
+		parent,
+	)
+}
+
+func (mc *Collector) NewStorageControllerCacheHealth(ch chan<- prometheus.Metric, parent string, m *StorageController) {
+	value := health2value(m.CacheSummary.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.StorageControllerCacheHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		parent,
+		m.CacheSummary.Status.Health,
+	)
+}
+
 func (mc *Collector) NewStorageVolumeInfo(ch chan<- prometheus.Metric, parent string, m *StorageVolume) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.StorageVolumeInfo,

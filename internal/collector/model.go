@@ -311,22 +311,15 @@ type ThermalMetrics struct {
 }
 
 type Storage struct {
-	Id                 string     `json:"Id"`
-	Name               string     `json:"Name"`
-	Description        string     `json:"Description"`
-	Drives             OdataSlice `json:"Drives"`
-	Controllers        Odata      `json:"Controllers"`
-	Volumes            Odata      `json:"Volumes"`
-	Status             Status     `json:"Status"`
-	StorageControllers []struct { // deprecated
-		FirmwareVersion string  `json:"FirmwareVersion"`
-		Manufacturer    string  `json:"Manufacturer"`
-		Model           string  `json:"Model"`
-		Name            string  `json:"Name"`
-		SpeedGbps       float64 `json:"SpeedGbps"`
-		Status          Status  `json:"Status"`
-	} `json:"StorageControllers"`
-	Oem struct {
+	Id                 string              `json:"Id"`
+	Name               string              `json:"Name"`
+	Description        string              `json:"Description"`
+	Drives             OdataSlice          `json:"Drives"`
+	Controllers        Odata               `json:"Controllers"`
+	Volumes            Odata               `json:"Volumes"`
+	Status             Status              `json:"Status"`
+	StorageControllers []StorageController `json:"StorageControllers"` // deprecated
+	Oem                struct {
 		Dell *struct {
 			DellControllerBattery struct {
 				Id            string `json:"Id"`
@@ -343,13 +336,15 @@ type StorageController struct {
 	Id              string  `json:"Id"`
 	Name            string  `json:"Name"`
 	Description     string  `json:"Description"`
+	MemberId        string  `json:"MemberId"` // used for deprecated inline controllers in the Storage struct
 	FirmwareVersion string  `json:"FirmwareVersion"`
 	Manufacturer    string  `json:"Manufacturer"`
 	Model           string  `json:"Model"`
 	SpeedGbps       float64 `json:"SpeedGbps"`
 	SerialNumber    string  `json:"SerialNumber"`
-	CacheSummary    struct {
-		TotalCacheSizeMiB int `json:"TotalCacheSizeMiB"`
+	CacheSummary    *struct {
+		TotalCacheSizeMiB int    `json:"TotalCacheSizeMiB"`
+		Status            Status `json:"Status"`
 	} `json:"CacheSummary"`
 	ControllerRates struct {
 		ConsistencyCheckRatePercent int `json:"ConsistencyCheckRatePercent"`
