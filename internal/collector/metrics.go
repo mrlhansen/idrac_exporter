@@ -806,7 +806,7 @@ func (mc *Collector) NewDellEstimatedSystemAirflowCFM(ch chan<- prometheus.Metri
 	ch <- prometheus.MustNewConstMetric(
 		mc.DellEstimatedSystemAirflowCFM,
 		prometheus.GaugeValue,
-		float64(value),
+		value,
 	)
 }
 

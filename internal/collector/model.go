@@ -77,27 +77,46 @@ type Threshold struct {
 
 // V1Response represents structure of the response body from /redfish/v1
 type V1Response struct {
-	RedfishVersion     string `json:"RedfishVersion"`
-	Name               string `json:"Name"`
-	Product            string `json:"Product"`
-	Vendor             string `json:"Vendor"`
-	Description        string `json:"Description"`
-	AccountService     Odata  `json:"AccountService"`
-	CertificateService Odata  `json:"CertificateService"`
-	Chassis            Odata  `json:"Chassis"`
-	EventService       Odata  `json:"EventService"`
-	Fabrics            Odata  `json:"Fabrics"`
-	JobService         Odata  `json:"JobService"`
-	JsonSchemas        Odata  `json:"JsonSchemas"`
-	Managers           Odata  `json:"Managers"`
-	Registries         Odata  `json:"Registries"`
-	SessionService     Odata  `json:"SessionService"`
-	Systems            Odata  `json:"Systems"`
-	Tasks              Odata  `json:"Tasks"`
-	TelemetryService   Odata  `json:"TelemetryService"`
-	UpdateService      Odata  `json:"UpdateService"`
-	PowerEquipment     *Odata `json:"PowerEquipment"`
-	PowerDistribution  *Odata `json:"PowerDistribution"`
+	RedfishVersion            string `json:"RedfishVersion"`
+	Name                      string `json:"Name"`
+	Product                   string `json:"Product"`
+	Vendor                    string `json:"Vendor"`
+	Description               string `json:"Description"`
+	AccountService            Odata  `json:"AccountService"`
+	CertificateService        Odata  `json:"CertificateService"`
+	Chassis                   Odata  `json:"Chassis"`
+	ComponentIntegrity        Odata  `json:"ComponentIntegrity"`
+	EventService              Odata  `json:"EventService"`
+	Fabrics                   Odata  `json:"Fabrics"`
+	JobService                Odata  `json:"JobService"`
+	JsonSchemas               Odata  `json:"JsonSchemas"`
+	Managers                  Odata  `json:"Managers"`
+	Registries                Odata  `json:"Registries"`
+	SessionService            Odata  `json:"SessionService"`
+	Systems                   Odata  `json:"Systems"`
+	Tasks                     Odata  `json:"Tasks"`
+	TelemetryService          Odata  `json:"TelemetryService"`
+	UpdateService             Odata  `json:"UpdateService"`
+	PowerEquipment            *Odata `json:"PowerEquipment"`
+	PowerDistribution         *Odata `json:"PowerDistribution"`
+	ProtocolFeaturesSupported struct {
+		DeepOperations struct {
+			DeepPATCH bool `json:"DeepPATCH"`
+			DeepPOST  bool `json:"DeepPOST"`
+			MaxLevels int  `json:"MaxLevels"`
+		} `json:"DeepOperations"`
+		ExpandQuery struct {
+			ExpandAll bool `json:"ExpandAll"`
+			Levels    bool `json:"Levels"`
+			Links     bool `json:"Links"`
+			MaxLevels int  `json:"MaxLevels"`
+			NoLinks   bool `json:"NoLinks"`
+		} `json:"ExpandQuery"`
+		ExcerptQuery    bool `json:"ExcerptQuery"`
+		FilterQuery     bool `json:"FilterQuery"`
+		OnlyMemberQuery bool `json:"OnlyMemberQuery"`
+		SelectQuery     bool `json:"SelectQuery"`
+	} `json:"ProtocolFeaturesSupported"`
 }
 
 type GroupResponse struct {
@@ -522,7 +541,6 @@ type SystemResponse struct {
 		Status          Status `json:"Status"`
 		TimeoutAction   string `json:"TimeoutAction"`
 	} `json:"HostWatchdogTimer"`
-	HostingRoles  []any `json:"HostingRoles"`
 	Memory        Odata `json:"Memory"`
 	MemorySummary *struct {
 		MemoryMirroring      string  `json:"MemoryMirroring"`
@@ -705,9 +723,13 @@ type PowerSubsystem struct {
 	Name          string  `json:"Name"`
 	Description   string  `json:"Description"`
 	CapacityWatts float64 `json:"CapacityWatts"`
-	PowerSupplies Odata   `json:"PowerSupplies"`
-	Batteries     Odata   `json:"Batteries"`
-	Status        Status  `json:"Status"`
+	Allocation    struct {
+		AllocatedWatts float64 `json:"AllocatedWatts"`
+		RequestedWatts float64 `json:"RequestedWatts"`
+	} `json:"Allocation"`
+	PowerSupplies Odata  `json:"PowerSupplies"`
+	Batteries     Odata  `json:"Batteries"`
+	Status        Status `json:"Status"`
 }
 
 type PowerSupply struct {
@@ -789,30 +811,30 @@ const (
 )
 
 type DellSystem struct {
-	BIOSReleaseDate                    string `json:"BIOSReleaseDate"`
-	BatteryRollupStatus                string `json:"BatteryRollupStatus"`
-	CoolingRollupStatus                string `json:"CoolingRollupStatus"`
-	CurrentRollupStatus                string `json:"CurrentRollupStatus"`
-	EstimatedExhaustTemperatureCelsius int    `json:"EstimatedExhaustTemperatureCelsius"`
-	EstimatedSystemAirflowCFM          int    `json:"EstimatedSystemAirflowCFM"`
-	ExpressServiceCode                 string `json:"ExpressServiceCode"`
-	FanRollupStatus                    string `json:"FanRollupStatus"`
-	IntrusionRollupStatus              string `json:"IntrusionRollupStatus"`
-	LicensingRollupStatus              string `json:"LicensingRollupStatus"`
-	MaxCPUSockets                      int    `json:"MaxCPUSockets"`
-	MaxDIMMSlots                       int    `json:"MaxDIMMSlots"`
-	MaxPCIeSlots                       int    `json:"MaxPCIeSlots"`
-	MaxSystemMemoryMiB                 int    `json:"MaxSystemMemoryMiB"`
-	PSRollupStatus                     string `json:"PSRollupStatus"`
-	PopulatedDIMMSlots                 int    `json:"PopulatedDIMMSlots"`
-	PopulatedPCIeSlots                 int    `json:"PopulatedPCIeSlots"`
-	PowerCapEnabledState               string `json:"PowerCapEnabledState"`
-	SELRollupStatus                    string `json:"SELRollupStatus"`
-	StorageRollupStatus                string `json:"StorageRollupStatus"`
-	SystemGeneration                   string `json:"SystemGeneration"`
-	SystemHealthRollupStatus           string `json:"SystemHealthRollupStatus"`
-	TempRollupStatus                   string `json:"TempRollupStatus"`
-	TempStatisticsRollupStatus         string `json:"TempStatisticsRollupStatus"`
+	BIOSReleaseDate                    string  `json:"BIOSReleaseDate"`
+	BatteryRollupStatus                string  `json:"BatteryRollupStatus"`
+	CoolingRollupStatus                string  `json:"CoolingRollupStatus"`
+	CurrentRollupStatus                string  `json:"CurrentRollupStatus"`
+	EstimatedExhaustTemperatureCelsius float64 `json:"EstimatedExhaustTemperatureCelsius"`
+	EstimatedSystemAirflowCFM          float64 `json:"EstimatedSystemAirflowCFM"`
+	ExpressServiceCode                 string  `json:"ExpressServiceCode"`
+	FanRollupStatus                    string  `json:"FanRollupStatus"`
+	IntrusionRollupStatus              string  `json:"IntrusionRollupStatus"`
+	LicensingRollupStatus              string  `json:"LicensingRollupStatus"`
+	MaxCPUSockets                      int     `json:"MaxCPUSockets"`
+	MaxDIMMSlots                       int     `json:"MaxDIMMSlots"`
+	MaxPCIeSlots                       int     `json:"MaxPCIeSlots"`
+	MaxSystemMemoryMiB                 int     `json:"MaxSystemMemoryMiB"`
+	PSRollupStatus                     string  `json:"PSRollupStatus"`
+	PopulatedDIMMSlots                 int     `json:"PopulatedDIMMSlots"`
+	PopulatedPCIeSlots                 int     `json:"PopulatedPCIeSlots"`
+	PowerCapEnabledState               string  `json:"PowerCapEnabledState"`
+	SELRollupStatus                    string  `json:"SELRollupStatus"`
+	StorageRollupStatus                string  `json:"StorageRollupStatus"`
+	SystemGeneration                   string  `json:"SystemGeneration"`
+	SystemHealthRollupStatus           string  `json:"SystemHealthRollupStatus"`
+	TempRollupStatus                   string  `json:"TempRollupStatus"`
+	TempStatisticsRollupStatus         string  `json:"TempStatisticsRollupStatus"`
 }
 
 type DellAttributes struct {
@@ -836,7 +858,7 @@ type PowerEquipment struct {
 }
 
 type PowerDistribution struct {
-	Id              any    `json:"Id"`
+	Id              any    `json:"Id"` // seen reported as both string and integer
 	Name            string `json:"Name"`
 	EquipmentType   string `json:"EquipmentType"`
 	FirmwareVersion string `json:"FirmwareVersion"`
