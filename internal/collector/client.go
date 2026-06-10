@@ -386,10 +386,13 @@ func (client *Client) RefreshSensorsUnified(mc *Collector, ch chan<- prometheus.
 }
 
 func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) bool {
-	if client.path.Thermal != "" {
+	if len(client.path.Sensors) > 0 && client.features.ExpandLevels {
+		return client.RefreshSensorsUnified(mc, ch)
+	}
+	if len(client.path.Thermal) > 0 {
 		return client.RefreshSensorsOld(mc, ch)
 	}
-	if client.path.ThermalSubsystem != "" {
+	if len(client.path.ThermalSubsystem) > 0 {
 		return client.RefreshSensorsNew(mc, ch)
 	}
 	return true
