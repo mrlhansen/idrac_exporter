@@ -3,6 +3,8 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 // When unmarshalling JSON, the "xstring" type can be one of the following
@@ -56,4 +58,20 @@ func (w *xstring) String() string {
 
 func asPtr[T any](v T) *T {
 	return &v
+}
+
+// asFloat64 coerces a value decoded into an "any" field (such as ReadingVolts,
+// which some BMCs serialize as a JSON string) into a float64.
+func asFloat64(v any) (float64, bool) {
+	switch x := v.(type) {
+	case float64:
+		return x, true
+	case string:
+		f, err := strconv.ParseFloat(strings.TrimSpace(x), 64)
+		if err != nil {
+			return 0, false
+		}
+		return f, true
+	}
+	return 0, false
 }

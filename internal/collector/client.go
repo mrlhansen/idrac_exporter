@@ -649,6 +649,21 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 		mc.NewPowerControlInterval(ch, pm.IntervalInMinutes, id, pc.Name)
 	}
 
+	// Voltage sensors. The Voltages array is part of the Power response already
+	// fetched above, so emitting these costs no additional Redfish requests. On
+	// many BMCs (e.g. Lenovo XCC) it includes the board rails and the CMOS/RTC
+	// battery. Entries without a usable reading are skipped.
+	for i, v := range resp.Voltages {
+		if v.Name == "" {
+			continue
+		}
+		value, ok := asFloat64(v.ReadingVolts)
+		if !ok {
+			continue
+		}
+		mc.NewSensorsVoltage(ch, value, strconv.Itoa(i), v.Name, "volts")
+	}
+
 	return true
 }
 
