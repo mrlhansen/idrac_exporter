@@ -2,17 +2,23 @@ package collector
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
-// When unmarshalling JSON from iDRAC, the "xstring" type defined here can be
-// one of the following:
+// When unmarshalling JSON, the "xstring" type can be one of the following
 // - nil
 // - string
+// - integer
 // - [{"Member": "VALUE"}]
 type xstring string
 
 func (w *xstring) UnmarshalJSON(data []byte) error {
 	var x any
+	var s string
+
+	defer func() {
+		*w = xstring(s)
+	}()
 
 	err := json.Unmarshal(data, &x)
 	if err != nil {
@@ -20,25 +26,27 @@ func (w *xstring) UnmarshalJSON(data []byte) error {
 	}
 
 	if x == nil {
-		*w = xstring("")
 		return nil
 	}
 
-	s, ok := x.(string)
-	if ok {
-		*w = xstring(s)
+	if v, ok := x.(string); ok {
+		s = v
+		return nil
+	}
+
+	if v, ok := x.(int); ok {
+		s = fmt.Sprintf("%d", v)
 		return nil
 	}
 
 	list := x.([]any)
 	dict := list[0].(map[string]any)
-	s, ok = dict["Member"].(string)
-	if ok {
-		*w = xstring(s)
+
+	if v, ok := dict["Member"].(string); ok {
+		s = v
 		return nil
 	}
 
-	*w = xstring("")
 	return nil
 }
 

@@ -147,7 +147,7 @@ type Processor struct {
 		VendorID                      string `json:"VendorId"`
 	} `json:"ProcessorId"`
 	ProcessorType     string  `json:"ProcessorType"`
-	Socket            string  `json:"Socket"`
+	Socket            xstring `json:"Socket"`
 	Status            Status  `json:"Status"`
 	TDPWatts          float64 `json:"TDPWatts"`
 	TotalCores        int     `json:"TotalCores"`
@@ -858,25 +858,25 @@ type PowerEquipment struct {
 }
 
 type PowerDistribution struct {
-	Id              any    `json:"Id"` // seen reported as both string and integer
-	Name            string `json:"Name"`
-	EquipmentType   string `json:"EquipmentType"`
-	FirmwareVersion string `json:"FirmwareVersion"`
-	Version         string `json:"Version"`
-	ProductionDate  string `json:"ProductionDate"`
-	Manufacturer    string `json:"Manufacturer"`
-	Model           string `json:"Model"`
-	SerialNumber    string `json:"SerialNumber"`
-	PartNumber      string `json:"PartNumber"`
-	UUID            string `json:"UUID"`
-	AssetTag        string `json:"AssetTag"`
-	Status          Status `json:"Status"`
-	Mains           Odata  `json:"Mains"`
-	Branches        Odata  `json:"Branches"`
-	Outlets         Odata  `json:"Outlets"`
-	OutletGroups    Odata  `json:"OutletGroups"`
-	Metrics         Odata  `json:"Metrics"`
-	Sensors         Odata  `json:"Sensors"`
+	Id              xstring `json:"Id"`
+	Name            string  `json:"Name"`
+	EquipmentType   string  `json:"EquipmentType"`
+	FirmwareVersion string  `json:"FirmwareVersion"`
+	Version         string  `json:"Version"`
+	ProductionDate  string  `json:"ProductionDate"`
+	Manufacturer    string  `json:"Manufacturer"`
+	Model           string  `json:"Model"`
+	SerialNumber    string  `json:"SerialNumber"`
+	PartNumber      string  `json:"PartNumber"`
+	UUID            string  `json:"UUID"`
+	AssetTag        string  `json:"AssetTag"`
+	Status          Status  `json:"Status"`
+	Mains           Odata   `json:"Mains"`
+	Branches        Odata   `json:"Branches"`
+	Outlets         Odata   `json:"Outlets"`
+	OutletGroups    Odata   `json:"OutletGroups"`
+	Metrics         Odata   `json:"Metrics"`
+	Sensors         Odata   `json:"Sensors"`
 }
 
 func (m *PowerDistribution) GetId() string {

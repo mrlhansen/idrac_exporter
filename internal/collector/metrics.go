@@ -694,7 +694,7 @@ func (mc *Collector) NewCpuInfo(ch chan<- prometheus.Metric, m *Processor) {
 		prometheus.UntypedValue,
 		1.0,
 		m.Id,
-		m.Socket,
+		m.Socket.String(),
 		cleanTrademarks(m.Manufacturer),
 		cleanTrademarks(m.Model),
 		arch.String(),
