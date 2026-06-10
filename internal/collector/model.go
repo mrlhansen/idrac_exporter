@@ -125,6 +125,12 @@ type GroupResponse struct {
 	Members     OdataSlice `json:"Members"`
 }
 
+type ExpandedGroup[T any] struct {
+	Name        string `json:"Name"`
+	Description string `json:"Description"`
+	Members     []T    `json:"Members"`
+}
+
 type Processor struct {
 	Id                    string  `json:"Id"`
 	Name                  string  `json:"Name"`
@@ -769,6 +775,48 @@ type PowerSupplyMetrics struct {
 	FrequencyHz *struct {
 		Reading int `json:"Reading"`
 	} `json:"FrequencyHz"`
+}
+
+type Sensor struct {
+	Id                         string  `json:"Id"`
+	Name                       string  `json:"Name"`
+	Description                string  `json:"Description"`
+	MinAllowableOperatingValue float64 `json:"MinAllowableOperatingValue"`
+	MaxAllowableOperatingValue float64 `json:"MaxAllowableOperatingValue"`
+	PhysicalContext            string  `json:"PhysicalContext"`
+	Precision                  float64 `json:"Precision"`
+	Reading                    float64 `json:"Reading"`
+	ReadingType                string  `json:"ReadingType"`
+	ReadingUnits               string  `json:"ReadingUnits"`
+	ReadingRangeMin            float64 `json:"ReadingRangeMin"`
+	ReadingRangeMax            float64 `json:"ReadingRangeMax"`
+	Status                     Status  `json:"Status"`
+	Thresholds                 struct {
+		LowerCaution struct {
+			Reading    float64 `json:"Reading"`
+			Activation string  `json:"Activation"`
+		} `json:"LowerCaution"`
+		LowerCritical struct {
+			Reading    float64 `json:"Reading"`
+			Activation string  `json:"Activation"`
+		} `json:"LowerCritical"`
+		LowerFatal struct {
+			Reading    float64 `json:"Reading"`
+			Activation string  `json:"Activation"`
+		} `json:"LowerFatal"`
+		UpperCaution struct {
+			Reading    float64 `json:"Reading"`
+			Activation string  `json:"Activation"`
+		} `json:"UpperCaution"`
+		UpperCritical struct {
+			Reading    float64 `json:"Reading"`
+			Activation string  `json:"Activation"`
+		} `json:"UpperCritical"`
+		UpperFatal struct {
+			Reading    float64 `json:"Reading"`
+			Activation string  `json:"Activation"`
+		} `json:"UpperFatal"`
+	} `json:"Thresholds"`
 }
 
 type EventLogResponse struct {

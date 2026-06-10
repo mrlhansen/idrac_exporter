@@ -37,6 +37,7 @@ type Client struct {
 		Power            string
 		PowerSubsystem   string
 		Storage          string
+		Sensors          string
 		Memory           string
 		Network          string
 		Event            string
@@ -44,6 +45,9 @@ type Client struct {
 		Manager          string
 		Extra            []string
 		RackPDUs         []string
+	}
+	features struct {
+		ExpandLevels bool
 	}
 }
 
@@ -132,6 +136,7 @@ func (client *Client) findAllEndpoints() bool {
 	client.path.Power = chassis.Power.OdataId
 	client.path.PowerSubsystem = chassis.PowerSubsystem.OdataId
 	client.path.Processors = system.Processors.OdataId
+	client.path.Sensors = chassis.Sensors.OdataId
 
 	// Vendor
 	m := strings.ToLower(system.Manufacturer)
@@ -233,6 +238,9 @@ func (client *Client) findAllEndpoints() bool {
 			client.version = 4
 		}
 	}
+
+	// Protocol features supported
+	client.features.ExpandLevels = root.ProtocolFeaturesSupported.ExpandQuery.Levels
 
 	return true
 }
@@ -343,6 +351,35 @@ func (client *Client) RefreshSensorsOld(mc *Collector, ch chan<- prometheus.Metr
 		id := f.GetId(n)
 		mc.NewSensorsFanHealth(ch, id, name, f.Status.Health)
 		mc.NewSensorsFanSpeed(ch, f.GetReading(), id, name, strings.ToLower(units))
+	}
+
+	return true
+}
+
+func (client *Client) RefreshSensorsUnified(mc *Collector, ch chan<- prometheus.Metric) bool {
+	resp := ExpandedGroup[Sensor]{}
+	ok := client.redfish.Get(client.path.Sensors+"?$expand=.($levels=1)", &resp)
+	if !ok {
+		return false
+	}
+
+	for _, s := range resp.Members {
+		if s.Status.State != StateEnabled {
+			continue
+		}
+
+		mc.NewSensorHealth(ch, &s)
+
+		if s.ReadingType == "" {
+			continue
+		}
+		if s.ReadingUnits == "" {
+			continue
+		}
+
+		mc.NewSensorValue(ch, &s)
+		mc.NewSensorLowerCritical(ch, &s)
+		mc.NewSensorUpperCritical(ch, &s)
 	}
 
 	return true

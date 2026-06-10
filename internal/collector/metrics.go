@@ -15,6 +15,19 @@ func cleanTrademarks(s string) string {
 	return strings.Join(strings.Fields(trademarkReplacer.Replace(s)), " ")
 }
 
+func cleanUnits(s string) string {
+	s = strings.ToLower(s)
+	switch s {
+	case "cel":
+		return "c"
+	case "watts":
+		return "w"
+	case "percent":
+		return "%"
+	}
+	return s
+}
+
 func health2value(health string) int {
 	switch health {
 	case "":
@@ -169,6 +182,60 @@ func (mc *Collector) NewSensorsFanSpeed(ch chan<- prometheus.Metric, speed float
 		id,
 		name,
 		units,
+	)
+}
+
+func (mc *Collector) NewSensorValue(ch chan<- prometheus.Metric, m *Sensor) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorValue,
+		prometheus.GaugeValue,
+		m.Reading,
+		m.Id,
+		m.Name,
+		cleanUnits(m.ReadingUnits),
+	)
+}
+
+func (mc *Collector) NewSensorHealth(ch chan<- prometheus.Metric, m *Sensor) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		m.Name,
+		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewSensorLowerCritical(ch chan<- prometheus.Metric, m *Sensor) {
+	if m.Thresholds.LowerCritical.Reading == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorLowerCritical,
+		prometheus.GaugeValue,
+		m.Thresholds.LowerCritical.Reading,
+		m.Id,
+		m.Name,
+		cleanUnits(m.ReadingUnits),
+	)
+}
+
+func (mc *Collector) NewSensorUpperCritical(ch chan<- prometheus.Metric, m *Sensor) {
+	if m.Thresholds.UpperCritical.Reading == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorUpperCritical,
+		prometheus.GaugeValue,
+		m.Thresholds.UpperCritical.Reading,
+		m.Id,
+		m.Name,
+		cleanUnits(m.ReadingUnits),
 	)
 }
 
