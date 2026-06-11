@@ -10,6 +10,7 @@ import (
 // When unmarshalling JSON, the "xstring" type can be one of the following
 // - nil
 // - string
+// - float64
 // - integer
 // - [{"Member": "VALUE"}]
 type xstring string
@@ -27,27 +28,39 @@ func (w *xstring) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
+	// case: nil
 	if x == nil {
 		return nil
 	}
 
+	// case: string
 	if v, ok := x.(string); ok {
 		s = v
 		return nil
 	}
 
+	// case: int
 	if v, ok := x.(int); ok {
 		s = fmt.Sprintf("%v", v)
 		return nil
 	}
 
+	// case: float64
 	if v, ok := x.(float64); ok {
 		s = fmt.Sprintf("%v", v)
 		return nil
 	}
 
-	list := x.([]any)
-	dict := list[0].(map[string]any)
+	// strange iDRAC case
+	list, ok := x.([]any)
+	if !ok {
+		return nil
+	}
+
+	dict, ok := list[0].(map[string]any)
+	if !ok {
+		return nil
+	}
 
 	if v, ok := dict["Member"].(string); ok {
 		s = v
