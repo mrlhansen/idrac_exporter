@@ -926,7 +926,7 @@ func (client *Client) RefreshPDUs(mc *Collector, ch chan<- prometheus.Metric) bo
 			continue
 		}
 
-		id := pd.GetId()
+		id := pd.Id.String()
 		mc.NewPduInfo(ch, id, &pd)
 		mc.NewPduHealth(ch, id, &pd)
 

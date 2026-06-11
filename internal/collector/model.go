@@ -2,7 +2,6 @@ package collector
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 )
 
@@ -884,10 +883,6 @@ type PowerDistribution struct {
 	OutletGroups    Odata   `json:"OutletGroups"`
 	Metrics         Odata   `json:"Metrics"`
 	Sensors         Odata   `json:"Sensors"`
-}
-
-func (m *PowerDistribution) GetId() string {
-	return fmt.Sprintf("%v", m.Id)
 }
 
 type PowerDistributionMetrics struct {
