@@ -802,6 +802,13 @@ type ManagerResponse struct {
 	ServiceIdentification string `json:"ServiceIdentification"`
 	TimeZoneName          string `json:"TimeZoneName"`
 	Status                Status `json:"Status"`
+	Links                 struct {
+		Oem struct {
+			Dell struct {
+				DellAttributes OdataSlice `json:"DellAttributes"`
+			} `json:"Dell"`
+		} `json:"Oem"`
+	} `json:"Links"`
 }
 
 // Dell OEM

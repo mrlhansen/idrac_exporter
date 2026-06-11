@@ -389,6 +389,18 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 		return false
 	}
 
+	if client.vendor == DELL {
+		s := mgr.Links.Oem.Dell.DellAttributes.GetLinks()
+		if slices.Contains(s, DellAttributesPath) {
+			attr := DellAttributes{}
+			ok := client.redfish.Get(DellAttributesPath, &attr)
+			if ok {
+				mgr.Model = attr.Attributes.InfoHWModel
+				mgr.ManagerType = attr.Attributes.InfoType
+			}
+		}
+	}
+
 	mc.NewManagerInfo(ch, &mgr)
 	mc.NewManagerHealth(ch, &mgr)
 
