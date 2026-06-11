@@ -110,7 +110,7 @@ idrac_system_machine_info{manufacturer,model,serial,sku}
 ```
 
 ### Sensors
-These metrics include temperature, FAN health and speeds, and voltage sensor readings (such as board rails and the CMOS battery, where the BMC reports them via the legacy Power resource). The voltage metric is part of the sensors metrics group; when the power group is also enabled, the readings are collected together with the power metrics at no additional cost.
+These metrics include temperature, FAN health and speeds, and voltage sensor readings.
 
 ```text
 idrac_sensors_temperature{id,name,units}
@@ -240,6 +240,18 @@ These metrics contain information about the exporter itself, such as build infor
 ```text
 idrac_exporter_build_info{goversion,revision,version}
 idrac_exporter_scrape_errors_total
+```
+
+### PDUs
+The exporter has _experimental_ support for scraping metrics from PDUs with Redfish support. The following metrics are exported for PDUs.
+
+```text
+idrac_pdu_info{firmware,id,manufacturer,model,serial,type}
+idrac_pdu_health{id,status}
+idrac_pdu_power_apparent_va{id}
+idrac_pdu_power_factor{id}
+idrac_pdu_power_watts{id}
+idrac_pdu_energy_kwh{id}
 ```
 
 
