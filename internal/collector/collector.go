@@ -592,6 +592,15 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 			if !ok {
 				collector.errors.Add(1)
 			}
+			// Voltage sensors live in the legacy Power resource. When the power
+			// group is enabled they are emitted as part of that collection (at
+			// no extra cost), otherwise they are fetched here.
+			if !collect.Power {
+				ok = collector.client.RefreshVoltages(collector, ch)
+				if !ok {
+					collector.errors.Add(1)
+				}
+			}
 			wg.Done()
 		}()
 	}

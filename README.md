@@ -110,7 +110,7 @@ idrac_system_machine_info{manufacturer,model,serial,sku}
 ```
 
 ### Sensors
-These metrics include temperature, FAN health and speeds, and voltage sensor readings (such as board rails and the CMOS battery, where the BMC reports them via the legacy Power resource).
+These metrics include temperature, FAN health and speeds, and voltage sensor readings (such as board rails and the CMOS battery, where the BMC reports them via the legacy Power resource). The voltage metric is part of the sensors metrics group; when the power group is also enabled, the readings are collected together with the power metrics at no additional cost.
 
 ```text
 idrac_sensors_temperature{id,name,units}

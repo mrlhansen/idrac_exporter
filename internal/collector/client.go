@@ -649,10 +649,39 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 		mc.NewPowerControlInterval(ch, pm.IntervalInMinutes, id, pc.Name)
 	}
 
-	// Voltage sensors. The Voltages array is part of the Power response already
-	// fetched above, so emitting these costs no additional Redfish requests. On
-	// many BMCs (e.g. Lenovo XCC) it includes the board rails and the CMOS/RTC
-	// battery. Entries without a usable reading are skipped.
+	// Voltage sensors belong to the sensors metrics group, but the data lives
+	// in the Power response fetched above, so when both groups are enabled they
+	// are emitted here at no additional cost.
+	if config.Config.Collect.Sensors {
+		client.emitVoltages(mc, ch, &resp)
+	}
+
+	return true
+}
+
+// RefreshVoltages emits the voltage sensors from the legacy Power resource. It
+// is used when the sensors metrics group is enabled but the power group is not;
+// when both groups are enabled the voltages are instead emitted during
+// RefreshPowerOld, from the response that is fetched there anyway.
+func (client *Client) RefreshVoltages(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.path.Power == "" {
+		return true
+	}
+
+	resp := PowerResponse{}
+	ok := client.redfish.Get(client.path.Power, &resp)
+	if !ok {
+		return false
+	}
+
+	client.emitVoltages(mc, ch, &resp)
+	return true
+}
+
+// emitVoltages emits the entries of the Voltages array found in the legacy
+// Power resource. On many BMCs (e.g. Lenovo XCC) this includes the board rails
+// and the CMOS/RTC battery. Entries without a usable reading are skipped.
+func (client *Client) emitVoltages(mc *Collector, ch chan<- prometheus.Metric, resp *PowerResponse) {
 	for i, v := range resp.Voltages {
 		if v.Name == "" {
 			continue
@@ -663,8 +692,6 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 		}
 		mc.NewSensorsVoltage(ch, value, strconv.Itoa(i), v.Name, "volts")
 	}
-
-	return true
 }
 
 func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) bool {
