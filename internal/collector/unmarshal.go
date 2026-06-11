@@ -37,7 +37,12 @@ func (w *xstring) UnmarshalJSON(data []byte) error {
 	}
 
 	if v, ok := x.(int); ok {
-		s = fmt.Sprintf("%d", v)
+		s = fmt.Sprintf("%v", v)
+		return nil
+	}
+
+	if v, ok := x.(float64); ok {
+		s = fmt.Sprintf("%v", v)
 		return nil
 	}
 
