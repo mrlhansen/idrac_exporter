@@ -172,6 +172,17 @@ func (mc *Collector) NewSensorsFanSpeed(ch chan<- prometheus.Metric, speed float
 	)
 }
 
+func (mc *Collector) NewSensorsVoltage(ch chan<- prometheus.Metric, voltage float64, id, name, units string) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorsVoltage,
+		prometheus.GaugeValue,
+		voltage,
+		id,
+		name,
+		units,
+	)
+}
+
 func (mc *Collector) NewPowerSupplyHealth(ch chan<- prometheus.Metric, health, id string) {
 	value := health2value(health)
 	if value < 0 {
