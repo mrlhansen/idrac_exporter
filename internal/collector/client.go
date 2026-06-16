@@ -389,6 +389,7 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 		return false
 	}
 
+	// Issue #190 and #175
 	if client.vendor == DELL {
 		s := mgr.Links.Oem.Dell.DellAttributes.GetLinks()
 		if slices.Contains(s, DellAttributesPath) {

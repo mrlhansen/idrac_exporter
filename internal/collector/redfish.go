@@ -200,7 +200,7 @@ func (r *Redfish) RefreshSession() bool {
 		return false
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusNotFound {
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusNotFound {
 		ok := r.CreateSession()
 		if !ok {
 			r.DisableSession()
