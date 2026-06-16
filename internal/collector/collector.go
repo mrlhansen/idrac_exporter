@@ -120,353 +120,359 @@ type Collector struct {
 	PduEnergyKWh       *prometheus.Desc
 }
 
-func NewCollector() *Collector {
+func NewCollector(labels prometheus.Labels) *Collector {
 	prefix := config.Config.MetricsPrefix
+
+	// Merge host labels with exporter build info labels
+	buildLabels := prometheus.Labels{
+		"version":   version.Version,
+		"revision":  version.Revision,
+		"goversion": runtime.Version(),
+	}
+	for k, v := range labels {
+		buildLabels[k] = v
+	}
 
 	collector := &Collector{
 		ExporterBuildInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "exporter", "build_info"),
 			"Constant metric with build information for the exporter",
-			nil, prometheus.Labels{
-				"version":   version.Version,
-				"revision":  version.Revision,
-				"goversion": runtime.Version(),
-			},
+			nil, buildLabels,
 		),
 		ExporterScrapeErrorsTotal: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "exporter", "scrape_errors_total"),
 			"Total number of errors encountered while scraping target",
-			nil, nil,
+			nil, labels,
 		),
 		SystemPowerOn: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "power_on"),
 			"Power state of the system",
-			nil, nil,
+			nil, labels,
 		),
 		SystemHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "health"),
 			"Health status of the system",
-			[]string{"status"}, nil,
+			[]string{"status"}, labels,
 		),
 		SystemIndicatorLED: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "indicator_led_on"),
 			"Indicator LED state of the system",
-			[]string{"state"}, nil,
+			[]string{"state"}, labels,
 		),
 		SystemIndicatorActive: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "indicator_active"),
 			"State of the system location indicator",
-			nil, nil,
+			nil, labels,
 		),
 		SystemMemorySize: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "memory_size_bytes"),
 			"Total memory size of the system in bytes",
-			nil, nil,
+			nil, labels,
 		),
 		SystemCpuCount: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "cpu_count"),
 			"Total number of CPUs in the system",
-			[]string{"model"}, nil,
+			[]string{"model"}, labels,
 		),
 		SystemBiosInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "bios_info"),
 			"Information about the BIOS",
-			[]string{"version"}, nil,
+			[]string{"version"}, labels,
 		),
 		SystemMachineInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "machine_info"),
 			"Information about the machine",
-			[]string{"manufacturer", "model", "serial", "sku", "hostname"}, nil,
+			[]string{"manufacturer", "model", "serial", "sku", "hostname"}, labels,
 		),
 		SensorsTemperature: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "temperature"),
 			"Sensors reporting temperature measurements",
-			[]string{"id", "name", "units"}, nil,
+			[]string{"id", "name", "units"}, labels,
 		),
 		SensorsFanHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "fan_health"),
 			"Health status for fans",
-			[]string{"id", "name", "status"}, nil,
+			[]string{"id", "name", "status"}, labels,
 		),
 		SensorsFanSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "fan_speed"),
 			"Sensors reporting fan speed measurements",
-			[]string{"id", "name", "units"}, nil,
+			[]string{"id", "name", "units"}, labels,
 		),
 		PowerSupplyHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "health"),
 			"Power supply health status",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "status"}, labels,
 		),
 		PowerSupplyOutputWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "output_watts"),
 			"Power supply output in watts",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PowerSupplyInputWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "input_watts"),
 			"Power supply input in watts",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PowerSupplyCapacityWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "capacity_watts"),
 			"Power supply capacity in watts",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PowerSupplyInputVoltage: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "input_voltage"),
 			"Power supply input voltage",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PowerSupplyEfficiencyPercent: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "efficiency_percent"),
 			"Power supply efficiency in percentage",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PowerControlConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "consumed_watts"),
 			"Consumption of power control system in watts",
-			[]string{"id", "name"}, nil,
+			[]string{"id", "name"}, labels,
 		),
 		PowerControlCapacityWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "capacity_watts"),
 			"Capacity of power control system in watts",
-			[]string{"id", "name"}, nil,
+			[]string{"id", "name"}, labels,
 		),
 		PowerControlMinConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "min_consumed_watts"),
 			"Minimum consumption of power control system during the reported interval",
-			[]string{"id", "name"}, nil,
+			[]string{"id", "name"}, labels,
 		),
 		PowerControlMaxConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "max_consumed_watts"),
 			"Maximum consumption of power control system during the reported interval",
-			[]string{"id", "name"}, nil,
+			[]string{"id", "name"}, labels,
 		),
 		PowerControlAvgConsumedWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "avg_consumed_watts"),
 			"Average consumption of power control system during the reported interval",
-			[]string{"id", "name"}, nil,
+			[]string{"id", "name"}, labels,
 		),
 		PowerControlInterval: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_control", "interval_in_minutes"),
 			"Interval for measurements of power control system",
-			[]string{"id", "name"}, nil,
+			[]string{"id", "name"}, labels,
 		),
 		EventLogEntry: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "events", "log_entry"),
 			"Entry from the system event log",
-			[]string{"id", "message", "severity"}, nil,
+			[]string{"id", "message", "severity"}, labels,
 		),
 		StorageInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage", "info"),
 			"Information about storage sub systems",
-			[]string{"id", "name"}, nil,
+			[]string{"id", "name"}, labels,
 		),
 		StorageHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage", "health"),
 			"Health status for storage sub systems",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "status"}, labels,
 		),
 		StorageDriveInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_drive", "info"),
 			"Information about disk drives",
-			[]string{"id", "storage_id", "manufacturer", "mediatype", "model", "name", "protocol", "serial", "slot"}, nil,
+			[]string{"id", "storage_id", "manufacturer", "mediatype", "model", "name", "protocol", "serial", "slot"}, labels,
 		),
 		StorageDriveHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_drive", "health"),
 			"Health status for disk drives",
-			[]string{"id", "storage_id", "status"}, nil,
+			[]string{"id", "storage_id", "status"}, labels,
 		),
 		StorageDriveCapacity: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_drive", "capacity_bytes"),
 			"Capacity of disk drives in bytes",
-			[]string{"id", "storage_id"}, nil,
+			[]string{"id", "storage_id"}, labels,
 		),
 		StorageDriveLifeLeft: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_drive", "life_left_percent"),
 			"Predicted life left in percent",
-			[]string{"id", "storage_id"}, nil,
+			[]string{"id", "storage_id"}, labels,
 		),
 		StorageDriveIndicatorActive: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_drive", "indicator_active"),
 			"State of the drive location indicator",
-			[]string{"id", "storage_id"}, nil,
+			[]string{"id", "storage_id"}, labels,
 		),
 		StorageControllerInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_controller", "info"),
 			"Information about storage controllers",
-			[]string{"id", "storage_id", "manufacturer", "model", "name", "firmware"}, nil,
+			[]string{"id", "storage_id", "manufacturer", "model", "name", "firmware"}, labels,
 		),
 		StorageControllerHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_controller", "health"),
 			"Health status for storage controllers",
-			[]string{"id", "storage_id", "status"}, nil,
+			[]string{"id", "storage_id", "status"}, labels,
 		),
 		StorageControllerSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_controller", "speed_mbps"),
 			"Speed of storage controllers in Mbps",
-			[]string{"id", "storage_id"}, nil,
+			[]string{"id", "storage_id"}, labels,
 		),
 		StorageVolumeInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_volume", "info"),
 			"Information about virtual volumes",
-			[]string{"id", "storage_id", "name", "volumetype", "raidtype"}, nil,
+			[]string{"id", "storage_id", "name", "volumetype", "raidtype"}, labels,
 		),
 		StorageVolumeHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_volume", "health"),
 			"Health status for virtual volumes",
-			[]string{"id", "storage_id", "status"}, nil,
+			[]string{"id", "storage_id", "status"}, labels,
 		),
 		StorageVolumeMediaSpan: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_volume", "media_span_count"),
 			"Number of media spanned by virtual volumes",
-			[]string{"id", "storage_id"}, nil,
+			[]string{"id", "storage_id"}, labels,
 		),
 		StorageVolumeCapacity: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage_volume", "capacity_bytes"),
 			"Capacity of virtual volumes in bytes",
-			[]string{"id", "storage_id"}, nil,
+			[]string{"id", "storage_id"}, labels,
 		),
 		MemoryModuleInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "info"),
 			"Information about memory modules",
-			[]string{"id", "ecc", "manufacturer", "type", "name", "serial", "rank"}, nil,
+			[]string{"id", "ecc", "manufacturer", "type", "name", "serial", "rank"}, labels,
 		),
 		MemoryModuleHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "health"),
 			"Health status for memory modules",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "status"}, labels,
 		),
 		MemoryModuleCapacity: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "capacity_bytes"),
 			"Capacity of memory modules in bytes",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		MemoryModuleSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "speed_mhz"),
 			"Speed of memory modules in Mhz",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		NetworkAdapterInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_adapter", "info"),
 			"Information about network adapters",
-			[]string{"id", "manufacturer", "model", "serial"}, nil,
+			[]string{"id", "manufacturer", "model", "serial"}, labels,
 		),
 		NetworkAdapterHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_adapter", "health"),
 			"Health status for network adapters",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "status"}, labels,
 		),
 		NetworkPortHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "health"),
 			"Health status for network ports",
-			[]string{"id", "adapter_id", "status"}, nil,
+			[]string{"id", "adapter_id", "status"}, labels,
 		),
 		NetworkPortMaxSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "max_speed_mbps"),
 			"Max link speed of network ports in Mbps",
-			[]string{"id", "adapter_id"}, nil,
+			[]string{"id", "adapter_id"}, labels,
 		),
 		NetworkPortCurrentSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "current_speed_mbps"),
 			"Current link speed of network ports in Mbps",
-			[]string{"id", "adapter_id"}, nil,
+			[]string{"id", "adapter_id"}, labels,
 		),
 		NetworkPortLinkUp: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_port", "link_up"),
 			"Link status of network ports (up or down)",
-			[]string{"id", "adapter_id", "status"}, nil,
+			[]string{"id", "adapter_id", "status"}, labels,
 		),
 		CpuInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "info"),
 			"Information about the CPU",
-			[]string{"id", "socket", "manufacturer", "model", "arch"}, nil,
+			[]string{"id", "socket", "manufacturer", "model", "arch"}, labels,
 		),
 		CpuHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "health"),
 			"Health status of the CPU",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "status"}, labels,
 		),
 		CpuVoltage: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "voltage"),
 			"Current voltage of the CPU",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		CpuMaxSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "max_speed_mhz"),
 			"Maximum speed of the CPU in Mhz",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		CpuCurrentSpeed: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "current_speed_mhz"),
 			"Current speed of the CPU in Mhz",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		CpuTotalCores: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "total_cores"),
 			"Total number of CPU cores",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		CpuTotalThreads: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "cpu", "total_threads"),
 			"Total number of CPU threads",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		ManagerInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "manager", "info"),
 			"Information about the manager",
-			[]string{"id", "type", "model", "firmware"}, nil,
+			[]string{"id", "type", "model", "firmware"}, labels,
 		),
 		ManagerHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "manager", "health"),
 			"Health status of the manager",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "status"}, labels,
 		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
-			[]string{"status"}, nil,
+			[]string{"status"}, labels,
 		),
 		DellEstimatedSystemAirflowCFM: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "estimated_system_airflow_cfm"),
 			"Estimated system airflow in cubic feet per minute",
-			nil, nil,
+			nil, labels,
 		),
 		DellControllerBatteryHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "controller_battery_health"),
 			"Health status of storage controller battery",
-			[]string{"id", "storage_id", "name", "status"}, nil,
+			[]string{"id", "storage_id", "name", "status"}, labels,
 		),
 		PduInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "pdu", "info"),
 			"Information about the PDU",
-			[]string{"id", "firmware", "manufacturer", "model", "name", "serial", "type"}, nil,
+			[]string{"id", "firmware", "manufacturer", "model", "name", "serial", "type"}, labels,
 		),
 		PduHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "pdu", "health"),
 			"Health status of the PDU",
-			[]string{"id", "status"}, nil,
+			[]string{"id", "status"}, labels,
 		),
 		PduPowerWatts: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "pdu", "power_watts"),
 			"Power reading in watts",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PduPowerApparentVA: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "pdu", "power_apparent_va"),
 			"Apparent power reading in VA units",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PduPowerFactor: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "pdu", "power_factor"),
 			"Power factor (efficiency)",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 		PduEnergyKWh: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "pdu", "energy_kwh"),
 			"Energy consumption in kWh",
-			[]string{"id"}, nil,
+			[]string{"id"}, labels,
 		),
 	}
 
@@ -731,10 +737,15 @@ func Reset(target string) {
 }
 
 func GetCollector(target, auth string) (*Collector, error) {
+	authConfig := config.GetAuthConfig(target, auth)
+	if authConfig == nil {
+		return nil, fmt.Errorf("could not find login credentials")
+	}
+
 	mu.Lock()
 	collector, ok := collectors[target]
 	if !ok {
-		collector = NewCollector()
+		collector = NewCollector(prometheus.Labels(authConfig.Labels))
 		collectors[target] = collector
 	}
 	mu.Unlock()
@@ -745,11 +756,7 @@ func GetCollector(target, auth string) (*Collector, error) {
 
 	// Try to instantiate a new Redfish host
 	if collector.client == nil {
-		auth := config.GetAuthConfig(target, auth)
-		if auth == nil {
-			return nil, fmt.Errorf("could not find login credentials")
-		}
-		c := NewClient(target, auth)
+		c := NewClient(target, authConfig)
 		if c == nil {
 			return nil, fmt.Errorf("failed to instantiate new client")
 		} else {
