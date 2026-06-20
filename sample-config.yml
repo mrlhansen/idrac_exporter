@@ -21,6 +21,11 @@ port: 9348
 # Environment variable CONFIG_TIMEOUT=10
 timeout: 10
 
+# Maximum number of concurrent HTTP connections per host
+# Default value: 10
+# Environment variable CONFIG_CONCURRENCY=10
+concurrency: 10
+
 # Prefix for the exported metrics
 # Default value: idrac
 # Environment variable CONFIG_METRICS_PREFIX=idrac

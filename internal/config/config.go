@@ -111,6 +111,10 @@ func (c *RootConfig) Validate() error {
 		c.Timeout = 10
 	}
 
+	if c.Concurrency == 0 {
+		c.Concurrency = 10
+	}
+
 	if c.MetricsPrefix == "" {
 		c.MetricsPrefix = "idrac"
 	}

@@ -63,6 +63,7 @@ func (c *RootConfig) FromEnvironment() {
 
 	getEnvUint("CONFIG_PORT", &c.Port)
 	getEnvUint("CONFIG_TIMEOUT", &c.Timeout)
+	getEnvUint("CONFIG_CONCURRENCY", &c.Concurrency)
 	getEnvUint("CONFIG_DEFAULT_PORT", &port)
 
 	getEnvBool("CONFIG_DEFAULT_USE_BASIC_AUTH", &use_basic_auth)

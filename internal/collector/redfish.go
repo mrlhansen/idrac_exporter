@@ -2,6 +2,7 @@ package collector
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/log"
+	"golang.org/x/sync/semaphore"
 )
 
 type RedfishSession struct {
@@ -23,17 +25,20 @@ type RedfishSession struct {
 }
 
 type Redfish struct {
-	http     *http.Client
 	baseurl  string
 	hostname string
 	username string
 	password string
 	session  RedfishSession
+	http     *http.Client
+	sem      *semaphore.Weighted
+	ctx      context.Context
 }
 
 const redfishRootPath = "/redfish/v1"
 
 func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
+	cfg := config.Config
 	baseurl := fmt.Sprintf("%s://%s", auth.Scheme, host)
 	if auth.Port > 0 {
 		baseurl = fmt.Sprintf("%s:%d", baseurl, auth.Port)
@@ -50,14 +55,15 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 			Transport: &http.Transport{
 				Proxy:                 http.ProxyFromEnvironment,
 				TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
-				MaxIdleConnsPerHost:   10,                                                 // Allow more concurrent requests per host
-				MaxConnsPerHost:       20,                                                 // Limit total connections per host
-				IdleConnTimeout:       30 * time.Second,                                   // Remove stale connections after 30s
-				ResponseHeaderTimeout: time.Duration(config.Config.Timeout) * time.Second, // Timeout waiting for response headers
-				ExpectContinueTimeout: 1 * time.Second,                                    // Timeout for 100-continue responses
+				MaxIdleConnsPerHost:   int(cfg.Concurrency),                     // Allow more concurrent requests per host
+				IdleConnTimeout:       30 * time.Second,                         // Remove stale connections after 30s
+				ResponseHeaderTimeout: time.Duration(cfg.Timeout) * time.Second, // Timeout waiting for response headers
+				ExpectContinueTimeout: 1 * time.Second,                          // Timeout for 100-continue responses
 			},
-			Timeout: time.Duration(config.Config.Timeout) * time.Second,
+			Timeout: time.Duration(cfg.Timeout) * time.Second,
 		},
+		sem: semaphore.NewWeighted(int64(cfg.Concurrency)),
+		ctx: context.Background(),
 	}
 }
 
@@ -218,6 +224,9 @@ func (r *Redfish) Get(path string, res any) bool {
 	if !strings.HasPrefix(path, redfishRootPath) {
 		return false
 	}
+
+	r.sem.Acquire(r.ctx, 1)
+	defer r.sem.Release(1)
 
 	url := fmt.Sprintf("%s%s", r.baseurl, path)
 	req, err := http.NewRequest("GET", url, nil)
