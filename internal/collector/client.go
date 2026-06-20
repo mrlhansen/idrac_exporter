@@ -606,11 +606,6 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 	}
 
 	for i, psu := range resp.PowerSupplies {
-		// Status is missing, but information is there
-		if client.vendor == INVENTEC {
-			psu.Status.State = StateEnabled
-		}
-
 		// Issue #116
 		if (client.vendor == HPE) && (client.version == 4) {
 			if psu.FirmwareVersion == "0.00" {
@@ -618,7 +613,7 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 			}
 		}
 
-		if psu.Status.State != StateEnabled {
+		if psu.Status.State == StateAbsent {
 			continue
 		}
 
