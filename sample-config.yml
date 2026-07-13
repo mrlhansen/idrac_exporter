@@ -60,6 +60,11 @@ default_target: "192.168.1.1"
 # is used by default) and always use HTTP basic auth. This is NOT recommended and
 # it should only be used if there is an actual reason.
 #
+# The option "allow_legacy_rsa_kex" enables legacy RSA key exchange for TLS 1.2
+# connections to devices that do not support modern ECDHE cipher suites. Only
+# RSA cipher suites using AES-GCM are enabled. This option is disabled by default
+# and should only be enabled for targets that require it.
+#
 # When the "target" parameter does not match any host, the exporter will attempt
 # to use the login credentials under "default". The credentials under "default"
 # can also be configured using environment variables, but this is not possible
@@ -71,6 +76,7 @@ hosts:
     scheme: https          # CONFIG_DEFAULT_SCHEME=https
     port: 8443             # CONFIG_DEFAULT_PORT=8443
     use_basic_auth: true   # CONFIG_DEFAULT_USE_BASIC_AUTH=true
+    allow_legacy_rsa_kex: false  # CONFIG_DEFAULT_ALLOW_LEGACY_RSA_KEX=false
   192.168.1.1:
     username: user
     password: pass

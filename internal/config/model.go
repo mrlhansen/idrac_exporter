@@ -3,11 +3,12 @@ package config
 import "sync"
 
 type AuthConfig struct {
-	Username  string `yaml:"username"`
-	Password  string `yaml:"password"`
-	Scheme    string `yaml:"scheme"`
-	Port      uint   `yaml:"port"`
-	BasicAuth bool   `yaml:"use_basic_auth"`
+	Username          string `yaml:"username"`
+	Password          string `yaml:"password"`
+	Scheme            string `yaml:"scheme"`
+	Port              uint   `yaml:"port"`
+	BasicAuth         bool   `yaml:"use_basic_auth"`
+	AllowLegacyRSAKex bool   `yaml:"allow_legacy_rsa_kex"`
 }
 
 type CollectConfig struct {

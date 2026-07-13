@@ -43,6 +43,28 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 	if auth.Port > 0 {
 		baseurl = fmt.Sprintf("%s:%d", baseurl, auth.Port)
 	}
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+	}
+	// Enable legacy RSA key exchange only for explicitly configured targets.
+	// TLS 1.0, TLS 1.1, 3DES, RC4, and CBC cipher suites remain disabled.
+	if auth.AllowLegacyRSAKex {
+		tlsConfig.CipherSuites = []uint16{
+			// Modern TLS 1.2 AEAD cipher suites
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+
+			// Legacy RSA key exchange restricted to AES-GCM cipher suites
+			tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+		}
+	}
+
 	return &Redfish{
 		baseurl:  baseurl,
 		hostname: host,
@@ -54,7 +76,7 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 		http: &http.Client{
 			Transport: &http.Transport{
 				Proxy:                 http.ProxyFromEnvironment,
-				TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+				TLSClientConfig:       tlsConfig,
 				MaxIdleConnsPerHost:   int(cfg.Concurrency),                     // Allow more concurrent requests per host
 				IdleConnTimeout:       30 * time.Second,                         // Remove stale connections after 30s
 				ResponseHeaderTimeout: time.Duration(cfg.Timeout) * time.Second, // Timeout waiting for response headers
