@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"path"
 	"regexp"
 	"slices"
 	"strconv"
@@ -62,6 +63,30 @@ func NewClient(host string, auth *config.AuthConfig) *Client {
 	return client
 }
 
+func findPrimaryChassis(g *GroupResponse) string {
+	switch len(g.Members) {
+	case 0:
+		return ""
+	case 1:
+		return g.Members[0].OdataId
+	}
+
+	preferred := []string{
+		"System.Embedded.1",
+		"Self",
+		"1",
+	}
+
+	for _, m := range g.Members {
+		s := path.Base(m.OdataId)
+		if slices.Contains(preferred, s) {
+			return m.OdataId
+		}
+	}
+
+	return g.Members[0].OdataId
+}
+
 func (client *Client) findAllEndpoints() bool {
 	var root V1Response
 	var group GroupResponse
@@ -107,23 +132,25 @@ func (client *Client) findAllEndpoints() bool {
 
 	client.path.System = group.Members[0].OdataId
 
+	ok = client.redfish.Get(client.path.System, &system)
+	if !ok {
+		return false
+	}
+
 	// Chassis
 	ok = client.redfish.Get(root.Chassis.OdataId, &group)
 	if !ok {
 		return false
 	}
 
-	// Thermal and Power
-	ok = client.redfish.Get(group.Members[0].OdataId, &chassis)
+	path = findPrimaryChassis(&group)
+
+	ok = client.redfish.Get(path, &chassis)
 	if !ok {
 		return false
 	}
 
-	ok = client.redfish.Get(client.path.System, &system)
-	if !ok {
-		return false
-	}
-
+	// Paths
 	client.path.Storage = system.Storage.OdataId
 	client.path.Memory = system.Memory.OdataId
 	client.path.Network = chassis.NetworkAdapters.OdataId
