@@ -349,7 +349,7 @@ func NewCollector() *Collector {
 		MemoryModuleInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "info"),
 			"Information about memory modules",
-			[]string{"id", "ecc", "manufacturer", "type", "name", "serial", "rank"}, nil,
+			[]string{"id", "ecc", "manufacturer", "type", "name", "serial", "part_number", "rank"}, nil,
 		),
 		MemoryModuleHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "memory_module", "health"),

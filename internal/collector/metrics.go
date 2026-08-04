@@ -564,6 +564,7 @@ func (mc *Collector) NewMemoryModuleInfo(ch chan<- prometheus.Metric, m *Memory)
 		m.MemoryDeviceType,
 		m.Name,
 		m.SerialNumber,
+		strings.TrimSpace(m.PartNumber),
 		fmt.Sprint(m.RankCount),
 	)
 }

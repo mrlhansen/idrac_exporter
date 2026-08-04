@@ -200,7 +200,7 @@ idrac_dell_controller_battery_health{id,name,status,storage_id}
 These metrics include information about memory modules in the machine.
 
 ```text
-idrac_memory_module_info{ecc,id,manufacturer,name,rank,serial,type}
+idrac_memory_module_info{ecc,id,manufacturer,name,part_number,rank,serial,type}
 idrac_memory_module_health{id,status}
 idrac_memory_module_capacity_bytes{id}
 idrac_memory_module_speed_mhz{id}
