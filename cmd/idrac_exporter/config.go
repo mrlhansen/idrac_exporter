@@ -39,7 +39,10 @@ func ReloadConfig(filename string) {
 	for k, v := range cfg.Hosts {
 		h, ok := old.Hosts[k]
 		if ok {
-			if h.Username != v.Username || h.Password != v.Password || h.Scheme != v.Scheme {
+			if h.Username != v.Username ||
+				h.Password != v.Password ||
+				h.AllowLegacyRSAKex != v.AllowLegacyRSAKex ||
+				h.Scheme != v.Scheme {
 				old.Hosts[k] = v
 				collector.Reset(k)
 			}

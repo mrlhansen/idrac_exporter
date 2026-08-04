@@ -43,11 +43,12 @@ func getEnvUint(env string, val *uint) {
 
 func (c *RootConfig) FromEnvironment() {
 	var (
-		use_basic_auth bool
-		username       string
-		password       string
-		scheme         string
-		port           uint
+		use_basic_auth    bool
+		allowLegacyRSAKex bool
+		username          string
+		password          string
+		scheme            string
+		port              uint
 	)
 
 	getEnvString("CONFIG_ADDRESS", &c.Address)
@@ -67,6 +68,7 @@ func (c *RootConfig) FromEnvironment() {
 	getEnvUint("CONFIG_DEFAULT_PORT", &port)
 
 	getEnvBool("CONFIG_DEFAULT_USE_BASIC_AUTH", &use_basic_auth)
+	getEnvBool("CONFIG_DEFAULT_ALLOW_LEGACY_RSA_KEX", &allowLegacyRSAKex)
 	getEnvBool("CONFIG_TLS_ENABLED", &c.TLS.Enabled)
 	getEnvBool("CONFIG_METRICS_ALL", &c.Collect.All)
 	getEnvBool("CONFIG_METRICS_SYSTEM", &c.Collect.System)
@@ -107,6 +109,11 @@ func (c *RootConfig) FromEnvironment() {
 
 	if use_basic_auth {
 		def.BasicAuth = true
+		ok = true
+	}
+
+	if allowLegacyRSAKex {
+		def.AllowLegacyRSAKex = true
 		ok = true
 	}
 
