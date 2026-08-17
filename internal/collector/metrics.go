@@ -609,6 +609,10 @@ func (mc *Collector) NewMemoryModuleSpeed(ch chan<- prometheus.Metric, m *Memory
 }
 
 func (mc *Collector) NewNetworkAdapterInfo(ch chan<- prometheus.Metric, m *NetworkAdapter) {
+	firmware := ""
+	if len(m.Controllers) > 0 {
+		firmware = m.Controllers[0].FirmwarePackageVersion
+	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.NetworkAdapterInfo,
 		prometheus.UntypedValue,
@@ -617,6 +621,7 @@ func (mc *Collector) NewNetworkAdapterInfo(ch chan<- prometheus.Metric, m *Netwo
 		m.Manufacturer,
 		m.Model,
 		m.SerialNumber,
+		firmware,
 	)
 }
 

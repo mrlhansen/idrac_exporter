@@ -369,7 +369,7 @@ func NewCollector() *Collector {
 		NetworkAdapterInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_adapter", "info"),
 			"Information about network adapters",
-			[]string{"id", "manufacturer", "model", "serial"}, nil,
+			[]string{"id", "manufacturer", "model", "serial", "firmware"}, nil,
 		),
 		NetworkAdapterHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "network_adapter", "health"),
