@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strings"
@@ -16,6 +17,22 @@ var Config *RootConfig = nil
 func (c *AuthConfig) Validate() error {
 	if c == nil {
 		return fmt.Errorf("empty section")
+	}
+
+	if c.Encoded {
+		u, err := base64.StdEncoding.DecodeString(c.Username)
+		if err != nil {
+			return fmt.Errorf("failed to decode username")
+		}
+
+		p, err := base64.StdEncoding.DecodeString(c.Password)
+		if err != nil {
+			return fmt.Errorf("failed to decode password")
+		}
+
+		c.Username = string(u)
+		c.Password = string(p)
+		c.Encoded = false
 	}
 
 	if c.Username == "" {
@@ -80,14 +97,16 @@ func SetConfig(c *RootConfig) {
 	}
 }
 
-func (c *RootConfig) FromFile(filename string) error {
+func (c *RootConfig) FromFile(filename string, expand bool) error {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("open configuration file: %v", err)
 	}
 
-	temp := os.ExpandEnv(string(data))
-	data = []byte(temp)
+	if expand {
+		temp := os.ExpandEnv(string(data))
+		data = []byte(temp)
+	}
 
 	err = yaml.Unmarshal(data, c)
 	if err != nil {

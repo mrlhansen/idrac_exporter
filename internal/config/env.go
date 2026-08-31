@@ -42,21 +42,14 @@ func getEnvUint(env string, val *uint) {
 }
 
 func (c *RootConfig) FromEnvironment() {
-	var (
-		use_basic_auth    bool
-		allowLegacyRSAKex bool
-		username          string
-		password          string
-		scheme            string
-		port              uint
-	)
+	var env AuthConfig
 
 	getEnvString("CONFIG_ADDRESS", &c.Address)
 	getEnvString("CONFIG_METRICS_PREFIX", &c.MetricsPrefix)
 	getEnvString("CONFIG_DEFAULT_TARGET", &c.DefaultTarget)
-	getEnvString("CONFIG_DEFAULT_USERNAME", &username)
-	getEnvString("CONFIG_DEFAULT_PASSWORD", &password)
-	getEnvString("CONFIG_DEFAULT_SCHEME", &scheme)
+	getEnvString("CONFIG_DEFAULT_USERNAME", &env.Username)
+	getEnvString("CONFIG_DEFAULT_PASSWORD", &env.Password)
+	getEnvString("CONFIG_DEFAULT_SCHEME", &env.Scheme)
 	getEnvString("CONFIG_EVENTS_SEVERITY", &c.Event.Severity)
 	getEnvString("CONFIG_EVENTS_MAXAGE", &c.Event.MaxAge)
 	getEnvString("CONFIG_TLS_CERT_FILE", &c.TLS.CertFile)
@@ -65,10 +58,11 @@ func (c *RootConfig) FromEnvironment() {
 	getEnvUint("CONFIG_PORT", &c.Port)
 	getEnvUint("CONFIG_TIMEOUT", &c.Timeout)
 	getEnvUint("CONFIG_CONCURRENCY", &c.Concurrency)
-	getEnvUint("CONFIG_DEFAULT_PORT", &port)
+	getEnvUint("CONFIG_DEFAULT_PORT", &env.Port)
 
-	getEnvBool("CONFIG_DEFAULT_USE_BASIC_AUTH", &use_basic_auth)
-	getEnvBool("CONFIG_DEFAULT_ALLOW_LEGACY_RSA_KEX", &allowLegacyRSAKex)
+	getEnvBool("CONFIG_DEFAULT_ENCODED", &env.Encoded)
+	getEnvBool("CONFIG_DEFAULT_USE_BASIC_AUTH", &env.BasicAuth)
+	getEnvBool("CONFIG_DEFAULT_ALLOW_LEGACY_RSA_KEX", &env.AllowLegacyRSAKex)
 	getEnvBool("CONFIG_TLS_ENABLED", &c.TLS.Enabled)
 	getEnvBool("CONFIG_METRICS_ALL", &c.Collect.All)
 	getEnvBool("CONFIG_METRICS_SYSTEM", &c.Collect.System)
@@ -87,32 +81,37 @@ func (c *RootConfig) FromEnvironment() {
 		def = &AuthConfig{}
 	}
 
-	if len(username) > 0 {
-		def.Username = username
+	if len(env.Username) > 0 {
+		def.Username = env.Username
 		ok = true
 	}
 
-	if len(password) > 0 {
-		def.Password = password
+	if len(env.Password) > 0 {
+		def.Password = env.Password
 		ok = true
 	}
 
-	if len(scheme) > 0 {
-		def.Scheme = scheme
+	if len(env.Scheme) > 0 {
+		def.Scheme = env.Scheme
 		ok = true
 	}
 
-	if port > 0 {
-		def.Port = port
+	if env.Port > 0 {
+		def.Port = env.Port
 		ok = true
 	}
 
-	if use_basic_auth {
+	if env.Encoded {
+		def.Encoded = true
+		ok = true
+	}
+
+	if env.BasicAuth {
 		def.BasicAuth = true
 		ok = true
 	}
 
-	if allowLegacyRSAKex {
+	if env.AllowLegacyRSAKex {
 		def.AllowLegacyRSAKex = true
 		ok = true
 	}

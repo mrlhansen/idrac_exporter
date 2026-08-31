@@ -9,14 +9,14 @@ import (
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 )
 
-func ReloadConfig(filename string) {
+func ReloadConfig(filename string, expand bool) {
 	cfg := config.NewConfig()
 	old := config.Config
 
 	log.Info("Configuration reload was triggered")
 
 	if len(filename) > 0 {
-		err := cfg.FromFile(filename)
+		err := cfg.FromFile(filename, expand)
 		if err != nil {
 			log.Error("Failed to %v", err)
 			return
@@ -54,7 +54,7 @@ func ReloadConfig(filename string) {
 	log.Info("Configuration reload was successful")
 }
 
-func WatchConfig(filename string) {
+func WatchConfig(filename string, expand bool) {
 	lastReload := time.Now()
 
 	watcher, err := fsnotify.NewWatcher()
@@ -92,7 +92,7 @@ func WatchConfig(filename string) {
 			}
 			if reload {
 				lastReload = time.Now()
-				ReloadConfig(filename)
+				ReloadConfig(filename, expand)
 			}
 		case err, ok := <-watcher.Errors:
 			if !ok {
@@ -103,11 +103,11 @@ func WatchConfig(filename string) {
 	}
 }
 
-func LoadConfig(filename string, watch bool) {
+func LoadConfig(filename string, watch, expand bool) *config.RootConfig {
 	cfg := config.NewConfig()
 
 	if len(filename) > 0 {
-		err := cfg.FromFile(filename)
+		err := cfg.FromFile(filename, expand)
 		if err != nil {
 			log.Fatal("Failed to %v", err)
 		}
@@ -123,6 +123,8 @@ func LoadConfig(filename string, watch bool) {
 	config.SetConfig(cfg)
 
 	if watch && len(filename) > 0 {
-		go WatchConfig(filename)
+		go WatchConfig(filename, expand)
 	}
+
+	return cfg
 }

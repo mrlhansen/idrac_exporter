@@ -45,7 +45,7 @@ func healthHandler(rsp http.ResponseWriter, req *http.Request) {
 }
 
 func reloadHandler(rsp http.ResponseWriter, req *http.Request) {
-	ReloadConfig(flagConfig)
+	ReloadConfig(flagConfig, flagExpand)
 }
 
 func resetHandler(rsp http.ResponseWriter, req *http.Request) {

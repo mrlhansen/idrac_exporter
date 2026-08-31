@@ -19,6 +19,7 @@ var (
 	flagConfig  string
 	flagWatch   bool
 	flagVersion bool
+	flagExpand  bool
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 	flag.BoolVar(&flagDebug, "debug", false, "Dump JSON response from Redfish requests (only for debugging purpose)")
 	flag.StringVar(&flagConfig, "config", "/etc/prometheus/idrac.yml", "Path to the configuration file")
 	flag.BoolVar(&flagWatch, "config-watch", false, "Watch the configuration file for changes and enable automatic reloading")
+	flag.BoolVar(&flagExpand, "config-expand-env", false, "Expand environment variables in the configurtion file")
 	flag.BoolVar(&flagVersion, "version", false, "Show version and exit")
 	flag.Parse()
 
@@ -40,7 +42,7 @@ func main() {
 	}
 
 	log.Info("Build information: version=%s revision=%s", version.Version, version.Revision)
-	LoadConfig(flagConfig, flagWatch)
+	cfg := LoadConfig(flagConfig, flagWatch, flagExpand)
 
 	if flagDebug {
 		config.Debug = true
@@ -58,13 +60,13 @@ func main() {
 	http.HandleFunc("/reset", resetHandler)
 	http.HandleFunc("/", rootHandler)
 
-	port := fmt.Sprintf("%d", config.Config.Port)
-	host := strings.Trim(config.Config.Address, "[]")
+	port := fmt.Sprintf("%d", cfg.Port)
+	host := strings.Trim(cfg.Address, "[]")
 	bind := net.JoinHostPort(host, port)
-	log.Info("Server listening on %s (TLS: %v)", bind, config.Config.TLS.Enabled)
+	log.Info("Server listening on %s (TLS: %v)", bind, cfg.TLS.Enabled)
 
-	if config.Config.TLS.Enabled {
-		err = http.ListenAndServeTLS(bind, config.Config.TLS.CertFile, config.Config.TLS.KeyFile, nil)
+	if cfg.TLS.Enabled {
+		err = http.ListenAndServeTLS(bind, cfg.TLS.CertFile, cfg.TLS.KeyFile, nil)
 	} else {
 		err = http.ListenAndServe(bind, nil)
 	}
