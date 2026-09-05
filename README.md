@@ -210,7 +210,7 @@ idrac_memory_module_speed_mhz{id}
 These metrics include information about network adapters and network ports.
 
 ```text
-idrac_network_adapter_info{id,manufacturer,model,serial}
+idrac_network_adapter_info{id,firmware,manufacturer,model,serial}
 idrac_network_adapter_health{id,status}
 idrac_network_port_health{adapter_id,id,status}
 idrac_network_port_max_speed_mbps{adapter_id,id}

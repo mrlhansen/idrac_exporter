@@ -29,7 +29,7 @@ func main() {
 	flag.BoolVar(&flagDebug, "debug", false, "Dump JSON response from Redfish requests (only for debugging purpose)")
 	flag.StringVar(&flagConfig, "config", "/etc/prometheus/idrac.yml", "Path to the configuration file")
 	flag.BoolVar(&flagWatch, "config-watch", false, "Watch the configuration file for changes and enable automatic reloading")
-	flag.BoolVar(&flagExpand, "config-expand-env", false, "Expand environment variables in the configurtion file")
+	flag.BoolVar(&flagExpand, "config-expand-env", false, "Expand environment variables in the configuration file")
 	flag.BoolVar(&flagVersion, "version", false, "Show version and exit")
 	flag.Parse()
 
