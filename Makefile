@@ -1,4 +1,4 @@
-VERSION  = $(or $(shell git tag --points-at HEAD | grep -oP 'v\K[0-9.]+'), unknown)
+VERSION  = $(or $(shell git tag --points-at HEAD | sed -n 's/^v//p' | head -1), unknown)
 REVISION = $(shell git rev-parse HEAD)
 
 REPOSITORY := github.com/mrlhansen/idrac_exporter

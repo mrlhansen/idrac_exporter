@@ -122,6 +122,31 @@ func (mc *Collector) NewSystemBiosInfo(ch chan<- prometheus.Metric, m *SystemRes
 	)
 }
 
+func normalizeBootMode(mode string) string {
+	switch strings.ToLower(strings.TrimSpace(mode)) {
+	case "uefi":
+		return "UEFI"
+	case "bios", "legacy":
+		return "BIOS"
+	default:
+		return strings.TrimSpace(mode)
+	}
+}
+
+func (mc *Collector) NewSystemBootMode(ch chan<- prometheus.Metric, mode string) {
+	mode = normalizeBootMode(mode)
+	if mode == "" {
+		return
+	}
+
+	ch <- prometheus.MustNewConstMetric(
+		mc.SystemBootMode,
+		prometheus.UntypedValue,
+		1.0,
+		mode,
+	)
+}
+
 func (mc *Collector) NewSystemMachineInfo(ch chan<- prometheus.Metric, m *SystemResponse) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.SystemMachineInfo,
@@ -869,6 +894,93 @@ func (mc *Collector) NewManagerHealth(ch chan<- prometheus.Metric, m *ManagerRes
 		float64(value),
 		m.Id,
 		m.Status.Health,
+	)
+}
+
+func licenseDescription(m *DellLicense) string {
+	return strings.TrimSpace(strings.Join(m.LicenseDescription, ", "))
+}
+
+func licenseID(m *DellLicense) string {
+	if m.Id != "" {
+		return m.Id
+	}
+	return m.EntitlementID
+}
+
+func (mc *Collector) NewManagerLicenseInfo(ch chan<- prometheus.Metric, m *DellLicense) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.ManagerLicenseInfo,
+		prometheus.UntypedValue,
+		1.0,
+		licenseID(m),
+		licenseDescription(m),
+		m.LicenseType,
+		m.LicensePrimaryStatus,
+		strings.Join(m.AssignedDevices, ","),
+	)
+}
+
+func (mc *Collector) NewVirtualConsoleLicense(ch chan<- prometheus.Metric, m *DellLicense) {
+	if !strings.Contains(strings.ToLower(licenseDescription(m)), "enterprise") {
+		return
+	}
+
+	ch <- prometheus.MustNewConstMetric(
+		mc.VirtualConsoleLicense,
+		prometheus.UntypedValue,
+		1.0,
+		licenseID(m),
+		licenseDescription(m),
+		m.LicenseType,
+		m.LicensePrimaryStatus,
+	)
+}
+
+func (mc *Collector) NewVirtualConsoleInfo(ch chan<- prometheus.Metric, m *ManagerResponse, license *DellLicense) {
+	if m.GraphicalConsole == nil {
+		return
+	}
+
+	description := ""
+	licenseType := ""
+	licenseStatus := ""
+	if license != nil {
+		description = licenseDescription(license)
+		licenseType = license.LicenseType
+		licenseStatus = license.LicensePrimaryStatus
+	}
+
+	connectTypes := m.GraphicalConsole.ConnectTypesSupported
+	if len(connectTypes) == 0 {
+		connectTypes = []string{""}
+	}
+	for _, connectType := range connectTypes {
+		ch <- prometheus.MustNewConstMetric(
+			mc.VirtualConsoleInfo,
+			prometheus.UntypedValue,
+			1.0,
+			m.Id,
+			connectType,
+			description,
+			licenseType,
+			licenseStatus,
+		)
+	}
+
+	enabled := 0.0
+	if m.GraphicalConsole.ServiceEnabled {
+		enabled = 1.0
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.VirtualConsoleEnabled,
+		prometheus.GaugeValue,
+		enabled,
+	)
+	ch <- prometheus.MustNewConstMetric(
+		mc.VirtualConsoleMaxConcurrentSessions,
+		prometheus.GaugeValue,
+		float64(m.GraphicalConsole.MaxConcurrentSessions),
 	)
 }
 
