@@ -154,27 +154,12 @@ func (c *RootConfig) Validate() error {
 		}
 	}
 
-	// events
-	switch strings.ToLower(c.Event.Severity) {
-	case "ok":
-		c.Event.SeverityLevel = 0
-	case "warning", "":
-		c.Event.SeverityLevel = 1
-	case "critical":
-		c.Event.SeverityLevel = 2
-	default:
-		return fmt.Errorf("invalid value: %s", c.Event.Severity)
+	if err := validateEventConfig(&c.Event); err != nil {
+		return fmt.Errorf("events: %v", err)
 	}
-
-	if c.Event.MaxAge == "" {
-		c.Event.MaxAge = "7d"
+	if err := validateEventConfig(&c.LCLog); err != nil {
+		return fmt.Errorf("lclog: %v", err)
 	}
-
-	t, err := str2duration.ParseDuration(c.Event.MaxAge)
-	if err != nil {
-		return fmt.Errorf("unable to parse duration: %v", err)
-	}
-	c.Event.MaxAgeSeconds = t.Seconds()
 
 	// metrics
 	if c.Collect.All {
@@ -189,6 +174,31 @@ func (c *RootConfig) Validate() error {
 		c.Collect.Manager = true
 		c.Collect.Extra = true
 	}
+
+	return nil
+}
+
+func validateEventConfig(event *EventConfig) error {
+	switch strings.ToLower(event.Severity) {
+	case "ok":
+		event.SeverityLevel = 0
+	case "warning", "":
+		event.SeverityLevel = 1
+	case "critical":
+		event.SeverityLevel = 2
+	default:
+		return fmt.Errorf("invalid value: %s", event.Severity)
+	}
+
+	if event.MaxAge == "" {
+		event.MaxAge = "7d"
+	}
+
+	duration, err := str2duration.ParseDuration(event.MaxAge)
+	if err != nil {
+		return fmt.Errorf("unable to parse duration: %v", err)
+	}
+	event.MaxAgeSeconds = duration.Seconds()
 
 	return nil
 }

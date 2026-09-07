@@ -48,6 +48,7 @@ type RootConfig struct {
 	DefaultTarget string                 `yaml:"default_target"`
 	Collect       CollectConfig          `yaml:"metrics"`
 	Event         EventConfig            `yaml:"events"`
+	LCLog         EventConfig            `yaml:"lclog"`
 	TLS           TLSConfig              `yaml:"tls"`
 	Timeout       uint                   `yaml:"timeout"`
 	Concurrency   uint                   `yaml:"concurrency"`

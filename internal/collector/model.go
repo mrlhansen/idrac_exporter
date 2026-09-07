@@ -774,6 +774,7 @@ type EventLogResponse struct {
 	Id          string `json:"Id"`
 	Name        string `json:"Name"`
 	Description string `json:"Description"`
+	NextLink    string `json:"Members@odata.nextLink"`
 	Members     []struct {
 		Id           string  `json:"Id"`
 		EventId      string  `json:"EventId"`

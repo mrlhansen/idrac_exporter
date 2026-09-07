@@ -52,6 +52,8 @@ func (c *RootConfig) FromEnvironment() {
 	getEnvString("CONFIG_DEFAULT_SCHEME", &env.Scheme)
 	getEnvString("CONFIG_EVENTS_SEVERITY", &c.Event.Severity)
 	getEnvString("CONFIG_EVENTS_MAXAGE", &c.Event.MaxAge)
+	getEnvString("CONFIG_LCLOG_SEVERITY", &c.LCLog.Severity)
+	getEnvString("CONFIG_LCLOG_MAXAGE", &c.LCLog.MaxAge)
 	getEnvString("CONFIG_TLS_CERT_FILE", &c.TLS.CertFile)
 	getEnvString("CONFIG_TLS_KEY_FILE", &c.TLS.KeyFile)
 

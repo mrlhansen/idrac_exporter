@@ -316,6 +316,17 @@ func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, me
 	)
 }
 
+func (mc *Collector) NewLCLogEntry(ch chan<- prometheus.Metric, id string, message string, severity string, created time.Time) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.LCLogEntry,
+		prometheus.CounterValue,
+		float64(created.Unix()),
+		id,
+		strings.TrimSpace(message),
+		severity,
+	)
+}
+
 func (mc *Collector) NewStorageInfo(ch chan<- prometheus.Metric, m *Storage) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.StorageInfo,

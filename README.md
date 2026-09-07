@@ -162,6 +162,13 @@ This is not exactly an ordinary metric, but it is often convenient to be informe
 idrac_events_log_entry{id,message,severity}
 ```
 
+On Dell systems, Lifecycle Controller log entries are exposed separately and
+use the filters in the `lclog` configuration section.
+
+```text
+idrac_lclog_entry{id,message,severity}
+```
+
 ### Storage
 The storage metrics are divided into four different groups.
 
