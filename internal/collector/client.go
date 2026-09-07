@@ -33,11 +33,13 @@ type Client struct {
 	version int
 	path    struct {
 		System           string
+		Bios             string
 		Thermal          string
 		ThermalSubsystem string
 		Power            string
 		PowerSubsystem   string
 		Storage          string
+		SimpleStorage    bool
 		Memory           string
 		Network          string
 		Event            string
@@ -152,8 +154,16 @@ func (client *Client) findAllEndpoints() bool {
 
 	// Paths
 	client.path.Storage = system.Storage.OdataId
+	if client.path.Storage == "" {
+		client.path.Storage = system.SimpleStorage.OdataId
+		client.path.SimpleStorage = client.path.Storage != ""
+	}
+	client.path.Bios = system.Bios.OdataId
 	client.path.Memory = system.Memory.OdataId
 	client.path.Network = chassis.NetworkAdapters.OdataId
+	if client.path.Network == "" {
+		client.path.Network = system.EthernetInterfaces.OdataId
+	}
 	client.path.Thermal = chassis.Thermal.OdataId
 	client.path.ThermalSubsystem = chassis.ThermalSubsystem.OdataId
 	client.path.Power = chassis.Power.OdataId
@@ -404,6 +414,13 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	mc.NewSystemMemorySize(ch, &resp)
 	mc.NewSystemCpuCount(ch, &resp)
 	mc.NewSystemBiosInfo(ch, &resp)
+	if client.path.Bios != "" {
+		bios := BiosResponse{}
+		if !client.redfish.Get(client.path.Bios, &bios) {
+			return false
+		}
+		mc.NewSystemBootMode(ch, bios.Attributes.BootMode)
+	}
 	mc.NewSystemMachineInfo(ch, &resp)
 
 	return true
@@ -431,6 +448,23 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 
 	mc.NewManagerInfo(ch, &mgr)
 	mc.NewManagerHealth(ch, &mgr)
+
+	var enterpriseLicense *DellLicense
+	licensePath := mgr.Links.Oem.Dell.DellLicenseCollection.OdataId
+	if licensePath != "" {
+		licenses := DellLicenseCollection{}
+		if client.redfish.Get(licensePath, &licenses) {
+			for i := range licenses.Members {
+				license := &licenses.Members[i]
+				mc.NewManagerLicenseInfo(ch, license)
+				if enterpriseLicense == nil && strings.Contains(strings.ToLower(licenseDescription(license)), "enterprise") {
+					enterpriseLicense = license
+				}
+				mc.NewVirtualConsoleLicense(ch, license)
+			}
+		}
+	}
+	mc.NewVirtualConsoleInfo(ch, &mgr, enterpriseLicense)
 
 	return true
 }
@@ -477,6 +511,10 @@ func (client *Client) RefreshProcessors(mc *Collector, ch chan<- prometheus.Metr
 }
 
 func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.path.Network == "" {
+		return true
+	}
+
 	group := GroupResponse{}
 	ok := client.redfish.Get(client.path.Network, &group)
 	if !ok {
@@ -508,6 +546,17 @@ func (client *Client) RefreshNetwork(mc *Collector, ch chan<- prometheus.Metric)
 
 		mc.NewNetworkAdapterInfo(ch, &ni)
 		mc.NewNetworkAdapterHealth(ch, &ni)
+
+		if ni.GetPorts() == "" {
+			if ni.SpeedMbps > 0 {
+				port := NetworkPort{
+					Id:                   ni.Id,
+					CurrentLinkSpeedMbps: ni.SpeedMbps,
+				}
+				mc.NewNetworkPortCurrentSpeed(ch, ni.Id, &port)
+			}
+			continue
+		}
 
 		ports := GroupResponse{}
 		ok = client.redfish.Get(ni.GetPorts(), &ports)
@@ -783,7 +832,59 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 	return true
 }
 
+func (client *Client) RefreshSimpleStorage(mc *Collector, ch chan<- prometheus.Metric) bool {
+	group := GroupResponse{}
+	if !client.redfish.Get(client.path.Storage, &group) {
+		return false
+	}
+
+	for _, link := range group.Members.GetLinks() {
+		resp := SimpleStorage{}
+		if !client.redfish.Get(link, &resp) {
+			return false
+		}
+
+		storage := Storage{
+			Id:     resp.Id,
+			Name:   resp.Name,
+			Status: resp.Status,
+		}
+		mc.NewStorageInfo(ch, &storage)
+		mc.NewStorageHealth(ch, &storage)
+
+		controller := StorageController{
+			Id:     resp.Id,
+			Name:   resp.Name,
+			Model:  resp.Name,
+			Status: resp.Status,
+		}
+		mc.NewStorageControllerInfo(ch, storage.Id, &controller)
+		mc.NewStorageControllerHealth(ch, storage.Id, &controller)
+
+		for i, device := range resp.Devices {
+			drive := StorageDrive{
+				Id:           fmt.Sprintf("%s-device-%d", resp.Id, i),
+				Name:         device.Name,
+				Manufacturer: device.Manufacturer,
+				Model:        device.Model,
+				Status:       device.Status,
+			}
+			mc.NewStorageDriveInfo(ch, storage.Id, &drive)
+			mc.NewStorageDriveHealth(ch, storage.Id, &drive)
+		}
+	}
+
+	return true
+}
+
 func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.path.Storage == "" {
+		return true
+	}
+	if client.path.SimpleStorage {
+		return client.RefreshSimpleStorage(mc, ch)
+	}
+
 	group := GroupResponse{}
 	ok := client.redfish.Get(client.path.Storage, &group)
 	if !ok {
@@ -924,6 +1025,10 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 }
 
 func (client *Client) RefreshMemory(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.path.Memory == "" {
+		return true
+	}
+
 	group := GroupResponse{}
 	ok := client.redfish.Get(client.path.Memory, &group)
 	if !ok {

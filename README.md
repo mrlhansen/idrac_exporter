@@ -106,6 +106,7 @@ idrac_system_indicator_active
 idrac_system_memory_size_bytes
 idrac_system_cpu_count{model}
 idrac_system_bios_info{version}
+idrac_system_boot_mode{mode}
 idrac_system_machine_info{manufacturer,model,serial,sku}
 ```
 
@@ -224,6 +225,18 @@ These metrics contain information about the out-of-band manager.
 ```text
 idrac_manager_info{id,firmware,model,type}
 idrac_manager_health{id,status}
+idrac_manager_license_info{device,description,id,status,type}
+```
+
+### Virtual Console
+These metrics report the virtual console service and, when the Dell Redfish
+license collection is available, the Enterprise license that enables it.
+
+```text
+idrac_virtual_console_info{connect_type,id,license,license_status,license_type}
+idrac_virtual_console_license{description,id,status,type}
+idrac_virtual_console_enabled
+idrac_virtual_console_max_concurrent_sessions
 ```
 
 ### Extra

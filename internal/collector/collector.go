@@ -37,6 +37,7 @@ type Collector struct {
 	SystemMemorySize      *prometheus.Desc
 	SystemCpuCount        *prometheus.Desc
 	SystemBiosInfo        *prometheus.Desc
+	SystemBootMode        *prometheus.Desc
 	SystemMachineInfo     *prometheus.Desc
 
 	// Sensors
@@ -106,8 +107,13 @@ type Collector struct {
 	CpuTotalThreads *prometheus.Desc
 
 	// BMC
-	ManagerInfo   *prometheus.Desc
-	ManagerHealth *prometheus.Desc
+	ManagerInfo                         *prometheus.Desc
+	ManagerHealth                       *prometheus.Desc
+	ManagerLicenseInfo                  *prometheus.Desc
+	VirtualConsoleInfo                  *prometheus.Desc
+	VirtualConsoleLicense               *prometheus.Desc
+	VirtualConsoleEnabled               *prometheus.Desc
+	VirtualConsoleMaxConcurrentSessions *prometheus.Desc
 
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
@@ -175,6 +181,11 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "system", "bios_info"),
 			"Information about the BIOS",
 			[]string{"version"}, nil,
+		),
+		SystemBootMode: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "system", "boot_mode"),
+			"Current boot mode configured in the BIOS",
+			[]string{"mode"}, nil,
 		),
 		SystemMachineInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "system", "machine_info"),
@@ -441,6 +452,31 @@ func NewCollector() *Collector {
 			"Health status of the manager",
 			[]string{"id", "status"}, nil,
 		),
+		ManagerLicenseInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "license_info"),
+			"Information about licenses installed on the manager",
+			[]string{"id", "description", "type", "status", "device"}, nil,
+		),
+		VirtualConsoleInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "virtual_console", "info"),
+			"Information about the virtual console and its associated license",
+			[]string{"id", "connect_type", "license", "license_type", "license_status"}, nil,
+		),
+		VirtualConsoleLicense: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "virtual_console", "license"),
+			"Whether an Enterprise license that enables virtual console features is installed",
+			[]string{"id", "description", "type", "status"}, nil,
+		),
+		VirtualConsoleEnabled: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "virtual_console", "enabled"),
+			"Whether the virtual console service is enabled",
+			nil, nil,
+		),
+		VirtualConsoleMaxConcurrentSessions: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "virtual_console", "max_concurrent_sessions"),
+			"Maximum number of concurrent virtual console sessions",
+			nil, nil,
+		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
@@ -506,6 +542,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SystemMemorySize
 	ch <- collector.SystemCpuCount
 	ch <- collector.SystemBiosInfo
+	ch <- collector.SystemBootMode
 	ch <- collector.SystemMachineInfo
 	ch <- collector.SensorsTemperature
 	ch <- collector.SensorsFanHealth
@@ -559,6 +596,11 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.CpuTotalThreads
 	ch <- collector.ManagerInfo
 	ch <- collector.ManagerHealth
+	ch <- collector.ManagerLicenseInfo
+	ch <- collector.VirtualConsoleInfo
+	ch <- collector.VirtualConsoleLicense
+	ch <- collector.VirtualConsoleEnabled
+	ch <- collector.VirtualConsoleMaxConcurrentSessions
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 	ch <- collector.DellControllerBatteryHealth
