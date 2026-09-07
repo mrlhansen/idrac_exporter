@@ -72,6 +72,7 @@ type Collector struct {
 
 	// System event log
 	EventLogEntry *prometheus.Desc
+	LCLogEntry    *prometheus.Desc
 
 	// Storage
 	StorageInfo                  *prometheus.Desc
@@ -299,6 +300,11 @@ func NewCollector() *Collector {
 		EventLogEntry: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "events", "log_entry"),
 			"Entry from the system event log",
+			[]string{"id", "message", "severity"}, nil,
+		),
+		LCLogEntry: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "lclog", "entry"),
+			"Entry from the Dell Lifecycle Controller log",
 			[]string{"id", "message", "severity"}, nil,
 		),
 		StorageInfo: prometheus.NewDesc(
@@ -569,6 +575,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.PowerControlAvgConsumedWatts
 	ch <- collector.PowerControlInterval
 	ch <- collector.EventLogEntry
+	ch <- collector.LCLogEntry
 	ch <- collector.StorageInfo
 	ch <- collector.StorageHealth
 	ch <- collector.StorageDriveInfo
@@ -664,11 +671,11 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 			}
 		})
 	}
-
 	if metrics.Events.Enabled {
 		wg.Go(func() {
-			ok := collector.client.RefreshEventLog(collector, ch)
-			if !ok {
+			eventOK := collector.client.RefreshEventLog(collector, ch)
+			lcLogOK := collector.client.RefreshLCLog(collector, ch)
+			if !eventOK || !lcLogOK {
 				collector.errors.Add(1)
 			}
 		})

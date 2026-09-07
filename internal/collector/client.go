@@ -2,11 +2,13 @@ package collector
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
@@ -43,6 +45,7 @@ type Client struct {
 		Network          string
 		Event            string
 		ManagerEvent     string
+		LCLog            string
 		Processors       string
 		Manager          string
 		Extra            []string
@@ -224,10 +227,14 @@ func (client *Client) findAllEndpoints() bool {
 			{
 				pathA := "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
 				pathB := "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
+				lcLogPath := "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Lclog/Entries"
 				if client.redfish.Exists(pathA) {
 					client.path.Event = pathA
 				} else if client.redfish.Exists(pathB) {
 					client.path.Event = pathB
+				}
+				if client.redfish.Exists(lcLogPath) {
+					client.path.LCLog = lcLogPath
 				}
 			}
 		case LENOVO:
@@ -822,6 +829,60 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 
 	for v := range log.Items() {
 		mc.NewEventLogEntry(ch, v.Id, v.Message, v.Severity, v.Timestamp)
+	}
+
+	return true
+}
+
+func eventLogFilterPaths(path string, eventConfig config.EventConfig) []string {
+	var severities []string
+	switch eventConfig.SeverityLevel {
+	case 1:
+		severities = []string{"Warning", "Critical"}
+	case 2:
+		severities = []string{"Critical"}
+	default:
+		return []string{path}
+	}
+
+	paths := make([]string, 0, len(severities))
+	for _, severity := range severities {
+		query := url.Values{}
+		query.Set("$filter", fmt.Sprintf("Severity eq '%s'", severity))
+		paths = append(paths, path+"?"+query.Encode())
+	}
+	return paths
+}
+
+func (client *Client) RefreshLCLog(mc *Collector, ch chan<- prometheus.Metric) bool {
+	if client.path.LCLog == "" {
+		return true
+	}
+
+	eventConfig := config.Config.LCLog
+	maxAge := eventConfig.MaxAgeSeconds
+	level := eventConfig.SeverityLevel
+	now := time.Now()
+
+	for _, filteredPath := range eventLogFilterPaths(client.path.LCLog, eventConfig) {
+		pagePath := filteredPath
+		for pagePath != "" {
+			resp := EventLogResponse{}
+			if !client.redfish.Get(pagePath, &resp) {
+				return false
+			}
+
+			for _, entry := range resp.Members {
+				created, err := time.Parse(time.RFC3339, entry.Created)
+				if err != nil || now.Sub(created).Seconds() > maxAge || health2value(entry.Severity) < level {
+					continue
+				}
+
+				mc.NewLCLogEntry(ch, entry.Id, entry.Message, entry.Severity, created)
+			}
+
+			pagePath = resp.NextLink
+		}
 	}
 
 	return true

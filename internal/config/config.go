@@ -204,6 +204,10 @@ func (c *RootConfig) Validate() error {
 	if err != nil {
 		return err
 	}
+	err = c.LCLog.validate()
+	if err != nil {
+		return err
+	}
 
 	// metrics
 	if c.Metrics.All.Enabled {
@@ -234,6 +238,30 @@ func (c *RootConfig) Validate() error {
 			return fmt.Errorf("group=%s: %v", k, err)
 		}
 	}
+	return nil
+}
+
+func validateEventConfig(event *EventConfig) error {
+	switch strings.ToLower(event.Severity) {
+	case "ok":
+		event.SeverityLevel = 0
+	case "warning", "":
+		event.SeverityLevel = 1
+	case "critical":
+		event.SeverityLevel = 2
+	default:
+		return fmt.Errorf("invalid value: %s", event.Severity)
+	}
+
+	if event.MaxAge == "" {
+		event.MaxAge = "7d"
+	}
+
+	duration, err := str2duration.ParseDuration(event.MaxAge)
+	if err != nil {
+		return fmt.Errorf("unable to parse duration: %v", err)
+	}
+	event.MaxAgeSeconds = duration.Seconds()
 
 	return nil
 }

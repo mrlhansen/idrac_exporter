@@ -114,8 +114,8 @@ groups:
 # Each section can also be enabled using the shown environment variable.
 # The group "all" overrides all other groups and enables all metrics.
 #
-# Events can be filtered based on minimum severity and maximum age.
-# Severity must be one of "ok", "warning", "critical"
+# Events can be filtered based on minimum severity and maximum age. Severity
+# must be one of "ok", "warning", "critical".
 metrics:
   all:
     enabled: false       # CONFIG_METRICS_ALL_ENABLED=false
@@ -146,3 +146,10 @@ metrics:
       maxage: 7d         # CONFIG_METRICS_MANAGER_EVENTS_MAXAGE=7d
   extra:
     enabled: false       # CONFIG_METRICS_EXTRA_ENABLED=false
+
+# Dell Lifecycle Controller logs use independent filters and are collected when
+# the "events" metrics group is enabled. Severity is sent to iDRAC as an OData
+# $filter query; maximum age is enforced by the exporter.
+lclog:
+  severity: warning  # CONFIG_LCLOG_SEVERITY=warning
+  maxage: 7d         # CONFIG_LCLOG_MAXAGE=7d

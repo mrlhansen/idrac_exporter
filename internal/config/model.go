@@ -76,6 +76,7 @@ type RootConfig struct {
 	MetricsPrefix string                 `yaml:"metrics_prefix"`
 	DefaultTarget string                 `yaml:"default_target"`
 	Metrics       MetricsConfig          `yaml:"metrics"`
+	LCLog         EventConfig            `yaml:"lclog"`
 	TLS           TLSConfig              `yaml:"tls"`
 	Timeout       uint                   `yaml:"timeout"`
 	Concurrency   uint                   `yaml:"concurrency"`

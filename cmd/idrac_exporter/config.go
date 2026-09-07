@@ -61,9 +61,9 @@ func ReloadConfig(filename string, expand bool) {
 		log.Error("Invalid configuration: %v", err)
 		return
 	}
-
 	// We only support configuration reload for the following sections: hosts, groups, metrics
 	// Whenever credentials or anything connection related is changed, all related targets are being reset
+	old.LCLog = cfg.LCLog
 
 	old.Metrics = cfg.Metrics
 	old.Mutex.Lock()

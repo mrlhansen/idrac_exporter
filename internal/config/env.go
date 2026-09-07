@@ -38,7 +38,6 @@ func getEnv[T envType](env string, val *T) {
 func (c *RootConfig) FromEnvironment() {
 	var env AuthConfig
 	var m = &c.Metrics
-
 	getEnv("CONFIG_ADDRESS", &c.Address)
 	getEnv("CONFIG_PORT", &c.Port)
 	getEnv("CONFIG_TIMEOUT", &c.Timeout)
@@ -66,6 +65,8 @@ func (c *RootConfig) FromEnvironment() {
 	getEnv("CONFIG_METRICS_EVENTS_ENABLED", &m.Events.Enabled)
 	getEnv("CONFIG_METRICS_EVENTS_SEVERITY", &m.Events.Severity)
 	getEnv("CONFIG_METRICS_EVENTS_MAXAGE", &m.Events.MaxAge)
+	getEnv("CONFIG_LCLOG_SEVERITY", &c.LCLog.Severity)
+	getEnv("CONFIG_LCLOG_MAXAGE", &c.LCLog.MaxAge)
 	getEnv("CONFIG_METRICS_POWER_ENABLED", &m.Power.Enabled)
 	getEnv("CONFIG_METRICS_STORAGE_ENABLED", &m.Storage.Enabled)
 	getEnv("CONFIG_METRICS_MEMORY_ENABLED", &m.Memory.Enabled)
