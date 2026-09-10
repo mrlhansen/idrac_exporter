@@ -123,3 +123,10 @@ metrics:
 events:
   severity: warning  # CONFIG_EVENTS_SEVERITY=warning
   maxage: 7d         # CONFIG_EVENTS_MAXAGE=7d
+
+# Dell Lifecycle Controller logs use independent filters and are collected when
+# the "events" metrics group is enabled. Severity is sent to iDRAC as an OData
+# $filter query; maximum age is enforced by the exporter.
+lclog:
+  severity: warning  # CONFIG_LCLOG_SEVERITY=warning
+  maxage: 7d         # CONFIG_LCLOG_MAXAGE=7d

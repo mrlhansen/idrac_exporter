@@ -263,8 +263,8 @@ func NewCollector() *Collector {
 		),
 		EventLogEntry: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "events", "log_entry"),
-			"Entry from the system event log",
-			[]string{"id", "message", "severity"}, nil,
+			"Entry from an iDRAC event log; the value is the entry creation time as a Unix timestamp",
+			[]string{"id", "message", "severity", "log_type"}, nil,
 		),
 		StorageInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "storage", "info"),
@@ -630,8 +630,9 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 	if collect.Events {
 		wg.Add(1)
 		go func() {
-			ok := collector.client.RefreshEventLog(collector, ch)
-			if !ok {
+			eventOK := collector.client.RefreshEventLog(collector, ch)
+			lcLogOK := collector.client.RefreshLCLog(collector, ch)
+			if !eventOK || !lcLogOK {
 				collector.errors.Add(1)
 			}
 			wg.Done()

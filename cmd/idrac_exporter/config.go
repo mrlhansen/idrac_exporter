@@ -32,6 +32,7 @@ func ReloadConfig(filename string, expand bool) {
 
 	old.Collect = cfg.Collect
 	old.Event = cfg.Event
+	old.LCLog = cfg.LCLog
 
 	old.Mutex.Lock()
 	defer old.Mutex.Unlock()
