@@ -155,19 +155,17 @@ idrac_cpu_total_cores{id}
 idrac_cpu_total_threads{id}
 ```
 
-### System Event Log
+### Event Logs
 This is not exactly an ordinary metric, but it is often convenient to be informed about new entries in the event log. The value of this metric is the Unix timestamp for when the entry was created.
 
 ```text
-idrac_events_log_entry{id,message,severity}
+idrac_events_log_entry{id,message,severity,log_type}
 ```
 
-On Dell systems, Lifecycle Controller log entries are exposed separately and
-use the filters in the `lclog` configuration section.
-
-```text
-idrac_lclog_entry{id,message,severity}
-```
+The `log_type` label is `system` for System Event Log entries and `lifecycle`
+for Dell Lifecycle Controller entries. Lifecycle entries use the filters in the
+`lclog` configuration section. The metric value is the Unix timestamp from the
+entry's iDRAC `Created` field, not the time at which the exporter collected it.
 
 ### Storage
 The storage metrics are divided into four different groups.

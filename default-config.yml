@@ -9,3 +9,6 @@ metrics:
 events:
   severity: warning
   maxage: 7d
+lclog:
+  severity: warning
+  maxage: 7d

@@ -783,7 +783,7 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 			continue
 		}
 
-		mc.NewEventLogEntry(ch, e.Id, e.Message, e.Severity, t)
+		mc.NewEventLogEntry(ch, e.Id, e.Message, e.Severity, "system", t)
 	}
 
 	return true
@@ -833,7 +833,7 @@ func (client *Client) RefreshLCLog(mc *Collector, ch chan<- prometheus.Metric) b
 					continue
 				}
 
-				mc.NewLCLogEntry(ch, entry.Id, entry.Message, entry.Severity, created)
+				mc.NewEventLogEntry(ch, entry.Id, entry.Message, entry.Severity, "lifecycle", created)
 			}
 
 			pagePath = resp.NextLink
