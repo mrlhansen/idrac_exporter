@@ -378,25 +378,15 @@ func (mc *Collector) NewPowerControlInterval(ch chan<- prometheus.Metric, interv
 	)
 }
 
-func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, message string, severity string, created time.Time) {
+func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, message string, severity string, logType string, created time.Time) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.EventLogEntry,
-		prometheus.CounterValue,
-		float64(created.Unix()),
-		id,
-		message,
-		severity,
-	)
-}
-
-func (mc *Collector) NewLCLogEntry(ch chan<- prometheus.Metric, id string, message string, severity string, created time.Time) {
-	ch <- prometheus.MustNewConstMetric(
-		mc.LCLogEntry,
-		prometheus.CounterValue,
+		prometheus.GaugeValue,
 		float64(created.Unix()),
 		id,
 		strings.TrimSpace(message),
 		severity,
+		logType,
 	)
 }
 

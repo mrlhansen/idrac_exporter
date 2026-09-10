@@ -469,7 +469,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sort_desc(sum by (id,message,severity) (idrac_events_log_entry{instance=\"$instance\"}*1000))",
+          "expr": "sort_desc(sum by (id,message,severity,log_type) (idrac_events_log_entry{instance=\"$instance\"}*1000))",
           "format": "table",
           "instant": true,
           "legendFormat": "__auto",
