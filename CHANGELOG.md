@@ -9,6 +9,13 @@ for tagged versions are also generated automatically on the
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-09-13
+
+### Security
+
+- `google.golang.org/grpc` 1.83.0 -> 1.83.2, fixing **GHSA-vp52-pcj8-j9qc** and
+  **GHSA-2v4p-qf9q-27wj** (HIGH), pulled in with an `otel` 1.45.0 -> 1.46.0 refresh.
+
 ## [1.2.0] - 2026-08-01
 
 This fork is being brought into the exporter-standards family. Highlights since the fork from
