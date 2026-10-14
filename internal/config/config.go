@@ -14,7 +14,7 @@ import (
 var Debug bool = false
 var Config *RootConfig = nil
 
-func (a *AuthConfig) AuthIsEqual(b *AuthConfig) bool {
+func AuthIsEqual(a, b *AuthConfig) bool {
 	if a.Username != b.Username {
 		return false
 	}

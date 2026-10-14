@@ -19,8 +19,8 @@ var collectors = map[string]*Collector{}
 
 type Collector struct {
 	// Internal variables
+	auth       *config.AuthConfig
 	client     *Client
-	group      string
 	registry   *prometheus.Registry
 	collected  *sync.Cond
 	collecting bool
@@ -768,19 +768,19 @@ func (collector *Collector) Gather() (string, error) {
 	return collector.builder.String(), nil
 }
 
-func ResetHost(host string) {
+func ResetTarget(target string) {
 	mu.Lock()
-	_, ok := collectors[host]
+	_, ok := collectors[target]
 	if ok {
-		delete(collectors, host)
+		delete(collectors, target)
 	}
 	mu.Unlock()
 }
 
-func ResetGroup(group string) {
+func ResetAuth(auth *config.AuthConfig) {
 	mu.Lock()
 	maps.DeleteFunc(collectors, func(k string, v *Collector) bool {
-		return v.group == group
+		return v.auth == auth
 	})
 	mu.Unlock()
 }
@@ -790,7 +790,6 @@ func GetCollector(target, group string) (*Collector, error) {
 	collector, ok := collectors[target]
 	if !ok {
 		collector = NewCollector()
-		collector.group = group
 		collectors[target] = collector
 	}
 	mu.Unlock()
@@ -810,6 +809,7 @@ func GetCollector(target, group string) (*Collector, error) {
 			return nil, fmt.Errorf("failed to instantiate new client")
 		} else {
 			collector.client = c
+			collector.auth = auth
 		}
 	}
 

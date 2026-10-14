@@ -72,9 +72,9 @@ func ReloadConfig(filename string, expand bool) {
 	for k, v := range cfg.Hosts {
 		h, ok := old.Hosts[k]
 		if ok {
-			if !h.AuthIsEqual(v) {
+			if !config.AuthIsEqual(h, v) {
 				old.Hosts[k] = v
-				collector.ResetHost(k)
+				collector.ResetAuth(h)
 			} else {
 				h.Metrics = v.Metrics
 			}
@@ -86,9 +86,9 @@ func ReloadConfig(filename string, expand bool) {
 	for k, v := range cfg.Groups {
 		h, ok := old.Groups[k]
 		if ok {
-			if !h.AuthIsEqual(v) {
+			if !config.AuthIsEqual(h, v) {
 				old.Groups[k] = v
-				collector.ResetGroup(k)
+				collector.ResetAuth(h)
 			} else {
 				h.Metrics = v.Metrics
 			}

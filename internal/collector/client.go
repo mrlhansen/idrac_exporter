@@ -50,6 +50,7 @@ type Client struct {
 	}
 	features struct {
 		ExpandLevels bool
+		Filter       bool
 	}
 }
 
@@ -270,6 +271,7 @@ func (client *Client) findAllEndpoints() bool {
 
 	// Protocol features supported
 	client.features.ExpandLevels = root.ProtocolFeaturesSupported.ExpandQuery.Levels
+	client.features.Filter = root.ProtocolFeaturesSupported.FilterQuery
 
 	return true
 }
