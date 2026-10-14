@@ -14,6 +14,28 @@ import (
 var Debug bool = false
 var Config *RootConfig = nil
 
+func (a *AuthConfig) AuthIsEqual(b *AuthConfig) bool {
+	if a.Username != b.Username {
+		return false
+	}
+	if a.Password != b.Password {
+		return false
+	}
+	if a.Scheme != b.Scheme {
+		return false
+	}
+	if a.Port != b.Port {
+		return false
+	}
+	if a.BasicAuth != b.BasicAuth {
+		return false
+	}
+	if a.AllowLegacyRSAKex != b.AllowLegacyRSAKex {
+		return false
+	}
+	return true
+}
+
 func (c *AuthConfig) Validate(root *RootConfig) error {
 	if c == nil {
 		return fmt.Errorf("empty section")
@@ -86,6 +108,7 @@ func GetAuthConfig(target, group string) *AuthConfig {
 		log.Error("Could not find login credentials: host=%s", target)
 		return nil
 	}
+
 	return host
 }
 

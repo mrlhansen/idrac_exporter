@@ -58,9 +58,9 @@ func resetHandler(rsp http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-	log.Debug("Handling reset request from %s for host %s", req.Host, target)
 
-	collector.Reset(target)
+	log.Debug("Handling reset request from %s for host %s", req.Host, target)
+	collector.ResetHost(target)
 }
 
 func discoverHandler(rsp http.ResponseWriter, req *http.Request) {

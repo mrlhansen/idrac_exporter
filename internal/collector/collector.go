@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"maps"
 	"runtime"
 	"strings"
 	"sync"
@@ -19,6 +20,7 @@ var collectors = map[string]*Collector{}
 type Collector struct {
 	// Internal variables
 	client     *Client
+	group      string
 	registry   *prometheus.Registry
 	collected  *sync.Cond
 	collecting bool
@@ -760,13 +762,20 @@ func (collector *Collector) Gather() (string, error) {
 	return collector.builder.String(), nil
 }
 
-// Resets an existing collector of the given target
-func Reset(target string) {
+func ResetHost(host string) {
 	mu.Lock()
-	_, ok := collectors[target]
+	_, ok := collectors[host]
 	if ok {
-		delete(collectors, target)
+		delete(collectors, host)
 	}
+	mu.Unlock()
+}
+
+func ResetGroup(group string) {
+	mu.Lock()
+	maps.DeleteFunc(collectors, func(k string, v *Collector) bool {
+		return v.group == group
+	})
 	mu.Unlock()
 }
 
@@ -775,6 +784,7 @@ func GetCollector(target, group string) (*Collector, error) {
 	collector, ok := collectors[target]
 	if !ok {
 		collector = NewCollector()
+		collector.group = group
 		collectors[target] = collector
 	}
 	mu.Unlock()

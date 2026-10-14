@@ -62,6 +62,9 @@ func ReloadConfig(filename string, expand bool) {
 		return
 	}
 
+	// We only support configuration reload for the following sections: hosts, groups, metrics
+	// Whenever credentials or anything connection related is changed, all related targets are being reset
+
 	old.Metrics = cfg.Metrics
 	old.Mutex.Lock()
 	defer old.Mutex.Unlock()
@@ -69,17 +72,28 @@ func ReloadConfig(filename string, expand bool) {
 	for k, v := range cfg.Hosts {
 		h, ok := old.Hosts[k]
 		if ok {
-			if h.Username != v.Username ||
-				h.Password != v.Password ||
-				h.AllowLegacyRSAKex != v.AllowLegacyRSAKex ||
-				h.Scheme != v.Scheme {
+			if !h.AuthIsEqual(v) {
 				old.Hosts[k] = v
-				collector.Reset(k)
+				collector.ResetHost(k)
 			} else {
 				h.Metrics = v.Metrics
 			}
 		} else {
 			old.Hosts[k] = v
+		}
+	}
+
+	for k, v := range cfg.Groups {
+		h, ok := old.Groups[k]
+		if ok {
+			if !h.AuthIsEqual(v) {
+				old.Groups[k] = v
+				collector.ResetGroup(k)
+			} else {
+				h.Metrics = v.Metrics
+			}
+		} else {
+			old.Groups[k] = v
 		}
 	}
 
