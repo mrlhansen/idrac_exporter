@@ -48,10 +48,11 @@ type Collector struct {
 	SensorsVoltage     *prometheus.Desc
 
 	// Sensors (unified)
+	SensorInfo          *prometheus.Desc
+	SensorHealth        *prometheus.Desc
 	SensorValue         *prometheus.Desc
 	SensorUpperCritical *prometheus.Desc
 	SensorLowerCritical *prometheus.Desc
-	SensorHealth        *prometheus.Desc
 
 	// Power supply
 	PowerSupplyHealth            *prometheus.Desc
@@ -209,25 +210,30 @@ func NewCollector() *Collector {
 			"Sensors reporting voltage measurements",
 			[]string{"id", "name", "units"}, nil,
 		),
-		SensorValue: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "sensor", "value"),
-			"Current sensor value",
-			[]string{"id", "name", "units"}, nil,
-		),
-		SensorUpperCritical: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "sensor", "upper_critical"),
-			"Upper critical sensor value",
-			[]string{"id", "name", "units"}, nil,
-		),
-		SensorLowerCritical: prometheus.NewDesc(
-			prometheus.BuildFQName(prefix, "sensor", "lower_critical"),
-			"Lower critical sensor value",
-			[]string{"id", "name", "units"}, nil,
+		SensorInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "info"),
+			"Information about the sensor",
+			[]string{"id", "name", "units", "context"}, nil,
 		),
 		SensorHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensor", "health"),
 			"Health status for the sensor",
-			[]string{"id", "name", "status"}, nil,
+			[]string{"id", "status"}, nil,
+		),
+		SensorValue: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "value"),
+			"Current sensor value",
+			[]string{"id"}, nil,
+		),
+		SensorUpperCritical: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "upper_critical"),
+			"Upper critical sensor value",
+			[]string{"id"}, nil,
+		),
+		SensorLowerCritical: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "lower_critical"),
+			"Lower critical sensor value",
+			[]string{"id"}, nil,
 		),
 		PowerSupplyHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "health"),
@@ -624,7 +630,7 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 			// Voltage sensors live in the legacy Power resource. When the power
 			// group is enabled they are emitted as part of that collection (at
 			// no extra cost), otherwise they are fetched here.
-			if !metrics.Power.Enabled {
+			if !metrics.Power.Enabled && !metrics.Sensors.Unified {
 				ok = collector.client.RefreshVoltages(collector, ch)
 				if !ok {
 					collector.errors.Add(1)

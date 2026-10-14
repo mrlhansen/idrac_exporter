@@ -74,9 +74,11 @@ func (c *AuthConfig) Validate(root *RootConfig) error {
 	}
 
 	c.Metrics = root.Metrics
-	err := yaml.Unmarshal(c.RawMetrics, &c.Metrics)
-	if err != nil {
-		return err
+	if c.RawMetrics != nil {
+		err := yaml.Unmarshal(c.RawMetrics, &c.Metrics)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

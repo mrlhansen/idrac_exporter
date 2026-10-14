@@ -196,14 +196,15 @@ func (mc *Collector) NewSensorsVoltage(ch chan<- prometheus.Metric, voltage floa
 	)
 }
 
-func (mc *Collector) NewSensorValue(ch chan<- prometheus.Metric, m *Sensor) {
+func (mc *Collector) NewSensorInfo(ch chan<- prometheus.Metric, m *Sensor) {
 	ch <- prometheus.MustNewConstMetric(
-		mc.SensorValue,
+		mc.SensorInfo,
 		prometheus.GaugeValue,
-		m.Reading,
+		1.0,
 		m.Id,
 		m.Name,
 		cleanUnits(m.ReadingUnits),
+		m.PhysicalContext,
 	)
 }
 
@@ -217,8 +218,16 @@ func (mc *Collector) NewSensorHealth(ch chan<- prometheus.Metric, m *Sensor) {
 		prometheus.GaugeValue,
 		float64(value),
 		m.Id,
-		m.Name,
 		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewSensorValue(ch chan<- prometheus.Metric, m *Sensor) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorValue,
+		prometheus.GaugeValue,
+		m.Reading,
+		m.Id,
 	)
 }
 
@@ -231,8 +240,6 @@ func (mc *Collector) NewSensorLowerCritical(ch chan<- prometheus.Metric, m *Sens
 		prometheus.GaugeValue,
 		m.Thresholds.LowerCritical.Reading,
 		m.Id,
-		m.Name,
-		cleanUnits(m.ReadingUnits),
 	)
 }
 
@@ -245,8 +252,6 @@ func (mc *Collector) NewSensorUpperCritical(ch chan<- prometheus.Metric, m *Sens
 		prometheus.GaugeValue,
 		m.Thresholds.UpperCritical.Reading,
 		m.Id,
-		m.Name,
-		cleanUnits(m.ReadingUnits),
 	)
 }
 
