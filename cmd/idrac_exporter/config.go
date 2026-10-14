@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -8,6 +9,37 @@ import (
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 )
+
+type Debouncer struct {
+	mu      sync.Mutex
+	pending bool
+	delay   time.Duration
+	action  func()
+}
+
+func NewDebouncer(delay time.Duration, action func()) *Debouncer {
+	return &Debouncer{
+		delay:  delay,
+		action: action,
+	}
+}
+
+func (d *Debouncer) Trigger() {
+	d.mu.Lock()
+	if d.pending {
+		d.mu.Unlock()
+		return
+	}
+	d.pending = true
+	d.mu.Unlock()
+
+	time.AfterFunc(d.delay, func() {
+		d.action()
+		d.mu.Lock()
+		d.pending = false
+		d.mu.Unlock()
+	})
+}
 
 func ReloadConfig(filename string, expand bool) {
 	cfg := config.NewConfig()
@@ -55,8 +87,6 @@ func ReloadConfig(filename string, expand bool) {
 }
 
 func WatchConfig(filename string, expand bool) {
-	lastReload := time.Now()
-
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Error("Failed to start file watcher: %v", err)
@@ -70,29 +100,32 @@ func WatchConfig(filename string, expand bool) {
 		return
 	}
 
+	// We use a debouncer with a delay because there might be multiple notifications
+	// when the configuration file is changed. A delay of one second should be enough
+	// to complete any operation on the filesystem before doing the reload.
+
+	d := NewDebouncer(time.Second, func() {
+		ReloadConfig(filename, expand)
+		if len(watcher.WatchList()) == 0 {
+			err := watcher.Add(filename)
+			if err != nil {
+				log.Error("Failed to watch configuration file after reload: %v", err)
+				watcher.Close()
+			}
+		}
+	})
+
 	for {
 		select {
 		case event, ok := <-watcher.Events:
 			if !ok {
 				return
 			}
-			if time.Since(lastReload) < time.Second {
-				break // needed to deduplicate e.g. multiple write events
-			}
-			reload := false
 			if event.Has(fsnotify.Write) {
-				reload = true
-			} else if event.Has(fsnotify.Remove) {
+				d.Trigger()
+			} else if event.Has(fsnotify.Remove) || event.Has(fsnotify.Rename) {
 				watcher.Remove(event.Name)
-				err := watcher.Add(filename)
-				if err != nil {
-					return
-				}
-				reload = true
-			}
-			if reload {
-				lastReload = time.Now()
-				ReloadConfig(filename, expand)
+				d.Trigger()
 			}
 		case err, ok := <-watcher.Errors:
 			if !ok {
