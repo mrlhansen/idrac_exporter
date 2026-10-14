@@ -67,7 +67,7 @@ hosts:
   192.168.1.1:
     username: user
     password: pass
-auths:
+groups:
   mygroup:
     username: user
     password: pass
@@ -75,13 +75,13 @@ metrics:
   all: true
 ```
 
-As shown in the example above, under `hosts` you can define credentials for individual hosts via their IP address or hostname. When a matching host cannot be found, the exporter will attempt to use the credentials under `default`. Alternatively you can define credentials for a group of hosts under the `auths` section and reference them in the request using the `auth` query parameter. For example:
+As shown in the example above, under `hosts` you can define credentials for individual hosts via their IP address or hostname. When a matching host cannot be found, the exporter will attempt to use the credentials under `default`. Alternatively you can define credentials for a group of hosts under the `groups` section and reference them in the request using the `group` query parameter. For example:
 
 ```text
-http://localhost:9348/metrics?target=192.168.10.10&auth=mygroup
+http://localhost:9348/metrics?target=192.168.10.10&group=mygroup
 ```
 
-You may combine `hosts` and `auths` in any way that fits your environment. The login user only needs read-only permissions and it is recommended to create a dedicated unpriviledged user for the exporter.
+You may combine `hosts` and `groups` in any way that fits your environment. The login user only needs read-only permissions and it is recommended to create a dedicated unpriviledged user for the exporter.
 
 **For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file. In this file you can also find the corresponding environment variables for the different configuration options.**
 

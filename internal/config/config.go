@@ -54,17 +54,17 @@ func (c *AuthConfig) Validate() error {
 	return nil
 }
 
-func GetAuthConfig(target, auth string) *AuthConfig {
+func GetAuthConfig(target, group string) *AuthConfig {
 	var host *AuthConfig
 	var ok bool
 
 	Config.Mutex.Lock()
 	defer Config.Mutex.Unlock()
 
-	if len(auth) > 0 {
-		host, ok = Config.Auths[auth]
+	if len(group) > 0 {
+		host, ok = Config.Groups[group]
 		if !ok {
-			log.Error("Could not find login credentials: auth=%s", auth)
+			log.Error("Could not find login credentials: group=%s", group)
 			return nil
 		}
 		return host
@@ -85,8 +85,8 @@ func GetAuthConfig(target, auth string) *AuthConfig {
 
 func NewConfig() *RootConfig {
 	return &RootConfig{
-		Hosts: make(map[string]*AuthConfig),
-		Auths: make(map[string]*AuthConfig),
+		Hosts:  make(map[string]*AuthConfig),
+		Groups: make(map[string]*AuthConfig),
 	}
 }
 
@@ -146,11 +146,11 @@ func (c *RootConfig) Validate() error {
 		}
 	}
 
-	// auths
-	for k, v := range c.Auths {
+	// groups
+	for k, v := range c.Groups {
 		err := v.Validate()
 		if err != nil {
-			return fmt.Errorf("auth=%s: %v", k, err)
+			return fmt.Errorf("group=%s: %v", k, err)
 		}
 	}
 

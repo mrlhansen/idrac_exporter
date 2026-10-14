@@ -52,9 +52,9 @@ type Client struct {
 	}
 }
 
-func NewClient(host string, auth *config.AuthConfig) *Client {
+func NewClient(host string, group *config.AuthConfig) *Client {
 	client := &Client{
-		redfish: NewRedfish(host, auth),
+		redfish: NewRedfish(host, group),
 	}
 
 	client.redfish.CreateSession()

@@ -91,11 +91,11 @@ hosts:
     username: user
     password: pass
 
-# The auths section has the same structure as the hosts section. Here you can
+# The groups section has the same structure as the hosts section. Here you can
 # define credentials for a group of hosts. When scraping a target you can
-# reference the group via the "auth" query parameter. This is similar to what
+# reference the group via the "group" query parameter. This is similar to what
 # the SNMP exporter does.
-auths:
+groups:
   mygroup:
     username: user
     password: pass

@@ -790,7 +790,7 @@ func Reset(target string) {
 	mu.Unlock()
 }
 
-func GetCollector(target, auth string) (*Collector, error) {
+func GetCollector(target, group string) (*Collector, error) {
 	mu.Lock()
 	collector, ok := collectors[target]
 	if !ok {
@@ -805,11 +805,11 @@ func GetCollector(target, auth string) (*Collector, error) {
 
 	// Try to instantiate a new Redfish host
 	if collector.client == nil {
-		auth := config.GetAuthConfig(target, auth)
-		if auth == nil {
+		group := config.GetAuthConfig(target, group)
+		if group == nil {
 			return nil, fmt.Errorf("could not find login credentials")
 		}
-		c := NewClient(target, auth)
+		c := NewClient(target, group)
 		if c == nil {
 			return nil, fmt.Errorf("failed to instantiate new client")
 		} else {

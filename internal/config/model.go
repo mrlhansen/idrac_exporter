@@ -52,5 +52,5 @@ type RootConfig struct {
 	Timeout       uint                   `yaml:"timeout"`
 	Concurrency   uint                   `yaml:"concurrency"`
 	Hosts         map[string]*AuthConfig `yaml:"hosts"`
-	Auths         map[string]*AuthConfig `yaml:"auths"`
+	Groups        map[string]*AuthConfig `yaml:"groups"`
 }
