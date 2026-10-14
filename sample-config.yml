@@ -71,6 +71,9 @@ default_target: "192.168.1.1"
 # to use the login credentials under "default". The credentials under "default"
 # can also be configured using environment variables, but this is not possible
 # for any of the other targets.
+#
+# For each host you can override the global "metrics" configuration below, in
+# case you want to scrape a different set of metrics on certain hosts.
 hosts:
   default:
     encoded: false               # CONFIG_DEFAULT_ENCODED=false
@@ -90,6 +93,9 @@ hosts:
   host01.example.com:
     username: user
     password: pass
+    metrics:                     # Example of metrics override
+      sensors:
+        unified: true
 
 # The groups section has the same structure as the hosts section. Here you can
 # define credentials for a group of hosts. When scraping a target you can
@@ -100,26 +106,36 @@ groups:
     username: user
     password: pass
 
-# The metrics section is used to select different groups of metrics.
+# The metrics section is used to globally enable different groups of
+# metrics. You can override the global configuration for individual
+# hosts or groups, as shown in the example above.
+#
 # See the README file for a detailed list of metrics in each group.
 # Each section can also be enabled using the shown environment variable.
 # The group "all" overrides all other groups and enables all metrics.
 metrics:
-  all: false         # CONFIG_METRICS_ALL=false
-  processors: false  # CONFIG_METRICS_PROCESSORS=false
-  system: false      # CONFIG_METRICS_SYSTEM=false
-  sensors: false     # CONFIG_METRICS_SENSORS=false
-  power: false       # CONFIG_METRICS_POWER=false
-  events: false      # CONFIG_METRICS_EVENTS=false
-  storage: false     # CONFIG_METRICS_STORAGE=false
-  memory: false      # CONFIG_METRICS_MEMORY=false
-  network: false     # CONFIG_METRICS_NETWORK=false
-  manager: false     # CONFIG_METRICS_MANAGER=false
-  extra: false       # CONFIG_METRICS_EXTRA=false
-
-# The events section is used for filtering events when the "events" metrics group
-# is enabled. Events can be filtered based on minimum severity and maximum age.
-# Severity must be one of "ok", "warning", "critical"
-events:
-  severity: warning  # CONFIG_EVENTS_SEVERITY=warning
-  maxage: 7d         # CONFIG_EVENTS_MAXAGE=7d
+  all:
+    enabled: false     # CONFIG_METRICS_ALL_ENABLED=false
+  processors:
+    enabled: false     # CONFIG_METRICS_PROCESSORS_ENABLED=false
+  system:
+    enabled: false     # CONFIG_METRICS_SYSTEM_ENABLED=false
+  sensors:
+    enabled: false     # CONFIG_METRICS_SENSORS_ENABLED=false
+    unified: false     # CONFIG_METRICS_SENSORS_UNIFIED=false
+  power:
+    enabled: false     # CONFIG_METRICS_POWER_ENABLED=false
+  events:
+    enabled: false     # CONFIG_METRICS_EVENTS_ENABLED=false
+    severity: warning  # CONFIG_METRICS_EVENTS_SEVERITY=warning
+    maxage: 7d         # CONFIG_METRICS_EVENTS_MAXAGE=7d
+  storage:
+    enabled: false     # CONFIG_METRICS_STORAGE_ENABLED=false
+  memory:
+    enabled: false     # CONFIG_METRICS_MEMORY_ENABLED=false
+  network:
+    enabled: false     # CONFIG_METRICS_NETWORK_ENABLED=false
+  manager:
+    enabled: false     # CONFIG_METRICS_MANAGER_ENABLED=false
+  extra:
+    enabled: false     # CONFIG_METRICS_EXTRA_ENABLED=false

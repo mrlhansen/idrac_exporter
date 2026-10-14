@@ -1,36 +1,62 @@
 package config
 
-import "sync"
+import (
+	"sync"
+
+	"github.com/goccy/go-yaml"
+)
 
 type AuthConfig struct {
-	Username          string `yaml:"username"`
-	Password          string `yaml:"password"`
-	Scheme            string `yaml:"scheme"`
-	Port              uint   `yaml:"port"`
-	Encoded           bool   `yaml:"encoded"`
-	BasicAuth         bool   `yaml:"use_basic_auth"`
-	AllowLegacyRSAKex bool   `yaml:"allow_legacy_rsa_kex"`
+	Username          string          `yaml:"username"`
+	Password          string          `yaml:"password"`
+	Scheme            string          `yaml:"scheme"`
+	Port              uint            `yaml:"port"`
+	Encoded           bool            `yaml:"encoded"`
+	BasicAuth         bool            `yaml:"use_basic_auth"`
+	AllowLegacyRSAKex bool            `yaml:"allow_legacy_rsa_kex"`
+	RawMetrics        yaml.RawMessage `yaml:"metrics"`
+	Metrics           MetricsConfig   `yaml:"-"`
 }
 
-type CollectConfig struct {
-	All        bool `yaml:"all"`
-	System     bool `yaml:"system"`
-	Sensors    bool `yaml:"sensors"`
-	Events     bool `yaml:"events"`
-	Power      bool `yaml:"power"`
-	Storage    bool `yaml:"storage"`
-	Memory     bool `yaml:"memory"`
-	Network    bool `yaml:"network"`
-	Processors bool `yaml:"processors"`
-	Manager    bool `yaml:"manager"`
-	Extra      bool `yaml:"extra"`
-}
-
-type EventConfig struct {
-	Severity      string `yaml:"severity"`
-	MaxAge        string `yaml:"maxage"`
-	SeverityLevel int
-	MaxAgeSeconds float64
+type MetricsConfig struct {
+	All struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"all"`
+	System struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"system"`
+	Sensors struct {
+		Enabled bool `yaml:"enabled"`
+		Unified bool `yaml:"unified"`
+	} `yaml:"sensors"`
+	Events struct {
+		Enabled       bool    `yaml:"enabled"`
+		Severity      string  `yaml:"severity"`
+		MaxAge        string  `yaml:"maxage"`
+		SeverityLevel int     `yaml:"-"`
+		MaxAgeSeconds float64 `yaml:"-"`
+	} `yaml:"events"`
+	Power struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"power"`
+	Storage struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"storage"`
+	Memory struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"memory"`
+	Network struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"network"`
+	Processors struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"processors"`
+	Manager struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"manager"`
+	Extra struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"extra"`
 }
 
 type TLSConfig struct {
@@ -46,8 +72,7 @@ type RootConfig struct {
 	HttpsProxy    string                 `yaml:"https_proxy"`
 	MetricsPrefix string                 `yaml:"metrics_prefix"`
 	DefaultTarget string                 `yaml:"default_target"`
-	Collect       CollectConfig          `yaml:"metrics"`
-	Event         EventConfig            `yaml:"events"`
+	Metrics       MetricsConfig          `yaml:"metrics"`
 	TLS           TLSConfig              `yaml:"tls"`
 	Timeout       uint                   `yaml:"timeout"`
 	Concurrency   uint                   `yaml:"concurrency"`

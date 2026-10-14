@@ -72,7 +72,8 @@ groups:
     username: user
     password: pass
 metrics:
-  all: true
+  all:
+    enabled: true
 ```
 
 As shown in the example above, under `hosts` you can define credentials for individual hosts via their IP address or hostname. When a matching host cannot be found, the exporter will attempt to use the credentials under `default`. Alternatively you can define credentials for a group of hosts under the `groups` section and reference them in the request using the `group` query parameter. For example:

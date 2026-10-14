@@ -602,22 +602,19 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 
 func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 	var wg sync.WaitGroup
-	collect := &config.Config.Collect
+	metrics := collector.client.metrics
 
-	if collect.System {
-		wg.Add(1)
-		go func() {
+	if metrics.System.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshSystem(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Sensors {
-		wg.Add(1)
-		go func() {
+	if metrics.Sensors.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshSensors(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
@@ -625,102 +622,85 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 			// Voltage sensors live in the legacy Power resource. When the power
 			// group is enabled they are emitted as part of that collection (at
 			// no extra cost), otherwise they are fetched here.
-			if !collect.Power {
+			if !metrics.Power.Enabled {
 				ok = collector.client.RefreshVoltages(collector, ch)
 				if !ok {
 					collector.errors.Add(1)
 				}
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Power {
-		wg.Add(1)
-		go func() {
+	if metrics.Power.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshPower(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Network {
-		wg.Add(1)
-		go func() {
+	if metrics.Network.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshNetwork(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Events {
-		wg.Add(1)
-		go func() {
+	if metrics.Events.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshEventLog(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Storage {
-		wg.Add(1)
-		go func() {
+	if metrics.Storage.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshStorage(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Memory {
-		wg.Add(1)
-		go func() {
+	if metrics.Memory.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshMemory(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Processors {
-		wg.Add(1)
-		go func() {
+	if metrics.Processors.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshProcessors(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Manager {
-		wg.Add(1)
-		go func() {
+	if metrics.Manager.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshManager(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Extra {
-		wg.Add(1)
-		go func() {
+	if metrics.Extra.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshDell(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
 	wg.Wait()
@@ -805,11 +785,11 @@ func GetCollector(target, group string) (*Collector, error) {
 
 	// Try to instantiate a new Redfish host
 	if collector.client == nil {
-		group := config.GetAuthConfig(target, group)
-		if group == nil {
+		auth := config.GetAuthConfig(target, group)
+		if auth == nil {
 			return nil, fmt.Errorf("could not find login credentials")
 		}
-		c := NewClient(target, group)
+		c := NewClient(target, auth)
 		if c == nil {
 			return nil, fmt.Errorf("failed to instantiate new client")
 		} else {

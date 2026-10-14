@@ -30,9 +30,7 @@ func ReloadConfig(filename string, expand bool) {
 		return
 	}
 
-	old.Collect = cfg.Collect
-	old.Event = cfg.Event
-
+	old.Metrics = cfg.Metrics
 	old.Mutex.Lock()
 	defer old.Mutex.Unlock()
 
@@ -45,6 +43,8 @@ func ReloadConfig(filename string, expand bool) {
 				h.Scheme != v.Scheme {
 				old.Hosts[k] = v
 				collector.Reset(k)
+			} else {
+				h.Metrics = v.Metrics
 			}
 		} else {
 			old.Hosts[k] = v

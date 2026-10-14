@@ -29,6 +29,7 @@ const (
 
 type Client struct {
 	redfish *Redfish
+	metrics *config.MetricsConfig
 	vendor  int
 	version int
 	path    struct {
@@ -52,9 +53,10 @@ type Client struct {
 	}
 }
 
-func NewClient(host string, group *config.AuthConfig) *Client {
+func NewClient(host string, config *config.AuthConfig) *Client {
 	client := &Client{
-		redfish: NewRedfish(host, group),
+		redfish: NewRedfish(host, config),
+		metrics: &config.Metrics,
 	}
 
 	client.redfish.CreateSession()
@@ -199,7 +201,7 @@ func (client *Client) findAllEndpoints() bool {
 	}
 
 	// Path for manager
-	if config.Config.Collect.Manager {
+	if client.metrics.Manager.Enabled {
 		ok = client.redfish.Get(root.Managers.OdataId, &group)
 		if ok && len(group.Members) > 0 {
 			client.path.Manager = group.Members[0].OdataId
@@ -207,7 +209,7 @@ func (client *Client) findAllEndpoints() bool {
 	}
 
 	// Path for event log
-	if config.Config.Collect.Events {
+	if client.metrics.Events.Enabled {
 		switch client.vendor {
 		case DELL:
 			{
@@ -241,7 +243,7 @@ func (client *Client) findAllEndpoints() bool {
 	}
 
 	// Extra
-	if config.Config.Collect.Extra {
+	if client.metrics.Extra.Enabled {
 		if client.vendor == DELL {
 			if client.redfish.Exists(DellSystemPath) {
 				client.path.Extra = append(client.path.Extra, DellSystemPath)
@@ -413,15 +415,20 @@ func (client *Client) RefreshSensorsOld(mc *Collector, ch chan<- prometheus.Metr
 }
 
 func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) bool {
-	// if len(client.path.Sensors) > 0 && client.features.ExpandLevels {
-	// 	return client.RefreshSensorsUnified(mc, ch)
-	// }
+	if client.metrics.Sensors.Unified {
+		if len(client.path.Sensors) > 0 && client.features.ExpandLevels {
+			return client.RefreshSensorsUnified(mc, ch)
+		}
+	}
+
 	if len(client.path.Thermal) > 0 {
 		return client.RefreshSensorsOld(mc, ch)
 	}
+
 	if len(client.path.ThermalSubsystem) > 0 {
 		return client.RefreshSensorsNew(mc, ch)
 	}
+
 	return true
 }
 
@@ -727,7 +734,7 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 	// Voltage sensors belong to the sensors metrics group, but the data lives
 	// in the Power response fetched above, so when both groups are enabled they
 	// are emitted here at no additional cost.
-	if config.Config.Collect.Sensors {
+	if client.metrics.Sensors.Enabled {
 		client.emitVoltages(mc, ch, &resp)
 	}
 
@@ -798,8 +805,8 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 		}
 	}
 
-	level := config.Config.Event.SeverityLevel
-	maxage := config.Config.Event.MaxAgeSeconds
+	level := client.metrics.Events.SeverityLevel
+	maxage := client.metrics.Events.MaxAgeSeconds
 
 	for _, e := range resp.Members {
 		t, err := time.Parse(time.RFC3339, e.Created)

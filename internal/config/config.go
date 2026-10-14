@@ -14,7 +14,7 @@ import (
 var Debug bool = false
 var Config *RootConfig = nil
 
-func (c *AuthConfig) Validate() error {
+func (c *AuthConfig) Validate(root *RootConfig) error {
 	if c == nil {
 		return fmt.Errorf("empty section")
 	}
@@ -49,6 +49,12 @@ func (c *AuthConfig) Validate() error {
 	case "http", "https":
 	default:
 		return fmt.Errorf("invalid scheme")
+	}
+
+	c.Metrics = root.Metrics
+	err := yaml.Unmarshal(c.RawMetrics, &c.Metrics)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -138,9 +144,45 @@ func (c *RootConfig) Validate() error {
 		c.MetricsPrefix = "idrac"
 	}
 
+	// events
+	switch strings.ToLower(c.Metrics.Events.Severity) {
+	case "ok":
+		c.Metrics.Events.SeverityLevel = 0
+	case "warning", "":
+		c.Metrics.Events.SeverityLevel = 1
+	case "critical":
+		c.Metrics.Events.SeverityLevel = 2
+	default:
+		return fmt.Errorf("invalid value: %s", c.Metrics.Events.Severity)
+	}
+
+	if c.Metrics.Events.MaxAge == "" {
+		c.Metrics.Events.MaxAge = "7d"
+	}
+
+	t, err := str2duration.ParseDuration(c.Metrics.Events.MaxAge)
+	if err != nil {
+		return fmt.Errorf("unable to parse duration: %v", err)
+	}
+	c.Metrics.Events.MaxAgeSeconds = t.Seconds()
+
+	// metrics
+	if c.Metrics.All.Enabled {
+		c.Metrics.System.Enabled = true
+		c.Metrics.Sensors.Enabled = true
+		c.Metrics.Events.Enabled = true
+		c.Metrics.Power.Enabled = true
+		c.Metrics.Storage.Enabled = true
+		c.Metrics.Memory.Enabled = true
+		c.Metrics.Network.Enabled = true
+		c.Metrics.Processors.Enabled = true
+		c.Metrics.Manager.Enabled = true
+		c.Metrics.Extra.Enabled = true
+	}
+
 	// hosts
 	for k, v := range c.Hosts {
-		err := v.Validate()
+		err := v.Validate(c)
 		if err != nil {
 			return fmt.Errorf("host=%s: %v", k, err)
 		}
@@ -148,46 +190,10 @@ func (c *RootConfig) Validate() error {
 
 	// groups
 	for k, v := range c.Groups {
-		err := v.Validate()
+		err := v.Validate(c)
 		if err != nil {
 			return fmt.Errorf("group=%s: %v", k, err)
 		}
-	}
-
-	// events
-	switch strings.ToLower(c.Event.Severity) {
-	case "ok":
-		c.Event.SeverityLevel = 0
-	case "warning", "":
-		c.Event.SeverityLevel = 1
-	case "critical":
-		c.Event.SeverityLevel = 2
-	default:
-		return fmt.Errorf("invalid value: %s", c.Event.Severity)
-	}
-
-	if c.Event.MaxAge == "" {
-		c.Event.MaxAge = "7d"
-	}
-
-	t, err := str2duration.ParseDuration(c.Event.MaxAge)
-	if err != nil {
-		return fmt.Errorf("unable to parse duration: %v", err)
-	}
-	c.Event.MaxAgeSeconds = t.Seconds()
-
-	// metrics
-	if c.Collect.All {
-		c.Collect.System = true
-		c.Collect.Sensors = true
-		c.Collect.Events = true
-		c.Collect.Power = true
-		c.Collect.Storage = true
-		c.Collect.Memory = true
-		c.Collect.Network = true
-		c.Collect.Processors = true
-		c.Collect.Manager = true
-		c.Collect.Extra = true
 	}
 
 	return nil
