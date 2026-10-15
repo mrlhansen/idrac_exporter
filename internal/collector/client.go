@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"net/url"
 	"path"
 	"regexp"
 	"slices"
@@ -794,8 +795,28 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 		return true
 	}
 
+	var (
+		level  = client.metrics.Events.SeverityLevel
+		maxage = client.metrics.Events.MaxAgeSeconds
+		filter = url.Values{}
+		path   = client.path.Event
+	)
+
+	if client.features.Filter {
+		switch level {
+		case 1:
+			filter.Set("$filter", "Severity eq 'Critical' or Severity eq 'Warning'")
+		case 2:
+			filter.Set("$filter", "Severity eq 'Critical'")
+		}
+
+		if s := filter.Encode(); len(s) > 0 {
+			path = path + "?" + s
+		}
+	}
+
 	resp := EventLogResponse{}
-	ok := client.redfish.Get(client.path.Event, &resp)
+	ok := client.redfish.Get(path, &resp)
 	if !ok {
 		return false
 	}
@@ -808,8 +829,9 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 		}
 	}
 
-	level := client.metrics.Events.SeverityLevel
-	maxage := client.metrics.Events.MaxAgeSeconds
+	// Some machines will report filtering as a supported feature, but in reality the
+	// returned data is not always properly filtered. For this reason we always filter
+	// the data when looping through the entries.
 
 	for _, e := range resp.Members {
 		t, err := time.Parse(time.RFC3339, e.Created)
@@ -878,7 +900,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			if (client.vendor == HPE) && (client.version == 4) {
 				drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
 				drive.Protocol = drive.InterfaceType
-				drive.PredictedLifeLeft = asPtr(100.0 - drive.SSDEnduranceUtilizationPercentage)
+				drive.PredictedLifeLeft = new(100.0 - drive.SSDEnduranceUtilizationPercentage)
 			}
 
 			// Inspur (issue #162)
