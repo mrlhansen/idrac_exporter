@@ -203,6 +203,7 @@ func (mc *Collector) NewSensorInfo(ch chan<- prometheus.Metric, m *Sensor) {
 		1.0,
 		m.Id,
 		m.Name,
+		strings.ToLower(m.ReadingType),
 		cleanUnits(m.ReadingUnits),
 		m.PhysicalContext,
 	)

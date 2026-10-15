@@ -213,7 +213,7 @@ func NewCollector() *Collector {
 		SensorInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensor", "info"),
 			"Information about the sensor",
-			[]string{"id", "name", "units", "context"}, nil,
+			[]string{"id", "name", "type", "units", "context"}, nil,
 		),
 		SensorHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensor", "health"),
@@ -545,10 +545,11 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SensorsFanHealth
 	ch <- collector.SensorsFanSpeed
 	ch <- collector.SensorsVoltage
+	ch <- collector.SensorInfo
+	ch <- collector.SensorHealth
 	ch <- collector.SensorValue
 	ch <- collector.SensorUpperCritical
 	ch <- collector.SensorLowerCritical
-	ch <- collector.SensorHealth
 	ch <- collector.PowerSupplyHealth
 	ch <- collector.PowerSupplyOutputWatts
 	ch <- collector.PowerSupplyInputWatts

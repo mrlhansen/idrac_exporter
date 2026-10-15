@@ -120,6 +120,16 @@ idrac_sensors_fan_speed{id,name,units}
 idrac_sensors_voltage{id,name,units}
 ```
 
+When using the _unified_ sensors endpoint (must be enabled in the configuration), the following metrics are exported instead.
+
+```text
+idrac_sensor_info{id,context,name,type,units}
+idrac_sensor_health{id,status}
+idrac_sensor_value{id}
+idrac_sensor_lower_critical{id}
+idrac_sensor_upper_critical{id}
+```
+
 ### Power
 These metrics include two sets of power readings. The first set is PSU power readings, such as power usage, total power capacity, input voltage and efficiency.
 

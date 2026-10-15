@@ -289,16 +289,16 @@ func (client *Client) RefreshSensorsUnified(mc *Collector, ch chan<- prometheus.
 			continue
 		}
 
-		mc.NewSensorInfo(ch, &s)
-		mc.NewSensorHealth(ch, &s)
-
 		if s.ReadingType == "" {
 			continue
 		}
+
 		if s.ReadingUnits == "" {
 			continue
 		}
 
+		mc.NewSensorInfo(ch, &s)
+		mc.NewSensorHealth(ch, &s)
 		mc.NewSensorValue(ch, &s)
 		mc.NewSensorLowerCritical(ch, &s)
 		mc.NewSensorUpperCritical(ch, &s)
