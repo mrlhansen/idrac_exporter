@@ -2,13 +2,11 @@ package collector
 
 import (
 	"fmt"
-	"net/url"
 	"path"
 	"regexp"
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
@@ -791,65 +789,21 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 }
 
 func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric) bool {
-	if client.path.Event == "" {
-		return true
-	}
-
-	var (
-		level  = client.metrics.Events.SeverityLevel
-		maxage = client.metrics.Events.MaxAgeSeconds
-		filter = url.Values{}
-		path   = client.path.Event
-	)
-
-	if client.features.Filter {
-		switch level {
-		case 1:
-			filter.Set("$filter", "Severity eq 'Critical' or Severity eq 'Warning'")
-		case 2:
-			filter.Set("$filter", "Severity eq 'Critical'")
-		}
-
-		if s := filter.Encode(); len(s) > 0 {
-			path = path + "?" + s
-		}
-	}
-
-	resp := EventLogResponse{}
-	ok := client.redfish.Get(path, &resp)
-	if !ok {
-		return false
+	log, ok := client.QueryEventLog(client.path.Event, &client.metrics.Events)
+	if log == nil {
+		return ok
 	}
 
 	// iDRAC 8 (issue #143)
 	if client.vendor == DELL {
-		if resp.Id == "SEL" && strings.Contains(client.path.Event, "LogServices") {
+		if log.response.Id == "SEL" && strings.Contains(client.path.Event, "LogServices") {
 			client.path.Event = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
 			return client.RefreshEventLog(mc, ch)
 		}
 	}
 
-	// Some machines will report filtering as a supported feature, but in reality the
-	// returned data is not always properly filtered. For this reason we always filter
-	// the data when looping through the entries.
-
-	for _, e := range resp.Members {
-		t, err := time.Parse(time.RFC3339, e.Created)
-		if err != nil {
-			continue
-		}
-
-		d := time.Since(t)
-		if d.Seconds() > maxage {
-			continue
-		}
-
-		severity := health2value(e.Severity)
-		if severity < level {
-			continue
-		}
-
-		mc.NewEventLogEntry(ch, e.Id, e.Message, e.Severity, t)
+	for v := range log.Items() {
+		mc.NewEventLogEntry(ch, v.Id, v.Message, v.Severity, v.Timestamp)
 	}
 
 	return true

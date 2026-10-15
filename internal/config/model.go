@@ -18,6 +18,14 @@ type AuthConfig struct {
 	Metrics           MetricsConfig   `yaml:"-"`
 }
 
+type EventConfig struct {
+	Enabled       bool    `yaml:"enabled"`
+	Severity      string  `yaml:"severity"`
+	MaxAge        string  `yaml:"maxage"`
+	SeverityLevel int     `yaml:"-"`
+	MaxAgeSeconds float64 `yaml:"-"`
+}
+
 type MetricsConfig struct {
 	All struct {
 		Enabled bool `yaml:"enabled"`
@@ -29,14 +37,8 @@ type MetricsConfig struct {
 		Enabled bool `yaml:"enabled"`
 		Unified bool `yaml:"unified"`
 	} `yaml:"sensors"`
-	Events struct {
-		Enabled       bool    `yaml:"enabled"`
-		Severity      string  `yaml:"severity"`
-		MaxAge        string  `yaml:"maxage"`
-		SeverityLevel int     `yaml:"-"`
-		MaxAgeSeconds float64 `yaml:"-"`
-	} `yaml:"events"`
-	Power struct {
+	Events EventConfig `yaml:"events"`
+	Power  struct {
 		Enabled bool `yaml:"enabled"`
 	} `yaml:"power"`
 	Storage struct {
