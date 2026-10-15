@@ -115,8 +115,9 @@ type Collector struct {
 	CpuTotalThreads *prometheus.Desc
 
 	// BMC
-	ManagerInfo   *prometheus.Desc
-	ManagerHealth *prometheus.Desc
+	ManagerInfo          *prometheus.Desc
+	ManagerHealth        *prometheus.Desc
+	ManagerEventLogEntry *prometheus.Desc
 
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
@@ -475,6 +476,11 @@ func NewCollector() *Collector {
 			"Health status of the manager",
 			[]string{"id", "status"}, nil,
 		),
+		ManagerEventLogEntry: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "events_log_entry"),
+			"Entry from the manager event log",
+			[]string{"id", "message", "severity"}, nil,
+		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
@@ -598,6 +604,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.CpuTotalThreads
 	ch <- collector.ManagerInfo
 	ch <- collector.ManagerHealth
+	ch <- collector.ManagerEventLogEntry
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 	ch <- collector.DellControllerBatteryHealth

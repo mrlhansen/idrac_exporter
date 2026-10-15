@@ -36,7 +36,32 @@ func AuthIsEqual(a, b *AuthConfig) bool {
 	return true
 }
 
-func (c *AuthConfig) Validate(root *RootConfig) error {
+func (c *EventConfig) validate() error {
+	switch strings.ToLower(c.Severity) {
+	case "ok":
+		c.SeverityLevel = 0
+	case "warning", "":
+		c.SeverityLevel = 1
+	case "critical":
+		c.SeverityLevel = 2
+	default:
+		return fmt.Errorf("invalid severity: %s", c.Severity)
+	}
+
+	if c.MaxAge == "" {
+		c.MaxAge = "7d"
+	}
+
+	t, err := str2duration.ParseDuration(c.MaxAge)
+	if err != nil {
+		return fmt.Errorf("unable to parse duration: %v", err)
+	}
+	c.MaxAgeSeconds = t.Seconds()
+
+	return nil
+}
+
+func (c *AuthConfig) validate(root *RootConfig) error {
 	if c == nil {
 		return fmt.Errorf("empty section")
 	}
@@ -170,26 +195,15 @@ func (c *RootConfig) Validate() error {
 	}
 
 	// events
-	switch strings.ToLower(c.Metrics.Events.Severity) {
-	case "ok":
-		c.Metrics.Events.SeverityLevel = 0
-	case "warning", "":
-		c.Metrics.Events.SeverityLevel = 1
-	case "critical":
-		c.Metrics.Events.SeverityLevel = 2
-	default:
-		return fmt.Errorf("invalid value: %s", c.Metrics.Events.Severity)
-	}
-
-	if c.Metrics.Events.MaxAge == "" {
-		c.Metrics.Events.MaxAge = "7d"
-	}
-
-	t, err := str2duration.ParseDuration(c.Metrics.Events.MaxAge)
+	err := c.Metrics.Events.validate()
 	if err != nil {
-		return fmt.Errorf("unable to parse duration: %v", err)
+		return err
 	}
-	c.Metrics.Events.MaxAgeSeconds = t.Seconds()
+
+	err = c.Metrics.Manager.Events.validate()
+	if err != nil {
+		return err
+	}
 
 	// metrics
 	if c.Metrics.All.Enabled {
@@ -207,7 +221,7 @@ func (c *RootConfig) Validate() error {
 
 	// hosts
 	for k, v := range c.Hosts {
-		err := v.Validate(c)
+		err := v.validate(c)
 		if err != nil {
 			return fmt.Errorf("host=%s: %v", k, err)
 		}
@@ -215,7 +229,7 @@ func (c *RootConfig) Validate() error {
 
 	// groups
 	for k, v := range c.Groups {
-		err := v.Validate(c)
+		err := v.validate(c)
 		if err != nil {
 			return fmt.Errorf("group=%s: %v", k, err)
 		}

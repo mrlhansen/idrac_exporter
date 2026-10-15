@@ -237,6 +237,12 @@ idrac_manager_info{id,firmware,model,type}
 idrac_manager_health{id,status}
 ```
 
+Optionally event logs from the manager can also be exported. Currently this is only supported on iDRAC (Lifecycle Logs) and on HPE (iLO Event Logs).
+
+```text
+idrac_manager_events_log_entry{id,message,severity}
+```
+
 ### Extra
 These metrics do not belong anywhere else and they might be OEM specific. At the moment only some Dell specific metrics are exported.
 

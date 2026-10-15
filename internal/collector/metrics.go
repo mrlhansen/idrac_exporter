@@ -384,7 +384,7 @@ func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, me
 		prometheus.CounterValue,
 		float64(created.Unix()),
 		id,
-		strings.TrimSpace(message),
+		message,
 		severity,
 	)
 }
@@ -942,6 +942,17 @@ func (mc *Collector) NewManagerHealth(ch chan<- prometheus.Metric, m *ManagerRes
 		float64(value),
 		m.Id,
 		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewManagerEventLogEntry(ch chan<- prometheus.Metric, id string, message string, severity string, created time.Time) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.ManagerEventLogEntry,
+		prometheus.CounterValue,
+		float64(created.Unix()),
+		id,
+		message,
+		severity,
 	)
 }
 

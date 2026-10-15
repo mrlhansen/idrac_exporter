@@ -42,6 +42,7 @@ type Client struct {
 		Memory           string
 		Network          string
 		Event            string
+		ManagerEvent     string
 		Processors       string
 		Manager          string
 		Extra            []string
@@ -200,7 +201,7 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = DELL
 	}
 
-	// Path for manager
+	// Manager
 	if client.metrics.Manager.Enabled {
 		ok = client.redfish.Get(root.Managers.OdataId, &group)
 		if ok && len(group.Members) > 0 {
@@ -208,7 +209,15 @@ func (client *Client) findAllEndpoints() bool {
 		}
 	}
 
-	// Path for event log
+	// Manager event log
+	switch client.vendor {
+	case DELL:
+		client.path.ManagerEvent = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Lclog/Entries"
+	case HPE:
+		client.path.ManagerEvent = "/redfish/v1/Managers/1/LogServices/IEL/Entries"
+	}
+
+	// System event log
 	if client.metrics.Events.Enabled {
 		switch client.vendor {
 		case DELL:
@@ -480,6 +489,15 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 
 	mc.NewManagerInfo(ch, &mgr)
 	mc.NewManagerHealth(ch, &mgr)
+
+	log, ok := client.QueryEventLog(client.path.ManagerEvent, &client.metrics.Manager.Events)
+	if log == nil {
+		return ok
+	}
+
+	for v := range log.Items() {
+		mc.NewManagerEventLogEntry(ch, v.Id, v.Message, v.Severity, v.Timestamp)
+	}
 
 	return true
 }

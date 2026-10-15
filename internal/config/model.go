@@ -54,7 +54,8 @@ type MetricsConfig struct {
 		Enabled bool `yaml:"enabled"`
 	} `yaml:"processors"`
 	Manager struct {
-		Enabled bool `yaml:"enabled"`
+		Enabled bool        `yaml:"enabled"`
+		Events  EventConfig `yaml:"events"`
 	} `yaml:"manager"`
 	Extra struct {
 		Enabled bool `yaml:"enabled"`

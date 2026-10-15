@@ -72,6 +72,9 @@ func (c *RootConfig) FromEnvironment() {
 	getEnv("CONFIG_METRICS_NETWORK_ENABLED", &m.Network.Enabled)
 	getEnv("CONFIG_METRICS_PROCESSORS_ENABLED", &m.Processors.Enabled)
 	getEnv("CONFIG_METRICS_MANAGER_ENABLED", &m.Manager.Enabled)
+	getEnv("CONFIG_METRICS_MANAGER_EVENTS_ENABLED", &m.Manager.Events.Enabled)
+	getEnv("CONFIG_METRICS_MANAGER_EVENTS_SEVERITY", &m.Manager.Events.Severity)
+	getEnv("CONFIG_METRICS_MANAGER_EVENTS_MAXAGE", &m.Manager.Events.MaxAge)
 	getEnv("CONFIG_METRICS_EXTRA_ENABLED", &m.Extra.Enabled)
 
 	def, ok := c.Hosts["default"]

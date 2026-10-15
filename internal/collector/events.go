@@ -3,6 +3,7 @@ package collector
 import (
 	"iter"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
@@ -77,7 +78,7 @@ func (e *EventLog) Items() iter.Seq[Event] {
 
 			v := Event{
 				Id:        v.Id,
-				Message:   v.Message,
+				Message:   strings.TrimSpace(v.Message),
 				Severity:  v.Severity,
 				Timestamp: t,
 			}

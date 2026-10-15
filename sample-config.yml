@@ -113,29 +113,36 @@ groups:
 # See the README file for a detailed list of metrics in each group.
 # Each section can also be enabled using the shown environment variable.
 # The group "all" overrides all other groups and enables all metrics.
+#
+# Events can be filtered based on minimum severity and maximum age.
+# Severity must be one of "ok", "warning", "critical"
 metrics:
   all:
-    enabled: false     # CONFIG_METRICS_ALL_ENABLED=false
+    enabled: false       # CONFIG_METRICS_ALL_ENABLED=false
   processors:
-    enabled: false     # CONFIG_METRICS_PROCESSORS_ENABLED=false
+    enabled: false       # CONFIG_METRICS_PROCESSORS_ENABLED=false
   system:
-    enabled: false     # CONFIG_METRICS_SYSTEM_ENABLED=false
+    enabled: false       # CONFIG_METRICS_SYSTEM_ENABLED=false
   sensors:
-    enabled: false     # CONFIG_METRICS_SENSORS_ENABLED=false
-    unified: false     # CONFIG_METRICS_SENSORS_UNIFIED=false
+    enabled: false       # CONFIG_METRICS_SENSORS_ENABLED=false
+    unified: false       # CONFIG_METRICS_SENSORS_UNIFIED=false
   power:
-    enabled: false     # CONFIG_METRICS_POWER_ENABLED=false
+    enabled: false       # CONFIG_METRICS_POWER_ENABLED=false
   events:
-    enabled: false     # CONFIG_METRICS_EVENTS_ENABLED=false
-    severity: warning  # CONFIG_METRICS_EVENTS_SEVERITY=warning
-    maxage: 7d         # CONFIG_METRICS_EVENTS_MAXAGE=7d
+    enabled: false       # CONFIG_METRICS_EVENTS_ENABLED=false
+    severity: warning    # CONFIG_METRICS_EVENTS_SEVERITY=warning
+    maxage: 7d           # CONFIG_METRICS_EVENTS_MAXAGE=7d
   storage:
-    enabled: false     # CONFIG_METRICS_STORAGE_ENABLED=false
+    enabled: false       # CONFIG_METRICS_STORAGE_ENABLED=false
   memory:
-    enabled: false     # CONFIG_METRICS_MEMORY_ENABLED=false
+    enabled: false       # CONFIG_METRICS_MEMORY_ENABLED=false
   network:
-    enabled: false     # CONFIG_METRICS_NETWORK_ENABLED=false
+    enabled: false       # CONFIG_METRICS_NETWORK_ENABLED=false
   manager:
-    enabled: false     # CONFIG_METRICS_MANAGER_ENABLED=false
+    enabled: false       # CONFIG_METRICS_MANAGER_ENABLED=false
+    events:
+      enabled: false     # CONFIG_METRICS_MANAGER_EVENTS_ENABLED=false
+      severity: warning  # CONFIG_METRICS_MANAGER_EVENTS_SEVERITY=warning
+      maxage: 7d         # CONFIG_METRICS_MANAGER_EVENTS_MAXAGE=7d
   extra:
-    enabled: false     # CONFIG_METRICS_EXTRA_ENABLED=false
+    enabled: false       # CONFIG_METRICS_EXTRA_ENABLED=false
