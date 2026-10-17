@@ -2,6 +2,7 @@ package collector
 
 import (
 	"fmt"
+	"maps"
 	"runtime"
 	"strings"
 	"sync"
@@ -18,6 +19,7 @@ var collectors = map[string]*Collector{}
 
 type Collector struct {
 	// Internal variables
+	auth       *config.AuthConfig
 	client     *Client
 	registry   *prometheus.Registry
 	collected  *sync.Cond
@@ -45,6 +47,13 @@ type Collector struct {
 	SensorsFanHealth   *prometheus.Desc
 	SensorsFanSpeed    *prometheus.Desc
 	SensorsVoltage     *prometheus.Desc
+
+	// Sensors (unified)
+	SensorInfo          *prometheus.Desc
+	SensorHealth        *prometheus.Desc
+	SensorValue         *prometheus.Desc
+	SensorUpperCritical *prometheus.Desc
+	SensorLowerCritical *prometheus.Desc
 
 	// Power supply
 	PowerSupplyHealth            *prometheus.Desc
@@ -109,6 +118,8 @@ type Collector struct {
 	// BMC
 	ManagerInfo                         *prometheus.Desc
 	ManagerHealth                       *prometheus.Desc
+	ManagerEventLogEntry                *prometheus.Desc
+
 	ManagerLicenseInfo                  *prometheus.Desc
 	VirtualConsoleInfo                  *prometheus.Desc
 	VirtualConsoleLicense               *prometheus.Desc
@@ -211,6 +222,31 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "sensors", "voltage"),
 			"Sensors reporting voltage measurements",
 			[]string{"id", "name", "units"}, nil,
+		),
+		SensorInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "info"),
+			"Information about the sensor",
+			[]string{"id", "name", "type", "units", "context"}, nil,
+		),
+		SensorHealth: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "health"),
+			"Health status for the sensor",
+			[]string{"id", "status"}, nil,
+		),
+		SensorValue: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "value"),
+			"Current sensor value",
+			[]string{"id"}, nil,
+		),
+		SensorUpperCritical: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "upper_critical"),
+			"Upper critical sensor value",
+			[]string{"id"}, nil,
+		),
+		SensorLowerCritical: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "sensor", "lower_critical"),
+			"Lower critical sensor value",
+			[]string{"id"}, nil,
 		),
 		PowerSupplyHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "power_supply", "health"),
@@ -452,6 +488,11 @@ func NewCollector() *Collector {
 			"Health status of the manager",
 			[]string{"id", "status"}, nil,
 		),
+		ManagerEventLogEntry: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "events_log_entry"),
+			"Entry from the manager event log",
+			[]string{"id", "message", "severity"}, nil,
+		),
 		ManagerLicenseInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "manager", "license_info"),
 			"Information about licenses installed on the manager",
@@ -548,6 +589,11 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.SensorsFanHealth
 	ch <- collector.SensorsFanSpeed
 	ch <- collector.SensorsVoltage
+	ch <- collector.SensorInfo
+	ch <- collector.SensorHealth
+	ch <- collector.SensorValue
+	ch <- collector.SensorUpperCritical
+	ch <- collector.SensorLowerCritical
 	ch <- collector.PowerSupplyHealth
 	ch <- collector.PowerSupplyOutputWatts
 	ch <- collector.PowerSupplyInputWatts
@@ -596,7 +642,8 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.CpuTotalThreads
 	ch <- collector.ManagerInfo
 	ch <- collector.ManagerHealth
-	ch <- collector.ManagerLicenseInfo
+	ch <- collector.ManagerEventLogEntry
+  ch <- collector.ManagerLicenseInfo
 	ch <- collector.VirtualConsoleInfo
 	ch <- collector.VirtualConsoleLicense
 	ch <- collector.VirtualConsoleEnabled
@@ -614,22 +661,19 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 
 func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 	var wg sync.WaitGroup
-	collect := &config.Config.Collect
+	metrics := collector.client.metrics
 
-	if collect.System {
-		wg.Add(1)
-		go func() {
+	if metrics.System.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshSystem(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Sensors {
-		wg.Add(1)
-		go func() {
+	if metrics.Sensors.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshSensors(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
@@ -637,102 +681,85 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 			// Voltage sensors live in the legacy Power resource. When the power
 			// group is enabled they are emitted as part of that collection (at
 			// no extra cost), otherwise they are fetched here.
-			if !collect.Power {
+			if !metrics.Power.Enabled && !metrics.Sensors.Unified {
 				ok = collector.client.RefreshVoltages(collector, ch)
 				if !ok {
 					collector.errors.Add(1)
 				}
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Power {
-		wg.Add(1)
-		go func() {
+	if metrics.Power.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshPower(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Network {
-		wg.Add(1)
-		go func() {
+	if metrics.Network.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshNetwork(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Events {
-		wg.Add(1)
-		go func() {
+	if metrics.Events.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshEventLog(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Storage {
-		wg.Add(1)
-		go func() {
+	if metrics.Storage.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshStorage(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Memory {
-		wg.Add(1)
-		go func() {
+	if metrics.Memory.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshMemory(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Processors {
-		wg.Add(1)
-		go func() {
+	if metrics.Processors.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshProcessors(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Manager {
-		wg.Add(1)
-		go func() {
+	if metrics.Manager.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshManager(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
-	if collect.Extra {
-		wg.Add(1)
-		go func() {
+	if metrics.Extra.Enabled {
+		wg.Go(func() {
 			ok := collector.client.RefreshDell(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}
-			wg.Done()
-		}()
+		})
 	}
 
 	wg.Wait()
@@ -792,8 +819,7 @@ func (collector *Collector) Gather() (string, error) {
 	return collector.builder.String(), nil
 }
 
-// Resets an existing collector of the given target
-func Reset(target string) {
+func ResetTarget(target string) {
 	mu.Lock()
 	_, ok := collectors[target]
 	if ok {
@@ -802,7 +828,15 @@ func Reset(target string) {
 	mu.Unlock()
 }
 
-func GetCollector(target, auth string) (*Collector, error) {
+func ResetAuth(auth *config.AuthConfig) {
+	mu.Lock()
+	maps.DeleteFunc(collectors, func(k string, v *Collector) bool {
+		return v.auth == auth
+	})
+	mu.Unlock()
+}
+
+func GetCollector(target, group string) (*Collector, error) {
 	mu.Lock()
 	collector, ok := collectors[target]
 	if !ok {
@@ -817,7 +851,7 @@ func GetCollector(target, auth string) (*Collector, error) {
 
 	// Try to instantiate a new Redfish host
 	if collector.client == nil {
-		auth := config.GetAuthConfig(target, auth)
+		auth := config.GetAuthConfig(target, group)
 		if auth == nil {
 			return nil, fmt.Errorf("could not find login credentials")
 		}
@@ -826,6 +860,7 @@ func GetCollector(target, auth string) (*Collector, error) {
 			return nil, fmt.Errorf("failed to instantiate new client")
 		} else {
 			collector.client = c
+			collector.auth = auth
 		}
 	}
 

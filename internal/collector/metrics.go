@@ -15,6 +15,19 @@ func cleanTrademarks(s string) string {
 	return strings.Join(strings.Fields(trademarkReplacer.Replace(s)), " ")
 }
 
+func cleanUnits(s string) string {
+	s = strings.ToLower(s)
+	switch s {
+	case "cel":
+		return "c"
+	case "watts":
+		return "w"
+	case "percent":
+		return "%"
+	}
+	return s
+}
+
 func health2value(health string) int {
 	switch health {
 	case "":
@@ -208,6 +221,66 @@ func (mc *Collector) NewSensorsVoltage(ch chan<- prometheus.Metric, voltage floa
 	)
 }
 
+func (mc *Collector) NewSensorInfo(ch chan<- prometheus.Metric, m *Sensor) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorInfo,
+		prometheus.GaugeValue,
+		1.0,
+		m.Id,
+		m.Name,
+		strings.ToLower(m.ReadingType),
+		cleanUnits(m.ReadingUnits),
+		m.PhysicalContext,
+	)
+}
+
+func (mc *Collector) NewSensorHealth(ch chan<- prometheus.Metric, m *Sensor) {
+	value := health2value(m.Status.Health)
+	if value < 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorHealth,
+		prometheus.GaugeValue,
+		float64(value),
+		m.Id,
+		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewSensorValue(ch chan<- prometheus.Metric, m *Sensor) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorValue,
+		prometheus.GaugeValue,
+		m.Reading,
+		m.Id,
+	)
+}
+
+func (mc *Collector) NewSensorLowerCritical(ch chan<- prometheus.Metric, m *Sensor) {
+	if m.Thresholds.LowerCritical.Reading == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorLowerCritical,
+		prometheus.GaugeValue,
+		m.Thresholds.LowerCritical.Reading,
+		m.Id,
+	)
+}
+
+func (mc *Collector) NewSensorUpperCritical(ch chan<- prometheus.Metric, m *Sensor) {
+	if m.Thresholds.UpperCritical.Reading == 0 {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.SensorUpperCritical,
+		prometheus.GaugeValue,
+		m.Thresholds.UpperCritical.Reading,
+		m.Id,
+	)
+}
+
 func (mc *Collector) NewPowerSupplyHealth(ch chan<- prometheus.Metric, health, id string) {
 	value := health2value(health)
 	if value < 0 {
@@ -336,7 +409,7 @@ func (mc *Collector) NewEventLogEntry(ch chan<- prometheus.Metric, id string, me
 		prometheus.CounterValue,
 		float64(created.Unix()),
 		id,
-		strings.TrimSpace(message),
+		message,
 		severity,
 	)
 }
@@ -981,6 +1054,17 @@ func (mc *Collector) NewVirtualConsoleInfo(ch chan<- prometheus.Metric, m *Manag
 		mc.VirtualConsoleMaxConcurrentSessions,
 		prometheus.GaugeValue,
 		float64(m.GraphicalConsole.MaxConcurrentSessions),
+	)
+}
+
+func (mc *Collector) NewManagerEventLogEntry(ch chan<- prometheus.Metric, id string, message string, severity string, created time.Time) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.ManagerEventLogEntry,
+		prometheus.CounterValue,
+		float64(created.Unix()),
+		id,
+		message,
+		severity,
 	)
 }
 

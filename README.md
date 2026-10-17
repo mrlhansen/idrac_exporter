@@ -67,21 +67,22 @@ hosts:
   192.168.1.1:
     username: user
     password: pass
-auths:
+groups:
   mygroup:
     username: user
     password: pass
 metrics:
-  all: true
+  all:
+    enabled: true
 ```
 
-As shown in the example above, under `hosts` you can define credentials for individual hosts via their IP address or hostname. When a matching host cannot be found, the exporter will attempt to use the credentials under `default`. Alternatively you can define credentials for a group of hosts under the `auths` section and reference them in the request using the `auth` query parameter. For example:
+As shown in the example above, under `hosts` you can define credentials for individual hosts via their IP address or hostname. When a matching host cannot be found, the exporter will attempt to use the credentials under `default`. Alternatively you can define credentials for a group of hosts under the `groups` section and reference them in the request using the `group` query parameter. For example:
 
 ```text
-http://localhost:9348/metrics?target=192.168.10.10&auth=mygroup
+http://localhost:9348/metrics?target=192.168.10.10&group=mygroup
 ```
 
-You may combine `hosts` and `auths` in any way that fits your environment. The login user only needs read-only permissions and it is recommended to create a dedicated unpriviledged user for the exporter.
+You may combine `hosts` and `groups` in any way that fits your environment. The login user only needs read-only permissions and it is recommended to create a dedicated unpriviledged user for the exporter.
 
 **For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file. In this file you can also find the corresponding environment variables for the different configuration options.**
 
@@ -118,6 +119,16 @@ idrac_sensors_temperature{id,name,units}
 idrac_sensors_fan_health{id,name,status}
 idrac_sensors_fan_speed{id,name,units}
 idrac_sensors_voltage{id,name,units}
+```
+
+When using the _unified_ sensors endpoint (must be enabled in the configuration), the following metrics are exported instead.
+
+```text
+idrac_sensor_info{id,context,name,type,units}
+idrac_sensor_health{id,status}
+idrac_sensor_value{id}
+idrac_sensor_lower_critical{id}
+idrac_sensor_upper_critical{id}
 ```
 
 ### Power
@@ -237,6 +248,12 @@ idrac_virtual_console_info{connect_type,id,license,license_status,license_type}
 idrac_virtual_console_license{description,id,status,type}
 idrac_virtual_console_enabled
 idrac_virtual_console_max_concurrent_sessions
+```
+
+Optionally event logs from the manager can also be exported. Currently this is only supported on iDRAC (Lifecycle Logs) and on HPE (iLO Event Logs).
+
+```text
+idrac_manager_events_log_entry{id,message,severity}
 ```
 
 ### Extra

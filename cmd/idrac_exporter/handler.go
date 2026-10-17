@@ -58,9 +58,9 @@ func resetHandler(rsp http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-	log.Debug("Handling reset request from %s for host %s", req.Host, target)
 
-	collector.Reset(target)
+	log.Debug("Handling reset request from %s for host %s", req.Host, target)
+	collector.ResetTarget(target)
 }
 
 func discoverHandler(rsp http.ResponseWriter, req *http.Request) {
@@ -78,11 +78,11 @@ func metricsHandler(rsp http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-	auth := req.URL.Query().Get("auth")
+	group := req.URL.Query().Get("group")
 
 	log.Debug("Handling metrics request from %s for host %s", req.Host, target)
 
-	c, err := collector.GetCollector(target, auth)
+	c, err := collector.GetCollector(target, group)
 	if err != nil {
 		errorMsg := fmt.Sprintf("Error instantiating metrics collector for host %s: %v", target, err)
 		log.Error("%v", errorMsg)

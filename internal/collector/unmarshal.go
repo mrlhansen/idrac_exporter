@@ -74,10 +74,6 @@ func (w *xstring) String() string {
 	return string(*w)
 }
 
-func asPtr[T any](v T) *T {
-	return &v
-}
-
 // asFloat64 coerces a value decoded into an "any" field (such as ReadingVolts,
 // which some BMCs serialize as a JSON string) into a float64.
 func asFloat64(v any) (float64, bool) {

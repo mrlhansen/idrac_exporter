@@ -7,7 +7,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/mrlhansen/idrac_exporter/internal/config"
 	"github.com/prometheus/client_golang/prometheus"
@@ -29,6 +28,7 @@ const (
 
 type Client struct {
 	redfish *Redfish
+	metrics *config.MetricsConfig
 	vendor  int
 	version int
 	path    struct {
@@ -38,21 +38,28 @@ type Client struct {
 		ThermalSubsystem string
 		Power            string
 		PowerSubsystem   string
+		Sensors          string
 		Storage          string
 		SimpleStorage    bool
 		Memory           string
 		Network          string
 		Event            string
+		ManagerEvent     string
 		Processors       string
 		Manager          string
 		Extra            []string
 		RackPDUs         []string
 	}
+	features struct {
+		ExpandLevels bool
+		Filter       bool
+	}
 }
 
-func NewClient(host string, auth *config.AuthConfig) *Client {
+func NewClient(host string, config *config.AuthConfig) *Client {
 	client := &Client{
-		redfish: NewRedfish(host, auth),
+		redfish: NewRedfish(host, config),
+		metrics: &config.Metrics,
 	}
 
 	client.redfish.CreateSession()
@@ -169,6 +176,7 @@ func (client *Client) findAllEndpoints() bool {
 	client.path.Power = chassis.Power.OdataId
 	client.path.PowerSubsystem = chassis.PowerSubsystem.OdataId
 	client.path.Processors = system.Processors.OdataId
+	client.path.Sensors = chassis.Sensors.OdataId
 
 	// Vendor
 	m := strings.ToLower(system.Manufacturer)
@@ -203,16 +211,24 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = DELL
 	}
 
-	// Path for manager
-	if config.Config.Collect.Manager {
+	// Manager
+	if client.metrics.Manager.Enabled {
 		ok = client.redfish.Get(root.Managers.OdataId, &group)
 		if ok && len(group.Members) > 0 {
 			client.path.Manager = group.Members[0].OdataId
 		}
 	}
 
-	// Path for event log
-	if config.Config.Collect.Events {
+	// Manager event log
+	switch client.vendor {
+	case DELL:
+		client.path.ManagerEvent = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Lclog/Entries"
+	case HPE:
+		client.path.ManagerEvent = "/redfish/v1/Managers/1/LogServices/IEL/Entries"
+	}
+
+	// System event log
+	if client.metrics.Events.Enabled {
 		switch client.vendor {
 		case DELL:
 			{
@@ -246,7 +262,7 @@ func (client *Client) findAllEndpoints() bool {
 	}
 
 	// Extra
-	if config.Config.Collect.Extra {
+	if client.metrics.Extra.Enabled {
 		if client.vendor == DELL {
 			if client.redfish.Exists(DellSystemPath) {
 				client.path.Extra = append(client.path.Extra, DellSystemPath)
@@ -269,6 +285,40 @@ func (client *Client) findAllEndpoints() bool {
 			client.path.Event = ""
 			client.version = 4
 		}
+	}
+
+	// Protocol features supported
+	client.features.ExpandLevels = root.ProtocolFeaturesSupported.ExpandQuery.Levels
+	client.features.Filter = root.ProtocolFeaturesSupported.FilterQuery
+
+	return true
+}
+
+func (client *Client) RefreshSensorsUnified(mc *Collector, ch chan<- prometheus.Metric) bool {
+	resp := ExpandedGroup[Sensor]{}
+	ok := client.redfish.Get(client.path.Sensors+"?$expand=.($levels=1)", &resp)
+	if !ok {
+		return false
+	}
+
+	for _, s := range resp.Members {
+		if s.Status.State != StateEnabled {
+			continue
+		}
+
+		if s.ReadingType == "" {
+			continue
+		}
+
+		if s.ReadingUnits == "" {
+			continue
+		}
+
+		mc.NewSensorInfo(ch, &s)
+		mc.NewSensorHealth(ch, &s)
+		mc.NewSensorValue(ch, &s)
+		mc.NewSensorLowerCritical(ch, &s)
+		mc.NewSensorUpperCritical(ch, &s)
 	}
 
 	return true
@@ -386,12 +436,20 @@ func (client *Client) RefreshSensorsOld(mc *Collector, ch chan<- prometheus.Metr
 }
 
 func (client *Client) RefreshSensors(mc *Collector, ch chan<- prometheus.Metric) bool {
-	if client.path.Thermal != "" {
+	if client.metrics.Sensors.Unified {
+		if len(client.path.Sensors) > 0 && client.features.ExpandLevels {
+			return client.RefreshSensorsUnified(mc, ch)
+		}
+	}
+
+	if len(client.path.Thermal) > 0 {
 		return client.RefreshSensorsOld(mc, ch)
 	}
-	if client.path.ThermalSubsystem != "" {
+
+	if len(client.path.ThermalSubsystem) > 0 {
 		return client.RefreshSensorsNew(mc, ch)
 	}
+
 	return true
 }
 
@@ -465,6 +523,15 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 		}
 	}
 	mc.NewVirtualConsoleInfo(ch, &mgr, enterpriseLicense)
+
+  log, ok := client.QueryEventLog(client.path.ManagerEvent, &client.metrics.Manager.Events)
+	if log == nil {
+		return ok
+	}
+
+	for v := range log.Items() {
+		mc.NewManagerEventLogEntry(ch, v.Id, v.Message, v.Severity, v.Timestamp)
+	}
 
 	return true
 }
@@ -736,7 +803,7 @@ func (client *Client) RefreshPowerOld(mc *Collector, ch chan<- prometheus.Metric
 	// Voltage sensors belong to the sensors metrics group, but the data lives
 	// in the Power response fetched above, so when both groups are enabled they
 	// are emitted here at no additional cost.
-	if config.Config.Collect.Sensors {
+	if client.metrics.Sensors.Enabled {
 		client.emitVoltages(mc, ch, &resp)
 	}
 
@@ -789,44 +856,21 @@ func (client *Client) RefreshPower(mc *Collector, ch chan<- prometheus.Metric) b
 }
 
 func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric) bool {
-	if client.path.Event == "" {
-		return true
-	}
-
-	resp := EventLogResponse{}
-	ok := client.redfish.Get(client.path.Event, &resp)
-	if !ok {
-		return false
+	log, ok := client.QueryEventLog(client.path.Event, &client.metrics.Events)
+	if log == nil {
+		return ok
 	}
 
 	// iDRAC 8 (issue #143)
 	if client.vendor == DELL {
-		if resp.Id == "SEL" && strings.Contains(client.path.Event, "LogServices") {
+		if log.response.Id == "SEL" && strings.Contains(client.path.Event, "LogServices") {
 			client.path.Event = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
 			return client.RefreshEventLog(mc, ch)
 		}
 	}
 
-	level := config.Config.Event.SeverityLevel
-	maxage := config.Config.Event.MaxAgeSeconds
-
-	for _, e := range resp.Members {
-		t, err := time.Parse(time.RFC3339, e.Created)
-		if err != nil {
-			continue
-		}
-
-		d := time.Since(t)
-		if d.Seconds() > maxage {
-			continue
-		}
-
-		severity := health2value(e.Severity)
-		if severity < level {
-			continue
-		}
-
-		mc.NewEventLogEntry(ch, e.Id, e.Message, e.Severity, t)
+	for v := range log.Items() {
+		mc.NewEventLogEntry(ch, v.Id, v.Message, v.Severity, v.Timestamp)
 	}
 
 	return true
@@ -929,7 +973,7 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			if (client.vendor == HPE) && (client.version == 4) {
 				drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
 				drive.Protocol = drive.InterfaceType
-				drive.PredictedLifeLeft = asPtr(100.0 - drive.SSDEnduranceUtilizationPercentage)
+				drive.PredictedLifeLeft = new(100.0 - drive.SSDEnduranceUtilizationPercentage)
 			}
 
 			// Inspur (issue #162)

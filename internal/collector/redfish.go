@@ -47,6 +47,7 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
 	}
+
 	// Enable legacy RSA key exchange only for explicitly configured targets.
 	// TLS 1.0, TLS 1.1, 3DES, RC4, and CBC cipher suites remain disabled.
 	if auth.AllowLegacyRSAKex {

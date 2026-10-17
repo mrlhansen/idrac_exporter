@@ -6,15 +6,62 @@ import (
 	"os"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/mrlhansen/idrac_exporter/internal/log"
 	"github.com/xhit/go-str2duration/v2"
-	"gopkg.in/yaml.v3"
 )
 
 var Debug bool = false
 var Config *RootConfig = nil
 
-func (c *AuthConfig) Validate() error {
+func AuthIsEqual(a, b *AuthConfig) bool {
+	if a.Username != b.Username {
+		return false
+	}
+	if a.Password != b.Password {
+		return false
+	}
+	if a.Scheme != b.Scheme {
+		return false
+	}
+	if a.Port != b.Port {
+		return false
+	}
+	if a.BasicAuth != b.BasicAuth {
+		return false
+	}
+	if a.AllowLegacyRSAKex != b.AllowLegacyRSAKex {
+		return false
+	}
+	return true
+}
+
+func (c *EventConfig) validate() error {
+	switch strings.ToLower(c.Severity) {
+	case "ok":
+		c.SeverityLevel = 0
+	case "warning", "":
+		c.SeverityLevel = 1
+	case "critical":
+		c.SeverityLevel = 2
+	default:
+		return fmt.Errorf("invalid severity: %s", c.Severity)
+	}
+
+	if c.MaxAge == "" {
+		c.MaxAge = "7d"
+	}
+
+	t, err := str2duration.ParseDuration(c.MaxAge)
+	if err != nil {
+		return fmt.Errorf("unable to parse duration: %v", err)
+	}
+	c.MaxAgeSeconds = t.Seconds()
+
+	return nil
+}
+
+func (c *AuthConfig) validate(root *RootConfig) error {
 	if c == nil {
 		return fmt.Errorf("empty section")
 	}
@@ -51,20 +98,28 @@ func (c *AuthConfig) Validate() error {
 		return fmt.Errorf("invalid scheme")
 	}
 
+	c.Metrics = root.Metrics
+	if c.RawMetrics != nil {
+		err := yaml.Unmarshal(c.RawMetrics, &c.Metrics)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func GetAuthConfig(target, auth string) *AuthConfig {
+func GetAuthConfig(target, group string) *AuthConfig {
 	var host *AuthConfig
 	var ok bool
 
 	Config.Mutex.Lock()
 	defer Config.Mutex.Unlock()
 
-	if len(auth) > 0 {
-		host, ok = Config.Auths[auth]
+	if len(group) > 0 {
+		host, ok = Config.Groups[group]
 		if !ok {
-			log.Error("Could not find login credentials: auth=%s", auth)
+			log.Error("Could not find login credentials: group=%s", group)
 			return nil
 		}
 		return host
@@ -80,13 +135,14 @@ func GetAuthConfig(target, auth string) *AuthConfig {
 		log.Error("Could not find login credentials: host=%s", target)
 		return nil
 	}
+
 	return host
 }
 
 func NewConfig() *RootConfig {
 	return &RootConfig{
-		Hosts: make(map[string]*AuthConfig),
-		Auths: make(map[string]*AuthConfig),
+		Hosts:  make(map[string]*AuthConfig),
+		Groups: make(map[string]*AuthConfig),
 	}
 }
 
@@ -138,56 +194,45 @@ func (c *RootConfig) Validate() error {
 		c.MetricsPrefix = "idrac"
 	}
 
+	// events
+	err := c.Metrics.Events.validate()
+	if err != nil {
+		return err
+	}
+
+	err = c.Metrics.Manager.Events.validate()
+	if err != nil {
+		return err
+	}
+
+	// metrics
+	if c.Metrics.All.Enabled {
+		c.Metrics.System.Enabled = true
+		c.Metrics.Sensors.Enabled = true
+		c.Metrics.Events.Enabled = true
+		c.Metrics.Power.Enabled = true
+		c.Metrics.Storage.Enabled = true
+		c.Metrics.Memory.Enabled = true
+		c.Metrics.Network.Enabled = true
+		c.Metrics.Processors.Enabled = true
+		c.Metrics.Manager.Enabled = true
+		c.Metrics.Extra.Enabled = true
+	}
+
 	// hosts
 	for k, v := range c.Hosts {
-		err := v.Validate()
+		err := v.validate(c)
 		if err != nil {
 			return fmt.Errorf("host=%s: %v", k, err)
 		}
 	}
 
-	// auths
-	for k, v := range c.Auths {
-		err := v.Validate()
+	// groups
+	for k, v := range c.Groups {
+		err := v.validate(c)
 		if err != nil {
-			return fmt.Errorf("auth=%s: %v", k, err)
+			return fmt.Errorf("group=%s: %v", k, err)
 		}
-	}
-
-	// events
-	switch strings.ToLower(c.Event.Severity) {
-	case "ok":
-		c.Event.SeverityLevel = 0
-	case "warning", "":
-		c.Event.SeverityLevel = 1
-	case "critical":
-		c.Event.SeverityLevel = 2
-	default:
-		return fmt.Errorf("invalid value: %s", c.Event.Severity)
-	}
-
-	if c.Event.MaxAge == "" {
-		c.Event.MaxAge = "7d"
-	}
-
-	t, err := str2duration.ParseDuration(c.Event.MaxAge)
-	if err != nil {
-		return fmt.Errorf("unable to parse duration: %v", err)
-	}
-	c.Event.MaxAgeSeconds = t.Seconds()
-
-	// metrics
-	if c.Collect.All {
-		c.Collect.System = true
-		c.Collect.Sensors = true
-		c.Collect.Events = true
-		c.Collect.Power = true
-		c.Collect.Storage = true
-		c.Collect.Memory = true
-		c.Collect.Network = true
-		c.Collect.Processors = true
-		c.Collect.Manager = true
-		c.Collect.Extra = true
 	}
 
 	return nil
