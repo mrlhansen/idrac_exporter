@@ -135,31 +135,6 @@ func (mc *Collector) NewSystemBiosInfo(ch chan<- prometheus.Metric, m *SystemRes
 	)
 }
 
-func normalizeBootMode(mode string) string {
-	switch strings.ToLower(strings.TrimSpace(mode)) {
-	case "uefi":
-		return "UEFI"
-	case "bios", "legacy":
-		return "BIOS"
-	default:
-		return strings.TrimSpace(mode)
-	}
-}
-
-func (mc *Collector) NewSystemBootMode(ch chan<- prometheus.Metric, mode string) {
-	mode = normalizeBootMode(mode)
-	if mode == "" {
-		return
-	}
-
-	ch <- prometheus.MustNewConstMetric(
-		mc.SystemBootMode,
-		prometheus.UntypedValue,
-		1.0,
-		mode,
-	)
-}
-
 func (mc *Collector) NewSystemMachineInfo(ch chan<- prometheus.Metric, m *SystemResponse) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.SystemMachineInfo,
@@ -479,6 +454,9 @@ func (mc *Collector) NewStorageDriveHealth(ch chan<- prometheus.Metric, parent s
 }
 
 func (mc *Collector) NewStorageDriveCapacity(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+	if m.CapacityBytes == 0 {
+		return
+	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.StorageDriveCapacity,
 		prometheus.GaugeValue,
@@ -944,6 +922,23 @@ func (mc *Collector) NewDellControllerBatteryHealth(ch chan<- prometheus.Metric,
 	)
 }
 
+func (mc *Collector) NewDellManagerLicenseInfo(ch chan<- prometheus.Metric, m *DellLicense) {
+	id := m.Id
+	if id == "" {
+		id = m.EntitlementID
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.DellManagerLicenseInfo,
+		prometheus.UntypedValue,
+		1.0,
+		id,
+		strings.TrimSpace(strings.Join(m.LicenseDescription, ", ")),
+		m.LicenseType,
+		m.LicensePrimaryStatus,
+		strings.Join(m.AssignedDevices, ","),
+	)
+}
+
 func (mc *Collector) NewManagerInfo(ch chan<- prometheus.Metric, m *ManagerResponse) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.ManagerInfo,
@@ -970,88 +965,27 @@ func (mc *Collector) NewManagerHealth(ch chan<- prometheus.Metric, m *ManagerRes
 	)
 }
 
-func licenseDescription(m *DellLicense) string {
-	return strings.TrimSpace(strings.Join(m.LicenseDescription, ", "))
-}
-
-func licenseID(m *DellLicense) string {
-	if m.Id != "" {
-		return m.Id
-	}
-	return m.EntitlementID
-}
-
-func (mc *Collector) NewManagerLicenseInfo(ch chan<- prometheus.Metric, m *DellLicense) {
-	ch <- prometheus.MustNewConstMetric(
-		mc.ManagerLicenseInfo,
-		prometheus.UntypedValue,
-		1.0,
-		licenseID(m),
-		licenseDescription(m),
-		m.LicenseType,
-		m.LicensePrimaryStatus,
-		strings.Join(m.AssignedDevices, ","),
-	)
-}
-
-func (mc *Collector) NewVirtualConsoleLicense(ch chan<- prometheus.Metric, m *DellLicense) {
-	if !strings.Contains(strings.ToLower(licenseDescription(m)), "enterprise") {
-		return
-	}
-
-	ch <- prometheus.MustNewConstMetric(
-		mc.VirtualConsoleLicense,
-		prometheus.UntypedValue,
-		1.0,
-		licenseID(m),
-		licenseDescription(m),
-		m.LicenseType,
-		m.LicensePrimaryStatus,
-	)
-}
-
-func (mc *Collector) NewVirtualConsoleInfo(ch chan<- prometheus.Metric, m *ManagerResponse, license *DellLicense) {
+func (mc *Collector) NewManagerRemoteConsoleEnabled(ch chan<- prometheus.Metric, m *ManagerResponse) {
 	if m.GraphicalConsole == nil {
 		return
 	}
-
-	description := ""
-	licenseType := ""
-	licenseStatus := ""
-	if license != nil {
-		description = licenseDescription(license)
-		licenseType = license.LicenseType
-		licenseStatus = license.LicensePrimaryStatus
-	}
-
-	connectTypes := m.GraphicalConsole.ConnectTypesSupported
-	if len(connectTypes) == 0 {
-		connectTypes = []string{""}
-	}
-	for _, connectType := range connectTypes {
-		ch <- prometheus.MustNewConstMetric(
-			mc.VirtualConsoleInfo,
-			prometheus.UntypedValue,
-			1.0,
-			m.Id,
-			connectType,
-			description,
-			licenseType,
-			licenseStatus,
-		)
-	}
-
 	enabled := 0.0
 	if m.GraphicalConsole.ServiceEnabled {
 		enabled = 1.0
 	}
 	ch <- prometheus.MustNewConstMetric(
-		mc.VirtualConsoleEnabled,
+		mc.ManagerRemoteConsoleEnabled,
 		prometheus.GaugeValue,
 		enabled,
 	)
+}
+
+func (mc *Collector) NewManagerRemoteConsoleMaxSessions(ch chan<- prometheus.Metric, m *ManagerResponse) {
+	if m.GraphicalConsole == nil {
+		return
+	}
 	ch <- prometheus.MustNewConstMetric(
-		mc.VirtualConsoleMaxConcurrentSessions,
+		mc.ManagerRemoteConsoleMaxSessions,
 		prometheus.GaugeValue,
 		float64(m.GraphicalConsole.MaxConcurrentSessions),
 	)

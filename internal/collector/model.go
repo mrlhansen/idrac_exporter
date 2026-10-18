@@ -365,10 +365,11 @@ type SimpleStorage struct {
 }
 
 type SimpleStorageDevice struct {
-	Manufacturer string `json:"Manufacturer"`
-	Model        string `json:"Model"`
-	Name         string `json:"Name"`
-	Status       Status `json:"Status"`
+	CapacityBytes float64 `json:"CapacityBytes"`
+	Manufacturer  string  `json:"Manufacturer"`
+	Model         string  `json:"Model"`
+	Name          string  `json:"Name"`
+	Status        Status  `json:"Status"`
 }
 
 type StorageController struct {
@@ -598,18 +599,6 @@ type SystemResponse struct {
 		} `json:"Hpe"`
 		Dell *json.RawMessage `json:"Dell"`
 	} `json:"Oem"`
-}
-
-type BiosResponse struct {
-	Attributes struct {
-		BootMode string `json:"BootMode"`
-	} `json:"Attributes"`
-}
-
-type GraphicalConsole struct {
-	ConnectTypesSupported []string `json:"ConnectTypesSupported"`
-	MaxConcurrentSessions int      `json:"MaxConcurrentSessions"`
-	ServiceEnabled        bool     `json:"ServiceEnabled"`
 }
 
 type PowerResponse struct {
@@ -888,9 +877,18 @@ type ManagerResponse struct {
 	} `json:"Links"`
 }
 
-type DellLicenseCollection struct {
-	Members []DellLicense `json:"Members"`
+type GraphicalConsole struct {
+	ConnectTypesSupported []string `json:"ConnectTypesSupported"`
+	MaxConcurrentSessions int      `json:"MaxConcurrentSessions"`
+	ServiceEnabled        bool     `json:"ServiceEnabled"`
 }
+
+// Dell OEM
+const (
+	DellSystemPath     string = "/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1"
+	DellAttributesPath string = "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1"
+	DellLicensePath    string = "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellLicenses"
+)
 
 type DellLicense struct {
 	Id                   string   `json:"Id"`
@@ -901,12 +899,6 @@ type DellLicense struct {
 	LicenseStatusMessage string   `json:"LicenseStatusMessage"`
 	LicenseType          string   `json:"LicenseType"`
 }
-
-// Dell OEM
-const (
-	DellSystemPath     string = "/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1"
-	DellAttributesPath string = "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1"
-)
 
 type DellSystem struct {
 	BIOSReleaseDate                    string  `json:"BIOSReleaseDate"`

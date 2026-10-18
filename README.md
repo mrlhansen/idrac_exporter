@@ -107,7 +107,6 @@ idrac_system_indicator_active
 idrac_system_memory_size_bytes
 idrac_system_cpu_count{model}
 idrac_system_bios_info{version}
-idrac_system_boot_mode{mode}
 idrac_system_machine_info{manufacturer,model,serial,sku}
 ```
 
@@ -236,18 +235,8 @@ These metrics contain information about the out-of-band manager.
 ```text
 idrac_manager_info{id,firmware,model,type}
 idrac_manager_health{id,status}
-idrac_manager_license_info{device,description,id,status,type}
-```
-
-### Virtual Console
-These metrics report the virtual console service and, when the Dell Redfish
-license collection is available, the Enterprise license that enables it.
-
-```text
-idrac_virtual_console_info{connect_type,id,license,license_status,license_type}
-idrac_virtual_console_license{description,id,status,type}
-idrac_virtual_console_enabled
-idrac_virtual_console_max_concurrent_sessions
+idrac_manager_remote_console_enabled
+idrac_manager_remote_console_max_concurrent_sessions
 ```
 
 Optionally event logs from the manager can also be exported. Currently this is only supported on iDRAC (Lifecycle Logs) and on HPE (iLO Event Logs).
@@ -260,6 +249,7 @@ idrac_manager_events_log_entry{id,message,severity}
 These metrics do not belong anywhere else and they might be OEM specific. At the moment only some Dell specific metrics are exported.
 
 ```text
+idrac_dell_manager_license_info{id,description,device,status,type}
 idrac_dell_battery_rollup_health{status}
 idrac_dell_estimated_system_airflow_cfm
 ```
