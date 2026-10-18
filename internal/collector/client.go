@@ -466,6 +466,7 @@ func (client *Client) RefreshSystem(mc *Collector, ch chan<- prometheus.Metric) 
 	mc.NewSystemIndicatorActive(ch, &resp)
 	mc.NewSystemMemorySize(ch, &resp)
 	mc.NewSystemCpuCount(ch, &resp)
+	mc.NewSystemBiosInfo(ch, &resp)
 	mc.NewSystemMachineInfo(ch, &resp)
 
 	return true

@@ -28,6 +28,7 @@ jobs:
         run: |
           echo "VERSION=$(git tag --points-at HEAD | grep -oP 'v\K[0-9.]+')" >> $GITHUB_ENV
           echo "REVISION=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "CGO_ENABLED=0" >> $GITHUB_ENV
 
       - name: Build and release
         uses: wangyoucao577/go-release-action@v1
