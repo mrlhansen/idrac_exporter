@@ -356,6 +356,22 @@ type Storage struct {
 	} `json:"Oem"`
 }
 
+type SimpleStorage struct {
+	Id          string                `json:"Id"`
+	Name        string                `json:"Name"`
+	Description string                `json:"Description"`
+	Devices     []SimpleStorageDevice `json:"Devices"`
+	Status      Status                `json:"Status"`
+}
+
+type SimpleStorageDevice struct {
+	CapacityBytes float64 `json:"CapacityBytes"`
+	Manufacturer  string  `json:"Manufacturer"`
+	Model         string  `json:"Model"`
+	Name          string  `json:"Name"`
+	Status        Status  `json:"Status"`
+}
+
 type StorageController struct {
 	Id              string  `json:"Id"`
 	Name            string  `json:"Name"`
@@ -471,17 +487,18 @@ type Memory struct {
 }
 
 type NetworkAdapter struct {
-	Id           string `json:"Id"`
-	Name         string `json:"Name"`
-	Description  string `json:"Description"`
-	Manufacturer string `json:"Manufacturer"`
-	Model        string `json:"Model"`
-	PartNumber   string `json:"PartNumber"`
-	SerialNumber string `json:"SerialNumber"`
-	SKU          string `json:"SKU"`
-	Status       Status `json:"Status"`
-	NetworkPorts Odata  `json:"NetworkPorts"` // deprecated
-	Ports        Odata  `json:"Ports"`
+	Id           string  `json:"Id"`
+	Name         string  `json:"Name"`
+	Description  string  `json:"Description"`
+	Manufacturer string  `json:"Manufacturer"`
+	Model        string  `json:"Model"`
+	PartNumber   string  `json:"PartNumber"`
+	SerialNumber string  `json:"SerialNumber"`
+	SKU          string  `json:"SKU"`
+	SpeedMbps    float64 `json:"SpeedMbps"`
+	Status       Status  `json:"Status"`
+	NetworkPorts Odata   `json:"NetworkPorts"` // deprecated
+	Ports        Odata   `json:"Ports"`
 	Controllers  []struct {
 		FirmwarePackageVersion string `json:"FirmwarePackageVersion"`
 	} `json:"Controllers"`
@@ -840,29 +857,48 @@ type EventLogResponse struct {
 }
 
 type ManagerResponse struct {
-	Id                    string `json:"Id"`
-	Name                  string `json:"Name"`
-	Description           string `json:"Description"`
-	ManagerType           string `json:"ManagerType"`
-	Model                 string `json:"Model"`
-	FirmwareVersion       string `json:"FirmwareVersion"`
-	ServiceIdentification string `json:"ServiceIdentification"`
-	TimeZoneName          string `json:"TimeZoneName"`
-	Status                Status `json:"Status"`
+	Id                    string            `json:"Id"`
+	Name                  string            `json:"Name"`
+	Description           string            `json:"Description"`
+	ManagerType           string            `json:"ManagerType"`
+	Model                 string            `json:"Model"`
+	FirmwareVersion       string            `json:"FirmwareVersion"`
+	ServiceIdentification string            `json:"ServiceIdentification"`
+	TimeZoneName          string            `json:"TimeZoneName"`
+	GraphicalConsole      *GraphicalConsole `json:"GraphicalConsole"`
+	Status                Status            `json:"Status"`
 	Links                 struct {
 		Oem struct {
 			Dell struct {
-				DellAttributes OdataSlice `json:"DellAttributes"`
+				DellAttributes        OdataSlice `json:"DellAttributes"`
+				DellLicenseCollection Odata      `json:"DellLicenseCollection"`
 			} `json:"Dell"`
 		} `json:"Oem"`
 	} `json:"Links"`
+}
+
+type GraphicalConsole struct {
+	ConnectTypesSupported []string `json:"ConnectTypesSupported"`
+	MaxConcurrentSessions int      `json:"MaxConcurrentSessions"`
+	ServiceEnabled        bool     `json:"ServiceEnabled"`
 }
 
 // Dell OEM
 const (
 	DellSystemPath     string = "/redfish/v1/Systems/System.Embedded.1/Oem/Dell/DellSystem/System.Embedded.1"
 	DellAttributesPath string = "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellAttributes/iDRAC.Embedded.1"
+	DellLicensePath    string = "/redfish/v1/Managers/iDRAC.Embedded.1/Oem/Dell/DellLicenses"
 )
+
+type DellLicense struct {
+	Id                   string   `json:"Id"`
+	AssignedDevices      []string `json:"AssignedDevices"`
+	EntitlementID        string   `json:"EntitlementID"`
+	LicenseDescription   []string `json:"LicenseDescription"`
+	LicensePrimaryStatus string   `json:"LicensePrimaryStatus"`
+	LicenseStatusMessage string   `json:"LicenseStatusMessage"`
+	LicenseType          string   `json:"LicenseType"`
+}
 
 type DellSystem struct {
 	BIOSReleaseDate                    string  `json:"BIOSReleaseDate"`

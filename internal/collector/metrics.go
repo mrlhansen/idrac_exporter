@@ -454,6 +454,9 @@ func (mc *Collector) NewStorageDriveHealth(ch chan<- prometheus.Metric, parent s
 }
 
 func (mc *Collector) NewStorageDriveCapacity(ch chan<- prometheus.Metric, parent string, m *StorageDrive) {
+	if m.CapacityBytes == 0 {
+		return
+	}
 	ch <- prometheus.MustNewConstMetric(
 		mc.StorageDriveCapacity,
 		prometheus.GaugeValue,
@@ -919,6 +922,23 @@ func (mc *Collector) NewDellControllerBatteryHealth(ch chan<- prometheus.Metric,
 	)
 }
 
+func (mc *Collector) NewDellManagerLicenseInfo(ch chan<- prometheus.Metric, m *DellLicense) {
+	id := m.Id
+	if id == "" {
+		id = m.EntitlementID
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.DellManagerLicenseInfo,
+		prometheus.UntypedValue,
+		1.0,
+		id,
+		strings.TrimSpace(strings.Join(m.LicenseDescription, ", ")),
+		m.LicenseType,
+		m.LicensePrimaryStatus,
+		strings.Join(m.AssignedDevices, ","),
+	)
+}
+
 func (mc *Collector) NewManagerInfo(ch chan<- prometheus.Metric, m *ManagerResponse) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.ManagerInfo,
@@ -942,6 +962,32 @@ func (mc *Collector) NewManagerHealth(ch chan<- prometheus.Metric, m *ManagerRes
 		float64(value),
 		m.Id,
 		m.Status.Health,
+	)
+}
+
+func (mc *Collector) NewManagerRemoteConsoleEnabled(ch chan<- prometheus.Metric, m *ManagerResponse) {
+	if m.GraphicalConsole == nil {
+		return
+	}
+	enabled := 0.0
+	if m.GraphicalConsole.ServiceEnabled {
+		enabled = 1.0
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.ManagerRemoteConsoleEnabled,
+		prometheus.GaugeValue,
+		enabled,
+	)
+}
+
+func (mc *Collector) NewManagerRemoteConsoleMaxSessions(ch chan<- prometheus.Metric, m *ManagerResponse) {
+	if m.GraphicalConsole == nil {
+		return
+	}
+	ch <- prometheus.MustNewConstMetric(
+		mc.ManagerRemoteConsoleMaxSessions,
+		prometheus.GaugeValue,
+		float64(m.GraphicalConsole.MaxConcurrentSessions),
 	)
 }
 

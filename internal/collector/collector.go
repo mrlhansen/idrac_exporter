@@ -114,15 +114,18 @@ type Collector struct {
 	CpuTotalCores   *prometheus.Desc
 	CpuTotalThreads *prometheus.Desc
 
-	// BMC
-	ManagerInfo          *prometheus.Desc
-	ManagerHealth        *prometheus.Desc
-	ManagerEventLogEntry *prometheus.Desc
+	// Manager
+	ManagerInfo                     *prometheus.Desc
+	ManagerHealth                   *prometheus.Desc
+	ManagerEventLogEntry            *prometheus.Desc
+	ManagerRemoteConsoleEnabled     *prometheus.Desc
+	ManagerRemoteConsoleMaxSessions *prometheus.Desc
 
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
 	DellControllerBatteryHealth   *prometheus.Desc
+	DellManagerLicenseInfo        *prometheus.Desc
 
 	// PDU
 	PduInfo            *prometheus.Desc
@@ -481,6 +484,16 @@ func NewCollector() *Collector {
 			"Entry from the manager event log",
 			[]string{"id", "message", "severity"}, nil,
 		),
+		ManagerRemoteConsoleEnabled: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "remote_console_enabled"),
+			"Whether the remote console service is enabled",
+			nil, nil,
+		),
+		ManagerRemoteConsoleMaxSessions: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "remote_console_max_concurrent_sessions"),
+			"Maximum number of concurrent remote console sessions",
+			nil, nil,
+		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
@@ -495,6 +508,11 @@ func NewCollector() *Collector {
 			prometheus.BuildFQName(prefix, "dell", "controller_battery_health"),
 			"Health status of storage controller battery",
 			[]string{"id", "storage_id", "name", "status"}, nil,
+		),
+		DellManagerLicenseInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "dell", "manager_license_info"),
+			"Information about licenses installed on the manager",
+			[]string{"id", "description", "type", "status", "device"}, nil,
 		),
 		PduInfo: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "pdu", "info"),
@@ -605,9 +623,12 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.ManagerInfo
 	ch <- collector.ManagerHealth
 	ch <- collector.ManagerEventLogEntry
+	ch <- collector.ManagerRemoteConsoleEnabled
+	ch <- collector.ManagerRemoteConsoleMaxSessions
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 	ch <- collector.DellControllerBatteryHealth
+	ch <- collector.DellManagerLicenseInfo
 	ch <- collector.PduInfo
 	ch <- collector.PduHealth
 	ch <- collector.PduPowerWatts
