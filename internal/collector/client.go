@@ -203,6 +203,15 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = DELL
 	}
 
+	// OEM systems (e.g. WEKApod, Cloudian HSA) report the integrator as
+	// Manufacturer while the service root still names the BMC vendor.
+	if client.vendor == UNKNOWN {
+		v := strings.ToLower(root.Vendor)
+		if strings.Contains(v, "supermicro") {
+			client.vendor = SUPERMICRO
+		}
+	}
+
 	// Manager
 	if client.metrics.Manager.Enabled {
 		ok = client.redfish.Get(root.Managers.OdataId, &group)
