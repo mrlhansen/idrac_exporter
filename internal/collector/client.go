@@ -182,6 +182,8 @@ func (client *Client) findAllEndpoints() bool {
 		client.vendor = INSPUR
 	} else if strings.Contains(m, "ieit") {
 		client.vendor = INSPUR
+	} else if strings.Contains(m, "aivres") {
+		client.vendor = INSPUR
 	} else if strings.Contains(m, "h3c") {
 		client.vendor = H3C
 	} else if strings.Contains(m, "inventec") {
@@ -935,7 +937,9 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 
 			// Inspur (issue #162)
 			if (client.vendor == INSPUR) && (drive.PredictedLifeLeft == nil) {
-				drive.PredictedLifeLeft = &drive.Oem.Public.TimeLeft
+				if v, ok := asFloat64(drive.Oem.Public.TimeLeft.String()); ok {
+					drive.PredictedLifeLeft = &v
+				}
 			}
 
 			// Supermicro (issue #164)
