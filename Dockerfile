@@ -1,11 +1,11 @@
-FROM golang:1.25-alpine3.23 AS builder
+FROM golang:1.27-alpine3.24 AS builder
 
 WORKDIR /app/src
 RUN apk add --no-cache make git grep
 COPY . .
 RUN make build
 
-FROM alpine:3.23 AS container
+FROM alpine:3.24 AS container
 
 WORKDIR /app
 COPY --from=builder /app/src/idrac_exporter /app/bin/

@@ -148,7 +148,7 @@ func (mc *Collector) NewSystemMachineInfo(ch chan<- prometheus.Metric, m *System
 	)
 }
 
-func (mc *Collector) NewSensorsTemperature(ch chan<- prometheus.Metric, temperature float64, id, name, units string) {
+func (mc *Collector) NewSensorsTemperature(ch chan<- prometheus.Metric, temperature float64, id, name, context, units string) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.SensorsTemperature,
 		prometheus.GaugeValue,
@@ -156,6 +156,7 @@ func (mc *Collector) NewSensorsTemperature(ch chan<- prometheus.Metric, temperat
 		id,
 		name,
 		units,
+		strings.ToLower(context),
 	)
 }
 
@@ -205,7 +206,7 @@ func (mc *Collector) NewSensorInfo(ch chan<- prometheus.Metric, m *Sensor) {
 		m.Name,
 		strings.ToLower(m.ReadingType),
 		cleanUnits(m.ReadingUnits),
-		m.PhysicalContext,
+		strings.ToLower(m.PhysicalContext),
 	)
 }
 

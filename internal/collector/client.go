@@ -43,9 +43,9 @@ type Client struct {
 		Memory           string
 		Network          string
 		Event            string
-		ManagerEvent     string
 		Processors       string
 		Manager          string
+		ManagerEvent     string
 		Extra            []string
 		RackPDUs         []string
 	}
@@ -379,7 +379,7 @@ func (client *Client) RefreshSensorsNew(mc *Collector, ch chan<- prometheus.Metr
 					name = s[len(s)-1]
 				}
 
-				mc.NewSensorsTemperature(ch, *c.Reading, strconv.Itoa(n), name, "celsius")
+				mc.NewSensorsTemperature(ch, *c.Reading, strconv.Itoa(n), name, c.PhysicalContext, "celsius")
 			}
 		}
 	}
@@ -404,7 +404,7 @@ func (client *Client) RefreshSensorsOld(mc *Collector, ch chan<- prometheus.Metr
 		}
 
 		id := t.GetId(n)
-		mc.NewSensorsTemperature(ch, t.ReadingCelsius, id, t.Name, "celsius")
+		mc.NewSensorsTemperature(ch, t.ReadingCelsius, id, t.Name, t.PhysicalContext, "celsius")
 	}
 
 	for n, f := range resp.Fans {

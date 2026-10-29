@@ -197,7 +197,7 @@ func NewCollector() *Collector {
 		SensorsTemperature: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "temperature"),
 			"Sensors reporting temperature measurements",
-			[]string{"id", "name", "units"}, nil,
+			[]string{"id", "name", "units", "context"}, nil,
 		),
 		SensorsFanHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "sensors", "fan_health"),
