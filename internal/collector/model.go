@@ -428,7 +428,7 @@ type StorageDrive struct {
 	// Inspur
 	Oem struct {
 		Public struct {
-			TimeLeft float64 `json:"TimeLeft"`
+			TimeLeft xstring `json:"TimeLeft"`
 		} `json:"Public"`
 	} `json:"Oem"`
 	// iLO 4
