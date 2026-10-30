@@ -595,7 +595,11 @@ type SystemResponse struct {
 	} `json:"TrustedModules"`
 	Oem struct {
 		Hpe struct {
+			*Odata
 			IndicatorLED string `json:"IndicatorLED"`
+			Links        struct {
+				SmartStorage Odata `json:"SmartStorage"`
+			} `json:"Links"`
 		} `json:"Hpe"`
 		Dell *json.RawMessage `json:"Dell"`
 	} `json:"Oem"`

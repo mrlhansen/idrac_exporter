@@ -114,7 +114,7 @@ idrac_system_machine_info{manufacturer,model,serial,sku}
 These metrics include temperature, FAN health and speeds, and voltage sensor readings.
 
 ```text
-idrac_sensors_temperature{id,name,units}
+idrac_sensors_temperature{id,context,name,units}
 idrac_sensors_fan_health{id,name,status}
 idrac_sensors_fan_speed{id,name,units}
 idrac_sensors_voltage{id,name,units}

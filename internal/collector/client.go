@@ -40,6 +40,7 @@ type Client struct {
 		Sensors          string
 		Storage          string
 		SimpleStorage    string
+		SmartStorage     string
 		Memory           string
 		Network          string
 		Event            string
@@ -93,6 +94,20 @@ func findPrimaryChassis(g *GroupResponse) string {
 	}
 
 	return g.Members[0].OdataId
+}
+
+func (client *Client) hasStorageDrives() bool {
+	group := GroupResponse{}
+	if !client.redfish.Get(client.path.Storage, &group) {
+		return false
+	}
+	for _, c := range group.Members.GetLinks() {
+		storage := Storage{}
+		if client.redfish.Get(c, &storage) && len(storage.Drives.GetLinks()) > 0 {
+			return true
+		}
+	}
+	return false
 }
 
 func (client *Client) findAllEndpoints() bool {
@@ -203,6 +218,9 @@ func (client *Client) findAllEndpoints() bool {
 	} else if system.Oem.Dell != nil {
 		// Issue #175
 		client.vendor = DELL
+	} else if system.Oem.Hpe.Odata != nil {
+		// Issue #218
+		client.vendor = HPE
 	}
 
 	// OEM systems (e.g. WEKApod, Cloudian HSA) report the integrator as
@@ -281,15 +299,27 @@ func (client *Client) findAllEndpoints() bool {
 		client.path.Storage = strings.ReplaceAll(client.path.Storage, "Storages", "Storage")
 	}
 
-	// Fix for iLO 4 machines
 	if client.vendor == HPE {
 		if strings.Contains(root.Name, "HP RESTful") {
+			// Fix for iLO 4 machines
 			client.path.Memory = "/redfish/v1/Systems/1/Memory/"
-			client.path.Storage = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
+			client.path.SmartStorage = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
 			client.path.Network = "/redfish/v1/Systems/1/NetworkAdapters/"
 			client.path.Processors = "/redfish/v1/Systems/1/Processors/"
+			client.path.Storage = ""
 			client.path.Event = ""
 			client.version = 4
+		} else if client.metrics.Storage.Enabled {
+			// iLO 5 lists only the embedded SATA controller, without drives,
+			// in the DMTF Storage collection; drives behind a Smart Array
+			// controller are only in the SmartStorage OEM resources, which
+			// have the same layout as on iLO 4.
+			if s := system.Oem.Hpe.Links.SmartStorage.OdataId; len(s) > 0 {
+				if !client.hasStorageDrives() {
+					client.path.SmartStorage = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers"
+					client.path.Storage = ""
+				}
+			}
 		}
 	}
 
@@ -889,8 +919,60 @@ func (client *Client) RefreshSimpleStorage(mc *Collector, ch chan<- prometheus.M
 	return true
 }
 
+func (client *Client) RefreshSmartStorage(mc *Collector, ch chan<- prometheus.Metric) bool {
+	group := GroupResponse{}
+	ok := client.redfish.Get(client.path.SmartStorage, &group)
+	if !ok {
+		return false
+	}
+
+	for _, c := range group.Members.GetLinks() {
+		storage := Storage{}
+		ok = client.redfish.Get(c, &storage)
+		if !ok {
+			return false
+		}
+
+		mc.NewStorageInfo(ch, &storage)
+		mc.NewStorageHealth(ch, &storage)
+
+		disks := GroupResponse{}
+		path := strings.TrimSuffix(c, "/") + "/DiskDrives/"
+		ok = client.redfish.Get(path, &disks)
+		if !ok {
+			return false
+		}
+
+		for _, c := range disks.Members.GetLinks() {
+			drive := StorageDrive{}
+			ok = client.redfish.Get(c, &drive)
+			if !ok {
+				return false
+			}
+
+			if drive.Status.State == StateAbsent {
+				continue
+			}
+
+			drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
+			drive.Protocol = drive.InterfaceType
+			drive.PredictedLifeLeft = new(100.0 - drive.SSDEnduranceUtilizationPercentage)
+
+			mc.NewStorageDriveInfo(ch, storage.Id, &drive)
+			mc.NewStorageDriveHealth(ch, storage.Id, &drive)
+			mc.NewStorageDriveCapacity(ch, storage.Id, &drive)
+			mc.NewStorageDriveLifeLeft(ch, storage.Id, &drive)
+		}
+	}
+
+	return true
+}
+
 func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric) bool {
 	if client.path.Storage == "" {
+		if client.path.SmartStorage != "" {
+			return client.RefreshSmartStorage(mc, ch)
+		}
 		if client.path.SimpleStorage != "" {
 			return client.RefreshSimpleStorage(mc, ch)
 		}
@@ -911,16 +993,6 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			return false
 		}
 
-		// iLO 4
-		if (client.vendor == HPE) && (client.version == 4) {
-			grp := GroupResponse{}
-			ok = client.redfish.Get(c+"DiskDrives/", &grp)
-			if !ok {
-				return false
-			}
-			storage.Drives = grp.Members
-		}
-
 		mc.NewStorageInfo(ch, &storage)
 		mc.NewStorageHealth(ch, &storage)
 		mc.NewDellControllerBatteryHealth(ch, &storage)
@@ -935,13 +1007,6 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 
 			if drive.Status.State == StateAbsent {
 				continue
-			}
-
-			// iLO 4
-			if (client.vendor == HPE) && (client.version == 4) {
-				drive.CapacityBytes = 1024 * 1024 * drive.CapacityMiB
-				drive.Protocol = drive.InterfaceType
-				drive.PredictedLifeLeft = new(100.0 - drive.SSDEnduranceUtilizationPercentage)
 			}
 
 			// Inspur (issue #162)
@@ -964,11 +1029,6 @@ func (client *Client) RefreshStorage(mc *Collector, ch chan<- prometheus.Metric)
 			mc.NewStorageDriveCapacity(ch, storage.Id, &drive)
 			mc.NewStorageDriveLifeLeft(ch, storage.Id, &drive)
 			mc.NewStorageDriveIndicatorActive(ch, storage.Id, &drive)
-		}
-
-		// iLO 4
-		if (client.vendor == HPE) && (client.version == 4) {
-			continue
 		}
 
 		// Controllers
