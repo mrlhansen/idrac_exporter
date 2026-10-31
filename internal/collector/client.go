@@ -314,7 +314,7 @@ func (client *Client) findAllEndpoints() bool {
 			// in the DMTF Storage collection; drives behind a Smart Array
 			// controller are only in the SmartStorage OEM resources, which
 			// have the same layout as on iLO 4.
-			if s := system.Oem.Hpe.Links.SmartStorage.OdataId; len(s) > 0 {
+			if len(system.Oem.Hpe.Links.SmartStorage.OdataId) > 0 {
 				if !client.hasStorageDrives() {
 					client.path.SmartStorage = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers"
 					client.path.Storage = ""

@@ -14,6 +14,10 @@ import (
 var Debug bool = false
 var Config *RootConfig = nil
 
+// This function is used during configuration reload to determine if there are changes
+// that require a reset of the collector, such as updated credentials. The function
+// findAllEndpoints() will also make conditional decisions based on selected metrics
+// groups, so a reset of the collector is needed when they are changed.
 func AuthIsEqual(a, b *AuthConfig) bool {
 	if a.Username != b.Username {
 		return false
@@ -31,6 +35,18 @@ func AuthIsEqual(a, b *AuthConfig) bool {
 		return false
 	}
 	if a.AllowLegacyRSAKex != b.AllowLegacyRSAKex {
+		return false
+	}
+	if a.Metrics.Events.Enabled != b.Metrics.Events.Enabled {
+		return false
+	}
+	if a.Metrics.Extra.Enabled != b.Metrics.Extra.Enabled {
+		return false
+	}
+	if a.Metrics.Manager.Enabled != b.Metrics.Manager.Enabled {
+		return false
+	}
+	if a.Metrics.Storage.Enabled != b.Metrics.Storage.Enabled {
 		return false
 	}
 	return true
