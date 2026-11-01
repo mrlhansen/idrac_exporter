@@ -27,9 +27,6 @@ make
 ```
 
 ### Docker
-> [!IMPORTANT]
-> Starting with v2.3.0 the container images are released on GHCR instead of Docker Hub. For those using Helm, the images are automatically pulled from the new repository. However, users running the container manually will have to switch to the new repository.
-
 There is a `Dockerfile` in the repository for building a container image. To build it locally use:
 
 ```sh

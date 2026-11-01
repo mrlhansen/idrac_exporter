@@ -387,7 +387,7 @@ type StorageController struct {
 		Status            Status `json:"Status"`
 	} `json:"CacheSummary"`
 	ControllerRates struct {
-		ConsistencyCheckRatePercent int `json:"ConsistencyCheckRatePercent"`
+		ConsistencyCheckRatePercent any `json:"ConsistencyCheckRatePercent"` // seen reported as "Not Available"
 		RebuildRatePercent          int `json:"RebuildRatePercent"`
 	} `json:"ControllerRates"`
 	PCIeInterface struct {
