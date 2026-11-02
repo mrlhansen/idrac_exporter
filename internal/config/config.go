@@ -34,7 +34,10 @@ func AuthIsEqual(a, b *AuthConfig) bool {
 	if a.BasicAuth != b.BasicAuth {
 		return false
 	}
-	if a.AllowLegacyRSAKex != b.AllowLegacyRSAKex {
+	if a.HTTP.AllowLegacyRSAKex != b.HTTP.AllowLegacyRSAKex {
+		return false
+	}
+	if a.HTTP.DisableKeepalive != b.HTTP.DisableKeepalive {
 		return false
 	}
 	if a.Metrics.Events.Enabled != b.Metrics.Events.Enabled {

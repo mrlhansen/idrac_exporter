@@ -50,7 +50,7 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 
 	// Enable legacy RSA key exchange only for explicitly configured targets.
 	// TLS 1.0, TLS 1.1, 3DES, RC4, and CBC cipher suites remain disabled.
-	if auth.AllowLegacyRSAKex {
+	if auth.HTTP.AllowLegacyRSAKex {
 		tlsConfig.CipherSuites = []uint16{
 			// Modern TLS 1.2 AEAD cipher suites
 			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
@@ -82,6 +82,7 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 				IdleConnTimeout:       30 * time.Second,                         // Remove stale connections after 30s
 				ResponseHeaderTimeout: time.Duration(cfg.Timeout) * time.Second, // Timeout waiting for response headers
 				ExpectContinueTimeout: 1 * time.Second,                          // Timeout for 100-continue responses
+				DisableKeepAlives:     auth.HTTP.DisableKeepalive,
 			},
 			Timeout: time.Duration(cfg.Timeout) * time.Second,
 		},

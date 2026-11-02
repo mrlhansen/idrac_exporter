@@ -62,10 +62,13 @@ default_target: "192.168.1.1"
 # is used by default) and always use HTTP basic auth. This is NOT recommended and
 # it should only be used if there is an actual reason.
 #
-# The option "allow_legacy_rsa_kex" enables legacy RSA key exchange for TLS 1.2
-# connections to devices that do not support modern ECDHE cipher suites. Only
-# RSA cipher suites using AES-GCM are enabled. This option is disabled by default
-# and should only be enabled for targets that require it.
+# The "http" section contains advanced options for the HTTP client. These options
+# are rarely needed and they should only be enabled for targets that require it.
+# - The option "disable_keepalive" will disables HTTP keep-alive, such that every
+#   connection only serves a single request.
+# - The option "allow_legacy_rsa_kex" enables legacy RSA key exchange for TLS 1.2
+#   connections to devices that do not support modern ECDHE cipher suites. Only
+#   RSA cipher suites using AES-GCM are enabled.
 #
 # When the "target" parameter does not match any host, the exporter will attempt
 # to use the login credentials under "default". The credentials under "default"
@@ -76,13 +79,15 @@ default_target: "192.168.1.1"
 # case you want to scrape a different set of metrics on certain hosts.
 hosts:
   default:
-    encoded: false               # CONFIG_DEFAULT_ENCODED=false
-    username: user               # CONFIG_DEFAULT_USERNAME=user
-    password: pass               # CONFIG_DEFAULT_PASSWORD=pass
-    scheme: https                # CONFIG_DEFAULT_SCHEME=https
-    port: 8443                   # CONFIG_DEFAULT_PORT=8443
-    use_basic_auth: true         # CONFIG_DEFAULT_USE_BASIC_AUTH=true
-    allow_legacy_rsa_kex: false  # CONFIG_DEFAULT_ALLOW_LEGACY_RSA_KEX=false
+    encoded: false        # CONFIG_DEFAULT_ENCODED=false
+    username: user        # CONFIG_DEFAULT_USERNAME=user
+    password: pass        # CONFIG_DEFAULT_PASSWORD=pass
+    scheme: https         # CONFIG_DEFAULT_SCHEME=https
+    port: 8443            # CONFIG_DEFAULT_PORT=8443
+    use_basic_auth: true  # CONFIG_DEFAULT_USE_BASIC_AUTH=true
+    http:
+      allow_legacy_rsa_kex: false  # CONFIG_DEFAULT_HTTP_ALLOW_LEGACY_RSA_KEX=false
+      disable_keepalive: false     # CONFIG_DEFAULT_HTTP_DISABLE_KEEPALIVE=false
   192.168.1.1:
     encoded: true
     username: dXNlcg==
@@ -93,7 +98,7 @@ hosts:
   host01.example.com:
     username: user
     password: pass
-    metrics:                     # Example of metrics override
+    metrics:              # Example of global metrics override
       sensors:
         unified: true
 

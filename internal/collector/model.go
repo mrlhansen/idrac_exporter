@@ -12,13 +12,13 @@ const (
 
 // Session
 type Session struct {
-	Id          string `json:"Id,omitempty"`
-	Name        string `json:"Name,omitempty"`
-	Username    string `json:"UserName,omitempty"`
-	Password    string `json:"Password,omitempty"`
-	CreatedTime string `json:"CreatedTime,omitempty"`
-	SessionType string `json:"SessionType,omitempty"`
-	OdataId     string `json:"@odata.id,omitempty"`
+	Id          xstring `json:"Id,omitempty"` // usually a string, sometimes an integer
+	Name        string  `json:"Name,omitempty"`
+	Username    string  `json:"UserName,omitempty"`
+	Password    string  `json:"Password,omitempty"`
+	CreatedTime string  `json:"CreatedTime,omitempty"`
+	SessionType string  `json:"SessionType,omitempty"`
+	OdataId     string  `json:"@odata.id,omitempty"`
 }
 
 // Odata is a common structure to unmarshal Open Data Protocol metadata

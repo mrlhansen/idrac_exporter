@@ -36,8 +36,12 @@ func getEnv[T envType](env string, val *T) {
 }
 
 func (c *RootConfig) FromEnvironment() {
-	var env AuthConfig
 	var m = &c.Metrics
+
+	def, ok := c.Hosts["default"]
+	if !ok {
+		def = &AuthConfig{}
+	}
 
 	getEnv("CONFIG_ADDRESS", &c.Address)
 	getEnv("CONFIG_PORT", &c.Port)
@@ -51,13 +55,14 @@ func (c *RootConfig) FromEnvironment() {
 	getEnv("CONFIG_TLS_CERT_FILE", &c.TLS.CertFile)
 	getEnv("CONFIG_TLS_KEY_FILE", &c.TLS.KeyFile)
 
-	getEnv("CONFIG_DEFAULT_ENCODED", &env.Encoded)
-	getEnv("CONFIG_DEFAULT_USERNAME", &env.Username)
-	getEnv("CONFIG_DEFAULT_PASSWORD", &env.Password)
-	getEnv("CONFIG_DEFAULT_SCHEME", &env.Scheme)
-	getEnv("CONFIG_DEFAULT_PORT", &env.Port)
-	getEnv("CONFIG_DEFAULT_USE_BASIC_AUTH", &env.BasicAuth)
-	getEnv("CONFIG_DEFAULT_ALLOW_LEGACY_RSA_KEX", &env.AllowLegacyRSAKex)
+	getEnv("CONFIG_DEFAULT_ENCODED", &def.Encoded)
+	getEnv("CONFIG_DEFAULT_USERNAME", &def.Username)
+	getEnv("CONFIG_DEFAULT_PASSWORD", &def.Password)
+	getEnv("CONFIG_DEFAULT_SCHEME", &def.Scheme)
+	getEnv("CONFIG_DEFAULT_PORT", &def.Port)
+	getEnv("CONFIG_DEFAULT_USE_BASIC_AUTH", &def.BasicAuth)
+	getEnv("CONFIG_DEFAULT_HTTP_ALLOW_LEGACY_RSA_KEX", &def.HTTP.AllowLegacyRSAKex)
+	getEnv("CONFIG_DEFAULT_HTTP_DISABLE_KEEPALIVE", &def.HTTP.DisableKeepalive)
 
 	getEnv("CONFIG_METRICS_ALL_ENABLED", &m.All.Enabled)
 	getEnv("CONFIG_METRICS_SYSTEM_ENABLED", &m.System.Enabled)
@@ -77,47 +82,7 @@ func (c *RootConfig) FromEnvironment() {
 	getEnv("CONFIG_METRICS_MANAGER_EVENTS_MAXAGE", &m.Manager.Events.MaxAge)
 	getEnv("CONFIG_METRICS_EXTRA_ENABLED", &m.Extra.Enabled)
 
-	def, ok := c.Hosts["default"]
-	if !ok {
-		def = &AuthConfig{}
-	}
-
-	if len(env.Username) > 0 {
-		def.Username = env.Username
-		ok = true
-	}
-
-	if len(env.Password) > 0 {
-		def.Password = env.Password
-		ok = true
-	}
-
-	if len(env.Scheme) > 0 {
-		def.Scheme = env.Scheme
-		ok = true
-	}
-
-	if env.Port > 0 {
-		def.Port = env.Port
-		ok = true
-	}
-
-	if env.Encoded {
-		def.Encoded = true
-		ok = true
-	}
-
-	if env.BasicAuth {
-		def.BasicAuth = true
-		ok = true
-	}
-
-	if env.AllowLegacyRSAKex {
-		def.AllowLegacyRSAKex = true
-		ok = true
-	}
-
-	if ok {
+	if len(def.Username) > 0 && len(def.Password) > 0 {
 		c.Hosts["default"] = def
 	}
 }

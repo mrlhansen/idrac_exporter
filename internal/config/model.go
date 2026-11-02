@@ -6,16 +6,21 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+type HttpConfig struct {
+	AllowLegacyRSAKex bool `yaml:"allow_legacy_rsa_kex"`
+	DisableKeepalive  bool `yaml:"disable_keepalive"`
+}
+
 type AuthConfig struct {
-	Username          string          `yaml:"username"`
-	Password          string          `yaml:"password"`
-	Scheme            string          `yaml:"scheme"`
-	Port              uint            `yaml:"port"`
-	Encoded           bool            `yaml:"encoded"`
-	BasicAuth         bool            `yaml:"use_basic_auth"`
-	AllowLegacyRSAKex bool            `yaml:"allow_legacy_rsa_kex"`
-	RawMetrics        yaml.RawMessage `yaml:"metrics"`
-	Metrics           MetricsConfig   `yaml:"-"`
+	Username   string          `yaml:"username"`
+	Password   string          `yaml:"password"`
+	Scheme     string          `yaml:"scheme"`
+	Port       uint            `yaml:"port"`
+	Encoded    bool            `yaml:"encoded"`
+	BasicAuth  bool            `yaml:"use_basic_auth"`
+	HTTP       HttpConfig      `yaml:"http"`
+	RawMetrics yaml.RawMessage `yaml:"metrics"`
+	Metrics    MetricsConfig   `yaml:"-"`
 }
 
 type EventConfig struct {
