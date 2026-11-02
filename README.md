@@ -9,7 +9,7 @@ Every time the exporter is called with a new target, it tries to establish a con
 
 
 ## Supported Systems
-The program supports several different systems, because they all follow the Redfish standard. The exporter has been tested on the following systems.
+The program supports many different systems, because they all follow the Redfish standard. The exporter is regularly tested on the following systems.
 
 * HPE iLO
 * Dell iDRAC
@@ -79,7 +79,7 @@ As shown in the example above, under `hosts` you can define credentials for indi
 http://localhost:9348/metrics?target=192.168.10.10&group=mygroup
 ```
 
-You may combine `hosts` and `groups` in any way that fits your environment. The login user only needs read-only permissions and it is recommended to create a dedicated unpriviledged user for the exporter.
+You can combine `hosts` and `groups` in any way that fits your environment. The login user only needs read-only permissions and it is recommended to create a dedicated unpriviledged user for the exporter.
 
 **For a detailed description of the configuration, please see the [sample-config.yml](sample-config.yml) file. In this file you can also find the corresponding environment variables for the different configuration options.**
 
@@ -117,7 +117,7 @@ idrac_sensors_fan_speed{id,name,units}
 idrac_sensors_voltage{id,name,units}
 ```
 
-When using the _unified_ sensors endpoint (must be enabled in the configuration), the following metrics are exported instead.
+When using the _unified_ sensors endpoint (must be enabled in the configuration), the following metrics are exported instead. These metrics are only supported on newer versions of Redfish, and even when advertised as supported, it does not always work. Please do some testing before enabling this in production.
 
 ```text
 idrac_sensor_info{id,context,name,type,units}
