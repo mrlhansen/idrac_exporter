@@ -30,6 +30,7 @@ type Redfish struct {
 	username string
 	password string
 	session  RedfishSession
+	proxy    *neturl.URL
 	http     *http.Client
 	sem      *semaphore.Weighted
 	ctx      context.Context
@@ -42,6 +43,14 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 	baseurl := fmt.Sprintf("%s://%s", auth.Scheme, host)
 	if auth.Port > 0 {
 		baseurl = fmt.Sprintf("%s:%d", baseurl, auth.Port)
+	}
+
+	var proxyURL *neturl.URL
+	if u, err := neturl.Parse(baseurl); err == nil {
+		proxyURL, _ = http.ProxyFromEnvironment(&http.Request{URL: u})
+	}
+	if proxyURL != nil {
+		log.Debug("Using proxy %s for target %s", proxyURL.Redacted(), host)
 	}
 
 	tlsConfig := &tls.Config{
@@ -78,6 +87,7 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 		session: RedfishSession{
 			disabled: auth.BasicAuth,
 		},
+		proxy: proxyURL,
 		http: &http.Client{
 			Transport: &http.Transport{
 				Proxy:                 http.ProxyFromEnvironment,
@@ -93,6 +103,16 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 		sem: semaphore.NewWeighted(int64(cfg.Concurrency)),
 		ctx: context.Background(),
 	}
+}
+
+// net/http drops the status code of a failed CONNECT, so a proxy that cannot
+// reach the BMC looks exactly like a BMC answering with an error status.
+func (r *Redfish) logQueryError(url string, err error) {
+	if r.proxy != nil {
+		log.Error("Failed to query %q via proxy %s: %v (if the proxy cannot reach the BMC, add the target to NO_PROXY)", url, r.proxy.Redacted(), err)
+		return
+	}
+	log.Error("Failed to query %q: %v", url, err)
 }
 
 func (r *Redfish) DisableSession() {
@@ -121,7 +141,7 @@ func (r *Redfish) CreateSession() bool {
 		}
 	}()
 	if err != nil {
-		log.Error("Failed to query %q: %v", url, err)
+		r.logQueryError(url, err)
 		return false
 	}
 
@@ -188,7 +208,7 @@ func (r *Redfish) DeleteSession() bool {
 		resp.Body.Close()
 	}
 	if err != nil {
-		log.Error("Failed to query %q: %v", url, err)
+		r.logQueryError(url, err)
 		return false
 	}
 
@@ -275,7 +295,7 @@ func (r *Redfish) Get(path string, res any) bool {
 		defer resp.Body.Close()
 	}
 	if err != nil {
-		log.Error("Failed to query %q: %v", url, err)
+		r.logQueryError(url, err)
 		return false
 	}
 
