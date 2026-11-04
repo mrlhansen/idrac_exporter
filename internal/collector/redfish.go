@@ -46,6 +46,10 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
+		// Resume TLS sessions instead of doing a full handshake for every new
+		// connection. This matters for slow BMCs, especially with keep-alive
+		// disabled, where every request opens a new connection.
+		ClientSessionCache: tls.NewLRUClientSessionCache(0),
 	}
 
 	// Enable legacy RSA key exchange only for explicitly configured targets.
