@@ -91,7 +91,8 @@ idracConfig: |
       username: USERNAME
       password: PASSWORD
   metrics:
-    all: true
+    all:
+      enabled: true
 
 env: []
 # - name: CONFIG_DEFAULT_USERNAME
