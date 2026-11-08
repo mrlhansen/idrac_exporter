@@ -110,6 +110,21 @@ func (client *Client) hasStorageDrives() bool {
 	return false
 }
 
+func iDRACVersion(m string) int {
+	if strings.Contains(m, "12G") {
+		return 7
+	} else if strings.Contains(m, "13G") {
+		return 8
+	} else if strings.Contains(m, "14G") {
+		return 9
+	} else if strings.Contains(m, "15G") {
+		return 9
+	} else if strings.Contains(m, "16G") {
+		return 9
+	}
+	return 10
+}
+
 func (client *Client) findAllEndpoints() bool {
 	var root V1Response
 	var group GroupResponse
@@ -232,6 +247,24 @@ func (client *Client) findAllEndpoints() bool {
 		}
 	}
 
+	// Detect manager version
+	switch client.vendor {
+	case DELL:
+		{
+			m := &ManagerResponse{}
+			ok = client.redfish.Get("/redfish/v1/Managers/iDRAC.Embedded.1", m)
+			if ok {
+				client.version = iDRACVersion(m.Model)
+			}
+		}
+	case HPE:
+		{
+			if strings.Contains(root.Name, "HP RESTful") {
+				client.version = 4
+			}
+		}
+	}
+
 	// Manager
 	if client.metrics.Manager.Enabled {
 		ok = client.redfish.Get(root.Managers.OdataId, &group)
@@ -243,7 +276,11 @@ func (client *Client) findAllEndpoints() bool {
 	// Manager event log
 	switch client.vendor {
 	case DELL:
-		client.path.ManagerEvent = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Lclog/Entries"
+		if client.version >= 9 {
+			client.path.ManagerEvent = "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Lclog/Entries"
+		} else {
+			client.path.ManagerEvent = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Lclog"
+		}
 	case HPE:
 		client.path.ManagerEvent = "/redfish/v1/Managers/1/LogServices/IEL/Entries"
 	}
@@ -252,7 +289,7 @@ func (client *Client) findAllEndpoints() bool {
 	if client.metrics.Events.Enabled {
 		switch client.vendor {
 		case DELL:
-			{
+			if client.version >= 9 {
 				pathA := "/redfish/v1/Managers/iDRAC.Embedded.1/LogServices/Sel/Entries"
 				pathB := "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
 				if client.redfish.Exists(pathA) {
@@ -260,6 +297,8 @@ func (client *Client) findAllEndpoints() bool {
 				} else if client.redfish.Exists(pathB) {
 					client.path.Event = pathB
 				}
+			} else {
+				client.path.Event = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
 			}
 		case LENOVO:
 			{
@@ -300,7 +339,7 @@ func (client *Client) findAllEndpoints() bool {
 	}
 
 	if client.vendor == HPE {
-		if strings.Contains(root.Name, "HP RESTful") {
+		if client.version == 4 {
 			// Fix for iLO 4 machines
 			client.path.Memory = "/redfish/v1/Systems/1/Memory/"
 			client.path.SmartStorage = "/redfish/v1/Systems/1/SmartStorage/ArrayControllers/"
@@ -308,7 +347,6 @@ func (client *Client) findAllEndpoints() bool {
 			client.path.Processors = "/redfish/v1/Systems/1/Processors/"
 			client.path.Storage = ""
 			client.path.Event = ""
-			client.version = 4
 		} else if client.metrics.Storage.Enabled {
 			// iLO 5 lists only the embedded SATA controller, without drives,
 			// in the DMTF Storage collection; drives behind a Smart Array
@@ -862,14 +900,6 @@ func (client *Client) RefreshEventLog(mc *Collector, ch chan<- prometheus.Metric
 	log, ok := client.QueryEventLog(client.path.Event, &client.metrics.Events)
 	if log == nil {
 		return ok
-	}
-
-	// iDRAC 8 (issue #143)
-	if client.vendor == DELL {
-		if log.response.Id == "SEL" && strings.Contains(client.path.Event, "LogServices") {
-			client.path.Event = "/redfish/v1/Managers/iDRAC.Embedded.1/Logs/Sel"
-			return client.RefreshEventLog(mc, ch)
-		}
 	}
 
 	for v := range log.Items() {

@@ -26,7 +26,11 @@ func (client *Client) QueryEventLog(path string, config *config.EventConfig) (*E
 		return nil, true
 	}
 
-	if client.features.Filter {
+	// Multiple goroutines can run this function concurrently and the fallback below
+	// might disable filtering, so we need a copy of the variable for consistency.
+	hasFilter := client.features.Filter
+
+	if hasFilter {
 		filter := url.Values{}
 
 		switch config.SeverityLevel {
@@ -44,6 +48,10 @@ func (client *Client) QueryEventLog(path string, config *config.EventConfig) (*E
 	resp := &EventLogResponse{}
 	ok := client.redfish.Get(path, resp)
 	if !ok {
+		if hasFilter {
+			client.features.Filter = false
+			return client.QueryEventLog(path, config)
+		}
 		return nil, false
 	}
 
