@@ -121,6 +121,9 @@ type Collector struct {
 	ManagerRemoteConsoleEnabled     *prometheus.Desc
 	ManagerRemoteConsoleMaxSessions *prometheus.Desc
 
+	// Firmware inventory
+	FirmwareInfo *prometheus.Desc
+
 	// Dell OEM
 	DellBatteryRollupHealth       *prometheus.Desc
 	DellEstimatedSystemAirflowCFM *prometheus.Desc
@@ -494,6 +497,11 @@ func NewCollector() *Collector {
 			"Maximum number of concurrent remote console sessions",
 			nil, nil,
 		),
+		FirmwareInfo: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "firmware", "info"),
+			"Information about installed firmware from the firmware inventory",
+			[]string{"id", "name", "version", "updateable"}, nil,
+		),
 		DellBatteryRollupHealth: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "dell", "battery_rollup_health"),
 			"Health rollup status for the batteries",
@@ -625,6 +633,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.ManagerEventLogEntry
 	ch <- collector.ManagerRemoteConsoleEnabled
 	ch <- collector.ManagerRemoteConsoleMaxSessions
+	ch <- collector.FirmwareInfo
 	ch <- collector.DellBatteryRollupHealth
 	ch <- collector.DellEstimatedSystemAirflowCFM
 	ch <- collector.DellControllerBatteryHealth
@@ -725,6 +734,15 @@ func (collector *Collector) CollectServer(ch chan<- prometheus.Metric) {
 	if metrics.Manager.Enabled {
 		wg.Go(func() {
 			ok := collector.client.RefreshManager(collector, ch)
+			if !ok {
+				collector.errors.Add(1)
+			}
+		})
+	}
+
+	if metrics.Firmware.Enabled {
+		wg.Go(func() {
+			ok := collector.client.RefreshFirmware(collector, ch)
 			if !ok {
 				collector.errors.Add(1)
 			}

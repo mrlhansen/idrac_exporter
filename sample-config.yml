@@ -149,5 +149,7 @@ metrics:
       enabled: false     # CONFIG_METRICS_MANAGER_EVENTS_ENABLED=false
       severity: warning  # CONFIG_METRICS_MANAGER_EVENTS_SEVERITY=warning
       maxage: 7d         # CONFIG_METRICS_MANAGER_EVENTS_MAXAGE=7d
+  firmware:
+    enabled: false       # CONFIG_METRICS_FIRMWARE_ENABLED=false
   extra:
     enabled: false       # CONFIG_METRICS_EXTRA_ENABLED=false
