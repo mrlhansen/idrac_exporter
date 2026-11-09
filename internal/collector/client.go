@@ -47,6 +47,7 @@ type Client struct {
 		Processors       string
 		Manager          string
 		ManagerEvent     string
+		Firmware         string
 		Extra            []string
 		RackPDUs         []string
 	}
@@ -54,6 +55,7 @@ type Client struct {
 		ExpandLevels bool
 		Filter       bool
 	}
+	firmwareNoExpand bool
 }
 
 func NewClient(host string, config *config.AuthConfig) *Client {
@@ -270,6 +272,15 @@ func (client *Client) findAllEndpoints() bool {
 		ok = client.redfish.Get(root.Managers.OdataId, &group)
 		if ok && len(group.Members) > 0 {
 			client.path.Manager = group.Members[0].OdataId
+		}
+	}
+
+	// Firmware inventory
+	if client.metrics.Firmware.Enabled && len(root.UpdateService.OdataId) > 0 {
+		svc := UpdateService{}
+		ok = client.redfish.Get(root.UpdateService.OdataId, &svc)
+		if ok {
+			client.path.Firmware = svc.FirmwareInventory.OdataId
 		}
 	}
 

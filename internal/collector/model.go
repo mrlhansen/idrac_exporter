@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	StateEnabled = "Enabled"
-	StateAbsent  = "Absent"
+	StateEnabled  = "Enabled"
+	StateAbsent   = "Absent"
+	StateDisabled = "Disabled"
 )
 
 // Session
@@ -116,6 +117,22 @@ type V1Response struct {
 		OnlyMemberQuery bool `json:"OnlyMemberQuery"`
 		SelectQuery     bool `json:"SelectQuery"`
 	} `json:"ProtocolFeaturesSupported"`
+}
+
+// UpdateService represents the update service, which links to the
+// firmware inventory
+type UpdateService struct {
+	FirmwareInventory Odata `json:"FirmwareInventory"`
+}
+
+// SoftwareInventory represents a single entry in the firmware inventory
+type SoftwareInventory struct {
+	OdataId    string  `json:"@odata.id"`
+	Id         string  `json:"Id"`
+	Name       string  `json:"Name"`
+	Version    xstring `json:"Version"`
+	Updateable *bool   `json:"Updateable"`
+	Status     Status  `json:"Status"`
 }
 
 type GroupResponse struct {

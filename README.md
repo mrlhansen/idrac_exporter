@@ -242,6 +242,15 @@ Optionally event logs from the manager can also be exported. Currently this is o
 idrac_manager_events_log_entry{id,message,severity}
 ```
 
+### Firmware
+These metrics contain the firmware inventory from the Redfish update service, i.e. the installed version of every firmware component (BMC, BIOS, CPLD, NICs, drives, power supplies, GPUs, etc.).
+
+```text
+idrac_firmware_info{id,name,version,updateable}
+```
+
+Only firmware that is present and active is exported. Absent components, pending updates and empty backup images are skipped. On Dell systems the rollback (`Previous-`) and staged (`Available-`) images are skipped, and the `id` label contains the component FQDD (e.g. `iDRAC.Embedded.1-1`), so that it does not change when the firmware is updated. The inventory is fetched with a single request when the BMC supports `$expand`.
+
 ### Extra
 These metrics do not belong anywhere else and they might be OEM specific. At the moment only some Dell specific metrics are exported.
 
