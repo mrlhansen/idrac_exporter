@@ -2,6 +2,7 @@ package collector
 
 import (
 	"iter"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -29,6 +30,7 @@ func (client *Client) QueryEventLog(path string, config *config.EventConfig) (*E
 	// Multiple goroutines can run this function concurrently and the fallback below
 	// might disable filtering, so we need a copy of the variable for consistency.
 	hasFilter := client.features.Filter
+	urlFilter := path
 
 	if hasFilter {
 		filter := url.Values{}
@@ -41,14 +43,15 @@ func (client *Client) QueryEventLog(path string, config *config.EventConfig) (*E
 		}
 
 		if s := filter.Encode(); len(s) > 0 {
-			path = path + "?" + s
+			urlFilter = path + "?" + s
 		}
 	}
 
 	resp := &EventLogResponse{}
-	ok := client.redfish.Get(path, resp)
+	ok, status := client.redfish.GetWithStatus(urlFilter, resp)
 	if !ok {
-		if hasFilter {
+		// Issue #233
+		if hasFilter && (status == http.StatusBadRequest || status == http.StatusNotImplemented) {
 			client.features.Filter = false
 			return client.QueryEventLog(path, config)
 		}

@@ -248,9 +248,9 @@ func (r *Redfish) RefreshSession() bool {
 	return true
 }
 
-func (r *Redfish) Get(path string, res any) bool {
+func (r *Redfish) GetWithStatus(path string, res any) (bool, int) {
 	if !strings.HasPrefix(path, redfishRootPath) {
-		return false
+		return false, 0
 	}
 
 	r.sem.Acquire(r.ctx, 1)
@@ -259,7 +259,7 @@ func (r *Redfish) Get(path string, res any) bool {
 	url := fmt.Sprintf("%s%s", r.baseurl, path)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return false
+		return false, 0
 	}
 
 	req.Header.Add("Accept", "application/json")
@@ -276,18 +276,18 @@ func (r *Redfish) Get(path string, res any) bool {
 	}
 	if err != nil {
 		log.Error("Failed to query %q: %v", url, err)
-		return false
+		return false, 0
 	}
 
 	if resp.StatusCode != http.StatusOK {
 		log.Error("Unexpected status code from %q: %s", url, resp.Status)
-		return false
+		return false, resp.StatusCode
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Error("Error reading response from %q: %v", url, err)
-		return false
+		return false, resp.StatusCode
 	}
 
 	if config.Debug {
@@ -300,10 +300,15 @@ func (r *Redfish) Get(path string, res any) bool {
 	err = json.Unmarshal(body, res)
 	if err != nil {
 		log.Error("Error decoding response from %q: %v", url, err)
-		return false
+		return false, resp.StatusCode
 	}
 
-	return true
+	return true, resp.StatusCode
+}
+
+func (r *Redfish) Get(path string, res any) bool {
+	ok, _ := r.GetWithStatus(path, res)
+	return ok
 }
 
 func (r *Redfish) Exists(path string) bool {
