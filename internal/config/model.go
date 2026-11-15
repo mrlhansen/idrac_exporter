@@ -62,6 +62,9 @@ type MetricsConfig struct {
 		Enabled bool        `yaml:"enabled"`
 		Events  EventConfig `yaml:"events"`
 	} `yaml:"manager"`
+	Firmware struct {
+		Enabled bool `yaml:"enabled"`
+	} `yaml:"firmware"`
 	Extra struct {
 		Enabled bool `yaml:"enabled"`
 	} `yaml:"extra"`

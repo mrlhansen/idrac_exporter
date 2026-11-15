@@ -49,6 +49,9 @@ func AuthIsEqual(a, b *AuthConfig) bool {
 	if a.Metrics.Manager.Enabled != b.Metrics.Manager.Enabled {
 		return false
 	}
+	if a.Metrics.Firmware.Enabled != b.Metrics.Firmware.Enabled {
+		return false
+	}
 	if a.Metrics.Storage.Enabled != b.Metrics.Storage.Enabled {
 		return false
 	}
@@ -235,6 +238,7 @@ func (c *RootConfig) Validate() error {
 		c.Metrics.Network.Enabled = true
 		c.Metrics.Processors.Enabled = true
 		c.Metrics.Manager.Enabled = true
+		c.Metrics.Firmware.Enabled = true
 		c.Metrics.Extra.Enabled = true
 	}
 

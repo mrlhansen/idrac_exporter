@@ -952,6 +952,23 @@ func (mc *Collector) NewManagerInfo(ch chan<- prometheus.Metric, m *ManagerRespo
 	)
 }
 
+func (mc *Collector) NewFirmwareInfo(ch chan<- prometheus.Metric, m *SoftwareInventory) {
+	updateable := ""
+	if m.Updateable != nil {
+		updateable = strconv.FormatBool(*m.Updateable)
+	}
+
+	ch <- prometheus.MustNewConstMetric(
+		mc.FirmwareInfo,
+		prometheus.UntypedValue,
+		1.0,
+		m.Id,
+		m.Name,
+		m.Version.String(),
+		updateable,
+	)
+}
+
 func (mc *Collector) NewManagerHealth(ch chan<- prometheus.Metric, m *ManagerResponse) {
 	value := health2value(m.Status.Health)
 	if value < 0 {
