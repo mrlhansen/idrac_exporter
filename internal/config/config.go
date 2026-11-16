@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"os"
@@ -38,6 +40,9 @@ func AuthIsEqual(a, b *AuthConfig) bool {
 		return false
 	}
 	if a.HTTP.DisableKeepalive != b.HTTP.DisableKeepalive {
+		return false
+	}
+	if !bytes.Equal(a.HTTP.CAData, b.HTTP.CAData) {
 		return false
 	}
 	if a.Metrics.Events.Enabled != b.Metrics.Events.Enabled {
@@ -115,6 +120,19 @@ func (c *AuthConfig) validate(root *RootConfig) error {
 	case "http", "https":
 	default:
 		return fmt.Errorf("invalid scheme")
+	}
+
+	if c.HTTP.CAFile != "" {
+		data, err := os.ReadFile(c.HTTP.CAFile)
+		if err != nil {
+			return fmt.Errorf("read ca_file: %v", err)
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(data) {
+			return fmt.Errorf("ca_file %s holds no PEM certificate", c.HTTP.CAFile)
+		}
+		c.HTTP.CAData = data
+		c.HTTP.RootCAs = pool
 	}
 
 	c.Metrics = root.Metrics

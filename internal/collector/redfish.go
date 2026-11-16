@@ -44,8 +44,11 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 		baseurl = fmt.Sprintf("%s:%d", baseurl, auth.Port)
 	}
 
+	// Without a ca_file the target is not verified, which keeps factory
+	// self-signed certificates working.
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: auth.HTTP.RootCAs == nil,
+		RootCAs:            auth.HTTP.RootCAs,
 		// Resume TLS sessions instead of doing a full handshake for every new
 		// connection. This matters for slow BMCs, especially with keep-alive
 		// disabled, where every request opens a new connection.

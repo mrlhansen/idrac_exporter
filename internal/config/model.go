@@ -1,14 +1,18 @@
 package config
 
 import (
+	"crypto/x509"
 	"sync"
 
 	"github.com/goccy/go-yaml"
 )
 
 type HttpConfig struct {
-	AllowLegacyRSAKex bool `yaml:"allow_legacy_rsa_kex"`
-	DisableKeepalive  bool `yaml:"disable_keepalive"`
+	AllowLegacyRSAKex bool           `yaml:"allow_legacy_rsa_kex"`
+	DisableKeepalive  bool           `yaml:"disable_keepalive"`
+	CAFile            string         `yaml:"ca_file"`
+	CAData            []byte         `yaml:"-"`
+	RootCAs           *x509.CertPool `yaml:"-"`
 }
 
 type AuthConfig struct {

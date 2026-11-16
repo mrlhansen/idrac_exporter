@@ -63,6 +63,7 @@ func (c *RootConfig) FromEnvironment() {
 	getEnv("CONFIG_DEFAULT_USE_BASIC_AUTH", &def.BasicAuth)
 	getEnv("CONFIG_DEFAULT_HTTP_ALLOW_LEGACY_RSA_KEX", &def.HTTP.AllowLegacyRSAKex)
 	getEnv("CONFIG_DEFAULT_HTTP_DISABLE_KEEPALIVE", &def.HTTP.DisableKeepalive)
+	getEnv("CONFIG_DEFAULT_HTTP_CA_FILE", &def.HTTP.CAFile)
 
 	getEnv("CONFIG_METRICS_ALL_ENABLED", &m.All.Enabled)
 	getEnv("CONFIG_METRICS_SYSTEM_ENABLED", &m.System.Enabled)
