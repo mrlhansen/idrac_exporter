@@ -576,6 +576,10 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 	mc.NewManagerRemoteConsoleEnabled(ch, &mgr)
 	mc.NewManagerRemoteConsoleMaxSessions(ch, &mgr)
 
+	if id, ok := client.LatestManagerLogId(); ok {
+		mc.NewManagerLogLatestEntryId(ch, id)
+	}
+
 	log, ok := client.QueryEventLog(client.path.ManagerEvent, &client.metrics.Manager.Events)
 	if log == nil {
 		return ok
@@ -586,6 +590,22 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 	}
 
 	return true
+}
+
+// LatestManagerLogId returns the Id of the newest Lifecycle Log entry.
+// The iDRAC lists the newest entry first and numbers entries sequentially.
+func (client *Client) LatestManagerLogId() (uint64, bool) {
+	if client.vendor != DELL || client.version < 9 {
+		return 0, false
+	}
+
+	resp := EventLogResponse{}
+	if !client.redfish.Get(client.path.ManagerEvent+"?$top=1", &resp) || len(resp.Members) == 0 {
+		return 0, false
+	}
+
+	id, err := strconv.ParseUint(resp.Members[0].Id, 10, 64)
+	return id, err == nil
 }
 
 func (client *Client) RefreshProcessors(mc *Collector, ch chan<- prometheus.Metric) bool {

@@ -1003,6 +1003,14 @@ func (mc *Collector) NewManagerEventLogEntry(ch chan<- prometheus.Metric, id str
 	)
 }
 
+func (mc *Collector) NewManagerLogLatestEntryId(ch chan<- prometheus.Metric, id uint64) {
+	ch <- prometheus.MustNewConstMetric(
+		mc.ManagerLogLatestEntryId,
+		prometheus.GaugeValue,
+		float64(id),
+	)
+}
+
 func (mc *Collector) NewPduInfo(ch chan<- prometheus.Metric, id string, m *PowerDistribution) {
 	ch <- prometheus.MustNewConstMetric(
 		mc.PduInfo,
