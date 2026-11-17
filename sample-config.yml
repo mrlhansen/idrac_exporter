@@ -69,10 +69,13 @@ default_target: "192.168.1.1"
 # - The option "allow_legacy_rsa_kex" enables legacy RSA key exchange for TLS 1.2
 #   connections to devices that do not support modern ECDHE cipher suites. Only
 #   RSA cipher suites using AES-GCM are enabled.
-# - The option "ca_file" names a PEM file of CA certificates. When it is set, the
-#   exporter verifies the target's certificate against those CAs and checks that
-#   the certificate names the target (IP address or hostname). When it is unset,
-#   the certificate is not verified.
+# - The option "insecure_skip_verify" turns off verification of the target's TLS
+#   certificate. It defaults to true, because most BMCs keep a self-signed
+#   certificate. When false, the exporter verifies the certificate and checks that
+#   it names the target (IP address or hostname).
+# - The option "ca_file" names a PEM file of CA certificates to verify against,
+#   instead of the system roots. It requires "insecure_skip_verify: false", and a
+#   configuration that sets "ca_file" without it is refused.
 #
 # When the "target" parameter does not match any host, the exporter will attempt
 # to use the login credentials under "default". The credentials under "default"
@@ -92,6 +95,7 @@ hosts:
     http:
       allow_legacy_rsa_kex: false  # CONFIG_DEFAULT_HTTP_ALLOW_LEGACY_RSA_KEX=false
       disable_keepalive: false     # CONFIG_DEFAULT_HTTP_DISABLE_KEEPALIVE=false
+      insecure_skip_verify: true   # CONFIG_DEFAULT_HTTP_INSECURE_SKIP_VERIFY=true
       ca_file: ""                  # CONFIG_DEFAULT_HTTP_CA_FILE=
   192.168.1.1:
     encoded: true

@@ -42,6 +42,9 @@ func AuthIsEqual(a, b *AuthConfig) bool {
 	if a.HTTP.DisableKeepalive != b.HTTP.DisableKeepalive {
 		return false
 	}
+	if a.HTTP.SkipVerify != b.HTTP.SkipVerify {
+		return false
+	}
 	if !bytes.Equal(a.HTTP.CAData, b.HTTP.CAData) {
 		return false
 	}
@@ -122,7 +125,16 @@ func (c *AuthConfig) validate(root *RootConfig) error {
 		return fmt.Errorf("invalid scheme")
 	}
 
+	// Skipping verification is the default, because most BMCs keep their
+	// factory self-signed certificate.
+	c.HTTP.SkipVerify = c.HTTP.InsecureSkipVerify == nil || *c.HTTP.InsecureSkipVerify
+
 	if c.HTTP.CAFile != "" {
+		// A ca_file that skipping verification would ignore is refused, so a
+		// forgotten insecure_skip_verify never leaves a target unchecked.
+		if c.HTTP.SkipVerify {
+			return fmt.Errorf("ca_file requires insecure_skip_verify: false")
+		}
 		data, err := os.ReadFile(c.HTTP.CAFile)
 		if err != nil {
 			return fmt.Errorf("read ca_file: %v", err)

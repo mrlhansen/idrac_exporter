@@ -52,18 +52,20 @@ func TestRedfishCertificateVerification(t *testing.T) {
 	unrelated.AddCert(unrelatedCert)
 
 	cases := []struct {
-		name    string
-		rootCAs *x509.CertPool
-		wantErr bool
+		name       string
+		skipVerify bool
+		rootCAs    *x509.CertPool
+		wantErr    bool
 	}{
-		{"no ca_file skips verification", nil, false},
-		{"ca_file that signed the target", signer, false},
-		{"ca_file that did not sign the target", unrelated, true},
+		{"skipped verification accepts any certificate", true, nil, false},
+		{"system roots refuse the test certificate", false, nil, true},
+		{"ca_file that signed the target", false, signer, false},
+		{"ca_file that did not sign the target", false, unrelated, true},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			auth := &config.AuthConfig{Scheme: "https", HTTP: config.HttpConfig{RootCAs: tc.rootCAs}}
+			auth := &config.AuthConfig{Scheme: "https", HTTP: config.HttpConfig{SkipVerify: tc.skipVerify, RootCAs: tc.rootCAs}}
 			r := NewRedfish(host, auth)
 
 			resp, err := r.http.Get(r.baseurl + redfishRootPath)

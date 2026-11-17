@@ -64,6 +64,11 @@ func (c *RootConfig) FromEnvironment() {
 	getEnv("CONFIG_DEFAULT_HTTP_ALLOW_LEGACY_RSA_KEX", &def.HTTP.AllowLegacyRSAKex)
 	getEnv("CONFIG_DEFAULT_HTTP_DISABLE_KEEPALIVE", &def.HTTP.DisableKeepalive)
 	getEnv("CONFIG_DEFAULT_HTTP_CA_FILE", &def.HTTP.CAFile)
+	if os.Getenv("CONFIG_DEFAULT_HTTP_INSECURE_SKIP_VERIFY") != "" {
+		var skip bool
+		getEnv("CONFIG_DEFAULT_HTTP_INSECURE_SKIP_VERIFY", &skip)
+		def.HTTP.InsecureSkipVerify = &skip
+	}
 
 	getEnv("CONFIG_METRICS_ALL_ENABLED", &m.All.Enabled)
 	getEnv("CONFIG_METRICS_SYSTEM_ENABLED", &m.System.Enabled)
