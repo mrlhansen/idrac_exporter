@@ -28,7 +28,7 @@ func TestLatestManagerLogId(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if r.URL.Path != entries || r.URL.Query().Get("$top") != "1" {
 					http.NotFound(w, r)
 					return
@@ -38,10 +38,10 @@ func TestLatestManagerLogId(t *testing.T) {
 			defer server.Close()
 
 			config.Config = &config.RootConfig{Timeout: 5, Concurrency: 1}
-			host := strings.TrimPrefix(server.URL, "https://")
+			host := strings.TrimPrefix(server.URL, "http://")
 
 			client := &Client{
-				redfish: NewRedfish(host, &config.AuthConfig{Scheme: "https"}),
+				redfish: NewRedfish(host, &config.AuthConfig{Scheme: "http"}),
 				vendor:  tc.vendor,
 				version: 9,
 			}
