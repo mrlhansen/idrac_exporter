@@ -66,7 +66,10 @@ func TestValidateCertificateVerification(t *testing.T) {
 			c := &AuthConfig{
 				Username: "user",
 				Password: "pass",
-				HTTP:     HttpConfig{InsecureSkipVerify: tc.insecure, CAFile: tc.caFile},
+				HTTP:     HttpConfig{InsecureSkipVerify: true, CAFile: tc.caFile},
+			}
+			if tc.insecure != nil {
+				c.HTTP.InsecureSkipVerify = *tc.insecure
 			}
 			err := c.validate(&RootConfig{})
 			if tc.wantErr != "" {
@@ -78,8 +81,8 @@ func TestValidateCertificateVerification(t *testing.T) {
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
-			if c.HTTP.SkipVerify != tc.wantSkip {
-				t.Errorf("SkipVerify = %v, want %v", c.HTTP.SkipVerify, tc.wantSkip)
+			if c.HTTP.InsecureSkipVerify != tc.wantSkip {
+				t.Errorf("SkipVerify = %v, want %v", c.HTTP.InsecureSkipVerify, tc.wantSkip)
 			}
 			if (c.HTTP.RootCAs != nil) != tc.wantRootCAsSet {
 				t.Errorf("RootCAs set = %v, want %v", c.HTTP.RootCAs != nil, tc.wantRootCAsSet)

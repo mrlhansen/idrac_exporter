@@ -47,7 +47,7 @@ func NewRedfish(host string, auth *config.AuthConfig) *Redfish {
 	// With no ca_file, RootCAs is nil and a verified target is checked
 	// against the system roots.
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: auth.HTTP.SkipVerify,
+		InsecureSkipVerify: auth.HTTP.InsecureSkipVerify,
 		RootCAs:            auth.HTTP.RootCAs,
 		// Resume TLS sessions instead of doing a full handshake for every new
 		// connection. This matters for slow BMCs, especially with keep-alive

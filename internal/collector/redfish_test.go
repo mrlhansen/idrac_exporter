@@ -65,7 +65,7 @@ func TestRedfishCertificateVerification(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			auth := &config.AuthConfig{Scheme: "https", HTTP: config.HttpConfig{SkipVerify: tc.skipVerify, RootCAs: tc.rootCAs}}
+			auth := &config.AuthConfig{Scheme: "https", HTTP: config.HttpConfig{InsecureSkipVerify: tc.skipVerify, RootCAs: tc.rootCAs}}
 			r := NewRedfish(host, auth)
 
 			resp, err := r.http.Get(r.baseurl + redfishRootPath)

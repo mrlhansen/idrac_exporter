@@ -10,9 +10,8 @@ import (
 type HttpConfig struct {
 	AllowLegacyRSAKex  bool           `yaml:"allow_legacy_rsa_kex"`
 	DisableKeepalive   bool           `yaml:"disable_keepalive"`
-	InsecureSkipVerify *bool          `yaml:"insecure_skip_verify"`
+	InsecureSkipVerify bool           `yaml:"insecure_skip_verify"`
 	CAFile             string         `yaml:"ca_file"`
-	SkipVerify         bool           `yaml:"-"`
 	CAData             []byte         `yaml:"-"`
 	RootCAs            *x509.CertPool `yaml:"-"`
 }
