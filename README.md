@@ -234,7 +234,10 @@ idrac_manager_info{id,firmware,model,type}
 idrac_manager_health{id,status}
 idrac_manager_remote_console_enabled
 idrac_manager_remote_console_max_concurrent_sessions
+idrac_manager_log_latest_entry_id
 ```
+
+The metric `idrac_manager_log_latest_entry_id` is the Id of the newest Lifecycle Log entry and is only exported on iDRAC 9 and newer. It does not depend on the event log settings below. Since every new entry increases the Id, the metric can show that events were logged, for example to check that a remote syslog server received them.
 
 Optionally event logs from the manager can also be exported. Currently this is only supported on iDRAC (Lifecycle Logs) and on HPE (iLO Event Logs).
 

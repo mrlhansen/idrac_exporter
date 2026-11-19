@@ -118,6 +118,7 @@ type Collector struct {
 	ManagerInfo                     *prometheus.Desc
 	ManagerHealth                   *prometheus.Desc
 	ManagerEventLogEntry            *prometheus.Desc
+	ManagerLogLatestEntryId         *prometheus.Desc
 	ManagerRemoteConsoleEnabled     *prometheus.Desc
 	ManagerRemoteConsoleMaxSessions *prometheus.Desc
 
@@ -484,6 +485,11 @@ func NewCollector() *Collector {
 			"Entry from the manager event log",
 			[]string{"id", "message", "severity"}, nil,
 		),
+		ManagerLogLatestEntryId: prometheus.NewDesc(
+			prometheus.BuildFQName(prefix, "manager", "log_latest_entry_id"),
+			"Id of the newest entry in the manager event log",
+			nil, nil,
+		),
 		ManagerRemoteConsoleEnabled: prometheus.NewDesc(
 			prometheus.BuildFQName(prefix, "manager", "remote_console_enabled"),
 			"Whether the remote console service is enabled",
@@ -623,6 +629,7 @@ func (collector *Collector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- collector.ManagerInfo
 	ch <- collector.ManagerHealth
 	ch <- collector.ManagerEventLogEntry
+	ch <- collector.ManagerLogLatestEntryId
 	ch <- collector.ManagerRemoteConsoleEnabled
 	ch <- collector.ManagerRemoteConsoleMaxSessions
 	ch <- collector.DellBatteryRollupHealth
