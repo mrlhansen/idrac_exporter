@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"os"
@@ -38,6 +40,12 @@ func AuthIsEqual(a, b *AuthConfig) bool {
 		return false
 	}
 	if a.HTTP.DisableKeepalive != b.HTTP.DisableKeepalive {
+		return false
+	}
+	if a.HTTP.SkipVerify != b.HTTP.SkipVerify {
+		return false
+	}
+	if !bytes.Equal(a.HTTP.CAData, b.HTTP.CAData) {
 		return false
 	}
 	if a.Metrics.Events.Enabled != b.Metrics.Events.Enabled {
@@ -115,6 +123,28 @@ func (c *AuthConfig) validate(root *RootConfig) error {
 	case "http", "https":
 	default:
 		return fmt.Errorf("invalid scheme")
+	}
+
+	// Skipping verification is the default, because most BMCs keep their
+	// factory self-signed certificate.
+	c.HTTP.SkipVerify = c.HTTP.InsecureSkipVerify == nil || *c.HTTP.InsecureSkipVerify
+
+	if c.HTTP.CAFile != "" {
+		// A ca_file that skipping verification would ignore is refused, so a
+		// forgotten insecure_skip_verify never leaves a target unchecked.
+		if c.HTTP.SkipVerify {
+			return fmt.Errorf("ca_file requires insecure_skip_verify: false")
+		}
+		data, err := os.ReadFile(c.HTTP.CAFile)
+		if err != nil {
+			return fmt.Errorf("read ca_file: %v", err)
+		}
+		pool := x509.NewCertPool()
+		if !pool.AppendCertsFromPEM(data) {
+			return fmt.Errorf("ca_file %s holds no PEM certificate", c.HTTP.CAFile)
+		}
+		c.HTTP.CAData = data
+		c.HTTP.RootCAs = pool
 	}
 
 	c.Metrics = root.Metrics
