@@ -2,6 +2,16 @@ apiVersion: v1
 entries:
   idrac-exporter:
   - apiVersion: v2
+    appVersion: 3.1.0
+    created: "2026-11-21T05:27:25.428843942Z"
+    description: Chart for iDRAC Exporter
+    digest: 6c263394dcd36f8774d4ed62c3890ed3b2a22f6ffe17bbf06cab5a776a2b60ac
+    name: idrac-exporter
+    type: application
+    urls:
+    - https://github.com/mrlhansen/idrac_exporter/releases/download/helm-idrac-exporter-3.1.0/idrac-exporter-3.1.0.tgz
+    version: 3.1.0
+  - apiVersion: v2
     appVersion: 3.0.0
     created: "2026-11-02T13:58:07.591553387Z"
     description: Chart for iDRAC Exporter
@@ -301,4 +311,4 @@ entries:
     urls:
     - https://github.com/mrlhansen/idrac_exporter/releases/download/helm-idrac-exporter-0.1.5/idrac-exporter-0.1.5.tgz
     version: 0.1.5
-generated: "2026-11-02T13:58:07.591785337Z"
+generated: "2026-11-21T05:27:25.429076925Z"
