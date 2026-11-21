@@ -234,7 +234,6 @@ idrac_manager_info{id,firmware,model,type}
 idrac_manager_health{id,status}
 idrac_manager_remote_console_enabled
 idrac_manager_remote_console_max_concurrent_sessions
-idrac_manager_log_latest_entry_id
 ```
 
 Optionally event logs from the manager can also be exported. Currently this is only supported on iDRAC (Lifecycle Logs) and on HPE (iLO Event Logs).
