@@ -577,7 +577,7 @@ func (client *Client) RefreshManager(mc *Collector, ch chan<- prometheus.Metric)
 	mc.NewManagerRemoteConsoleMaxSessions(ch, &mgr)
 
 	if id, ok := client.LatestManagerLogId(); ok {
-		mc.NewManagerLogLatestEntryId(ch, id)
+		mc.NewManagerEventLogEntryLatestId(ch, id)
 	}
 
 	log, ok := client.QueryEventLog(client.path.ManagerEvent, &client.metrics.Manager.Events)

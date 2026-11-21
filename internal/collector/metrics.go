@@ -1003,9 +1003,9 @@ func (mc *Collector) NewManagerEventLogEntry(ch chan<- prometheus.Metric, id str
 	)
 }
 
-func (mc *Collector) NewManagerLogLatestEntryId(ch chan<- prometheus.Metric, id uint64) {
+func (mc *Collector) NewManagerEventLogEntryLatestId(ch chan<- prometheus.Metric, id uint64) {
 	ch <- prometheus.MustNewConstMetric(
-		mc.ManagerLogLatestEntryId,
+		mc.ManagerEventLogEntryLatestId,
 		prometheus.GaugeValue,
 		float64(id),
 	)
